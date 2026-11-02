@@ -1,0 +1,344 @@
+<ion-header class="ion-no-border mobile-top-bar">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-content">
+      <div class="brand-logo-wrap" (click)="selectMenuItem('dashboard')">
+        <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
+      </div>
+      <button class="menu-icon-btn" (click)="openSideMenu()" aria-label="Open student menu">
+        <ion-icon name="menu-outline"></ion-icon>
+      </button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="reports-content">
+  <div class="reports-container">
+    <!-- Toast Feedback Banner -->
+    @if (feedbackMessage) {
+      <div class="feedback-banner" [class.success]="feedbackType === 'success'" [class.error]="feedbackType === 'error'">
+        <ion-icon [name]="feedbackType === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'"></ion-icon>
+        <span>{{ feedbackMessage }}</span>
+      </div>
+    }
+
+    <!-- Page Header (Exact Reference Layout) -->
+    <header class="page-header">
+      <h1 class="page-title">Reports</h1>
+      <p class="page-subtitle">Generate, manage, and submit your OJT reports</p>
+    </header>
+
+    <!-- Section 1: Generate Reports (Exact Reference Layout) -->
+    <section class="content-card generate-reports-section">
+      <div class="section-title-wrap">
+        <ion-icon name="copy-outline" class="title-icon"></ion-icon>
+        <div class="title-meta">
+          <h2 class="card-heading">Generate Reports</h2>
+          <p class="card-subheading">Select the type of report you want to generate</p>
+        </div>
+      </div>
+
+      <div class="report-types-grid">
+        <!-- 1. Time Log Report Card -->
+        <button class="report-type-card" (click)="generateReport('Time Log')">
+          <div class="type-icon-circle">
+            <ion-icon name="time-outline"></ion-icon>
+          </div>
+          <h3 class="type-name">Time Log Report</h3>
+          <p class="type-desc">Detailed record of daily activities and hours rendered</p>
+        </button>
+
+        <!-- 2. Summary Report Card -->
+        <button class="report-type-card" (click)="generateReport('Summary')">
+          <div class="type-icon-circle">
+            <ion-icon name="analytics-outline"></ion-icon>
+          </div>
+          <h3 class="type-name">Summary Report</h3>
+          <p class="type-desc">Overview of progress, hours completed, and pending tasks</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 2: My Reports (Exact Reference Layout) -->
+    <section class="content-card my-reports-section">
+      <h2 class="card-heading">My Reports</h2>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="reports-filter-bar">
+        <div class="filter-controls-row">
+          <div class="custom-select-wrap">
+            <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+              <option value="all">All Types</option>
+              <option value="Time Log">Time Log</option>
+              <option value="Summary">Summary</option>
+            </select>
+          </div>
+
+          <div class="custom-select-wrap">
+            <select [(ngModel)]="sortOrder" (change)="applyFilters()">
+              <option value="newest">Date (Newest First)</option>
+              <option value="oldest">Date (Oldest First)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="search-input-box">
+          <input
+            type="text"
+            placeholder="Search reports..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          />
+        </div>
+      </div>
+
+      <!-- Reports Table -->
+      <div class="table-container">
+        <div class="table-header-row">
+          <span class="col-head col-title">Report Title</span>
+          <span class="col-head col-type">Type</span>
+          <span class="col-head col-date">Date</span>
+          <span class="col-head col-status">Status</span>
+        </div>
+
+        @if (filteredReports.length === 0) {
+          <div class="table-empty-row">
+            <em>No reports found. Generate a report to get started.</em>
+          </div>
+        } @else {
+          <div class="table-body">
+            @for (rep of filteredReports; track rep.id) {
+              <div class="table-data-row" (click)="generateReport(rep.type)">
+                <div class="col-title">
+                  <span class="rep-title">{{ rep.title }}</span>
+                </div>
+                <div class="col-type">
+                  <span class="type-badge">{{ rep.type }}</span>
+                </div>
+                <div class="col-date">
+                  <span class="rep-date">{{ formatDate(rep.date) }}</span>
+                </div>
+                <div class="col-status">
+                  <span class="status-pill ready">{{ rep.status }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Section 3: OJT Information (Exact Reference Layout) -->
+    <section class="content-card ojt-info-section">
+      <h2 class="card-heading">OJT Information</h2>
+      <p class="card-subheading">Information that will be included in the report header</p>
+
+      <div class="info-card-box">
+        <div class="info-row">
+          <div class="info-block">
+            <span class="info-label">Student Name</span>
+            <strong class="info-value">{{ currentUser?.full_name || 'Reiniel Talplacido' }}</strong>
+          </div>
+          <div class="info-block">
+            <span class="info-label">Student ID</span>
+            <strong class="info-value">{{ currentUser?.student_id || 'SUM2023-00980' }}</strong>
+          </div>
+        </div>
+
+        <div class="info-row-divider"></div>
+
+        <div class="info-row">
+          <div class="info-block">
+            <span class="info-label">Course</span>
+            <strong class="info-value">{{ currentUser?.course_section || 'BSIT' }}</strong>
+          </div>
+          <div class="info-block">
+            <span class="info-label">Company</span>
+            <strong class="info-value">{{ currentUser?.company_name || 'Project Solo' }}</strong>
+          </div>
+        </div>
+
+        <div class="info-row-divider"></div>
+
+        <div class="info-row">
+          <div class="info-block">
+            <span class="info-label">OJT Adviser</span>
+            <strong class="info-value">{{ currentUser?.adviser_name || 'Sir gel' }}</strong>
+          </div>
+          <div class="info-block">
+            <span class="info-label">OJT Period</span>
+            <strong class="info-value">
+              {{ formatDate(currentUser?.start_date || '2027-02-03') }} - {{ formatDate(currentUser?.target_date || '2027-05-19') }}
+            </strong>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- INTERACTIVE REPORT PREVIEW & PRINT MODAL -->
+  <ion-modal [isOpen]="showPreviewModal" (didDismiss)="closePreviewModal()" class="report-modal">
+    <ng-template>
+      <div class="preview-modal-container">
+        <div class="preview-header">
+          <div class="header-left">
+            <ion-icon name="document-text-outline" class="modal-icon"></ion-icon>
+            <h3>{{ activeReportType }} Report</h3>
+          </div>
+          <button class="modal-close-btn" (click)="closePreviewModal()" aria-label="Close preview">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="printable-document">
+          <!-- Institutional Header -->
+          <div class="doc-header">
+            <h4>NUEVA ECIJA UNIVERSITY OF SCIENCE AND TECHNOLOGY</h4>
+            <p>Sumacab Campus, Cabanatuan City</p>
+            <strong class="doc-title">
+              {{ activeReportType === 'Time Log' ? 'DAILY TIME RECORD (DTR) REPORT' : 'OJT PROGRESS SUMMARY REPORT' }}
+            </strong>
+          </div>
+
+          <!-- Student & Agency Meta -->
+          <div class="doc-student-meta">
+            <div><strong>Trainee:</strong> {{ currentUser?.full_name }}</div>
+            <div><strong>Student ID:</strong> {{ currentUser?.student_id }}</div>
+            <div><strong>Program:</strong> {{ currentUser?.course_section || 'BSIT' }}</div>
+            <div><strong>Assigned Agency:</strong> {{ currentUser?.company_name }}</div>
+            <div><strong>Adviser:</strong> {{ currentUser?.adviser_name }}</div>
+            <div><strong>Target Hours:</strong> {{ currentUser?.required_hours || 500 }} hrs</div>
+          </div>
+
+          <!-- Dynamic Body -->
+          @if (activeReportType === 'Time Log') {
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                    <th>Rendered</th>
+                    <th>Accomplishment Summary</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (log of logs; track log.id) {
+                    <tr>
+                      <td>{{ formatDate(log.log_date) }}</td>
+                      <td>{{ log.time_in }}</td>
+                      <td>{{ log.time_out || '--:--' }}</td>
+                      <td><strong>{{ log.total_hours || '0.00' }}h</strong></td>
+                      <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
+                    </tr>
+                  }
+                  @if (logs.length === 0) {
+                    <tr>
+                      <td colspan="5" style="text-align:center; padding: 12px; color: #64748b;">
+                        No past duty records logged yet.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="doc-summary-body">
+              <div class="summary-metric-row">
+                <div class="metric-pill">
+                  <span>Accumulated Hours</span>
+                  <strong>{{ stats?.accumulated_hours || 0 }} hrs</strong>
+                </div>
+                <div class="metric-pill">
+                  <span>Required Hours</span>
+                  <strong>{{ currentUser?.required_hours || 500 }} hrs</strong>
+                </div>
+                <div class="metric-pill">
+                  <span>Completion</span>
+                  <strong>{{ stats?.completion_percent || 0 }}%</strong>
+                </div>
+              </div>
+
+              <h5>Tasks Summary</h5>
+              <p>Total Tasks: <strong>{{ tasks.length }}</strong> | Completed: <strong>{{ stats?.completed_tasks || 0 }}</strong> | Pending: <strong>{{ stats?.pending_tasks || 0 }}</strong></p>
+            </div>
+          }
+
+          <!-- Signatures -->
+          <div class="doc-signatures">
+            <div class="sig-col">
+              <div class="sig-line"></div>
+              <span>Student Trainee Signature</span>
+            </div>
+            <div class="sig-col">
+              <div class="sig-line"></div>
+              <span>Industry Supervisor Signature</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-actions">
+          <button class="print-btn" (click)="printReport()">
+            <ion-icon name="print-outline"></ion-icon>
+            <span>Print / Save PDF</span>
+          </button>
+          <button class="close-btn" (click)="closePreviewModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+
+<!-- SIDE DRAWER MENU (SHARED) -->
+<div class="side-drawer-backdrop" [class.open]="isSideMenuOpen" (click)="closeSideMenu()"></div>
+<aside class="side-drawer" [class.open]="isSideMenuOpen">
+  <div class="drawer-header">
+    <div class="student-mini-profile">
+      <div class="mini-avatar">
+        <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
+      </div>
+      <div class="mini-details">
+        <h4>{{ currentUser?.full_name || 'Reiniel Talplacido' }}</h4>
+        <p>{{ currentUser?.student_id || 'SUM2023-00980' }}</p>
+      </div>
+    </div>
+    <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <nav class="drawer-nav">
+    <button class="nav-item" [class.active]="activeMenu === 'dashboard'" (click)="selectMenuItem('dashboard')">
+      <ion-icon name="grid-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-item" [class.active]="activeMenu === 'timelogs'" (click)="selectMenuItem('timelogs')">
+      <ion-icon name="time-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Time Logs</span>
+    </button>
+    <button class="nav-item" [class.active]="activeMenu === 'tasks'" (click)="selectMenuItem('tasks')">
+      <ion-icon name="checkbox-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Tasks</span>
+    </button>
+    <button class="nav-item" [class.active]="activeMenu === 'reports'" (click)="selectMenuItem('reports')">
+      <ion-icon name="copy-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Reports</span>
+    </button>
+    <button class="nav-item" [class.active]="activeMenu === 'profile'" (click)="selectMenuItem('profile')">
+      <ion-icon name="person-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Profile</span>
+    </button>
+  </nav>
+
+  <div class="drawer-footer">
+    <button class="drawer-signout-btn" (click)="logout()">
+      <ion-icon name="log-out-outline"></ion-icon>
+      <span>Sign Out</span>
+    </button>
+    <span class="app-version-tag">OnTrack v1.0 • OJT Attendance</span>
+  </div>
+</aside>

@@ -34,6 +34,10 @@ log.txt
 npm-debug.log
 yarn-error.log
 
+# Backend uploads
+/backend/uploads/*
+!/backend/uploads/.gitkeep
+
 # IDEs and editors
 .idea/
 .project

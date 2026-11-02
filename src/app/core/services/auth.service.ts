@@ -81,6 +81,23 @@ export class AuthService {
     );
   }
 
+  /**
+   * Update student profile in ontrack-api
+   */
+  updateProfile(payload: any): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/update_profile.php`, payload).pipe(
+      tap((res) => {
+        if (res.success && res.user) {
+          this.setSession(res.user);
+        }
+      }),
+      catchError((err) => {
+        const errorMsg = err?.error?.message || 'Could not update profile.';
+        return of({ success: false, message: errorMsg });
+      })
+    );
+  }
+
   updateSessionUser(updatedUser: Partial<User>): void {
     const current = this.currentUserValue;
     if (current) {
