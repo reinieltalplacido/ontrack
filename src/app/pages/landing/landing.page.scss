@@ -1,156 +1,555 @@
-.landing-content {
+.onboarding-content {
   --background: #f8fafc;
 }
 
-.landing-container {
+.onboarding-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  padding: calc(env(safe-area-inset-top, 24px) + 16px) 20px calc(env(safe-area-inset-bottom, 24px) + 20px);
+  padding: calc(env(safe-area-inset-top, 24px) + 12px) 20px calc(env(safe-area-inset-bottom, 24px) + 16px);
   max-width: 480px;
   margin: 0 auto;
+  user-select: none;
 }
 
-/* Header branding */
-.app-header {
-  margin-bottom: 24px;
-}
-
-.brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #e8eef3;
-  color: #547792;
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  margin-bottom: 12px;
-
-  .badge-icon {
-    font-size: 0.95rem;
-  }
-}
-
-.logo-row {
+/* Top Navigation Header */
+.top-bar {
   display: flex;
   align-items: center;
-}
-
-.brand-full-logo {
-  max-width: 170px;
+  justify-content: space-between;
   height: 48px;
-  object-fit: contain;
-  display: block;
-}
+  margin-bottom: 20px;
 
-/* Hero Section */
-.hero-section {
-  margin-bottom: 24px;
-
-  .hero-title {
-    font-size: 1.65rem;
-    font-weight: 800;
-    line-height: 1.25;
-    color: #0f172a;
-    margin: 0 0 10px 0;
+  .brand-logo {
+    max-width: 140px;
+    height: 38px;
+    object-fit: contain;
   }
 
-  .hero-subtitle {
-    font-size: 0.95rem;
+  .skip-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &:active {
+      color: #0f172a;
+      background: #e2e8f0;
+    }
+  }
+
+  .top-spacer {
+    width: 48px;
+    height: 38px;
+  }
+}
+
+/* Carousel Body */
+.carousel-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+/* Visual Mockup Container */
+.visual-card-container {
+  width: 100%;
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Shared Mockup Card Styling */
+.mockup-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1.5px solid #eef2f6;
+  box-shadow: 0 10px 25px -5px rgba(84, 119, 146, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  padding: 20px;
+}
+
+/* Slide 0: Attendance Mockup */
+.attendance-card {
+  .card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #10b981;
+      background: #ecfdf5;
+      padding: 4px 10px;
+      border-radius: 12px;
+
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+      }
+    }
+
+    .time-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #547792;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  }
+
+  .checkin-preview {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px;
+    gap: 12px;
+    margin-bottom: 14px;
+
+    .icon-bubble {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #e8eef3;
+      color: #547792;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .checkin-details {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 2px 0;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #64748b;
+      }
+    }
+
+    .verified-icon {
+      color: #10b981;
+      font-size: 1.4rem;
+    }
+  }
+
+  .location-stamp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #547792;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #f0f5f9;
+    padding: 8px 12px;
+    border-radius: 10px;
+
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+/* Slide 1: Progress Mockup */
+.progress-card {
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+
+    .target-label {
+      color: #547792;
+    }
+  }
+
+  .hours-display {
+    margin-bottom: 14px;
+
+    .current-hrs {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -1px;
+    }
+
+    .total-hrs {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+  }
+
+  .progress-bar-shell {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 20px;
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #547792, #3c5b73);
+      border-radius: 6px;
+      transition: width 0.4s ease;
+    }
+  }
+
+  .metrics-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 10px 0;
+
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .m-val {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #1e293b;
+      }
+
+      .m-label {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: 500;
+        margin-top: 2px;
+      }
+    }
+
+    .metric-divider {
+      width: 1px;
+      height: 28px;
+      background: #e2e8f0;
+    }
+  }
+}
+
+/* Slide 2: Reports Mockup */
+.report-card {
+  .doc-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .doc-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #fdf2f2;
+      color: #ef4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .doc-info {
+      h4 {
+        margin: 0 0 2px 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #64748b;
+      }
+    }
+  }
+
+  .doc-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 10px;
+
+    .line {
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 4px;
+
+      &.full { width: 100%; }
+      &.medium { width: 75%; }
+      &.short { width: 45%; }
+    }
+  }
+
+  .doc-footer-stamp {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .approval-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #10b981;
+      font-size: 0.78rem;
+      font-weight: 700;
+
+      ion-icon {
+        font-size: 1.1rem;
+      }
+    }
+
+    .format-tag {
+      font-size: 0.72rem;
+      background: #eef2f6;
+      color: #475569;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+  }
+}
+
+/* Slide 3: Tasks Mockup */
+.task-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+
+    &.active-task {
+      background: #ffffff;
+      border-color: #cbdde9;
+      box-shadow: 0 2px 8px rgba(84, 119, 146, 0.08);
+    }
+
+    .task-checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &.checked {
+        color: #10b981;
+        font-size: 1.4rem;
+      }
+
+      &.pending {
+        border: 2px solid #cbd5e1;
+      }
+    }
+
+    .task-body {
+      flex: 1;
+
+      h5 {
+        margin: 0 0 4px 0;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      .priority {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 2px 6px;
+        border-radius: 4px;
+
+        &.high {
+          background: #fef2f2;
+          color: #ef4444;
+        }
+
+        &.medium {
+          background: #fffbeb;
+          color: #f59e0b;
+        }
+      }
+    }
+  }
+}
+
+/* Slide Text Details */
+.slide-text-wrapper {
+  text-align: center;
+  max-width: 380px;
+
+  .slide-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e8eef3;
+    color: #547792;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+
+    ion-icon {
+      font-size: 0.95rem;
+    }
+  }
+
+  .slide-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.4px;
+  }
+
+  .slide-subtitle {
+    font-size: 0.9rem;
     color: #64748b;
     line-height: 1.5;
     margin: 0;
   }
 }
 
-/* Features List */
-.features-list {
+/* Bottom Controls */
+.bottom-controls {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 28px;
-  flex-grow: 1;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 20px;
 }
 
-.feature-card {
+/* Pagination Dots */
+.pagination-dots {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  background: #ffffff;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid #eef2f6;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 
-  &:active {
-    transform: scale(0.99);
-  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: #cbd5e1;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  .feature-icon-wrapper {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    background: #f0f5f9;
-    color: #547792;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-
-  .feature-text {
-    h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #1e293b;
-      margin: 0 0 4px 0;
-    }
-
-    p {
-      font-size: 0.82rem;
-      color: #64748b;
-      margin: 0;
-      line-height: 1.4;
+    &.active {
+      width: 24px;
+      background: #547792;
     }
   }
 }
 
-/* Action Footer */
-.action-footer {
+/* Action Buttons Stack */
+.buttons-stack {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: auto;
-  padding-top: 12px;
 
-  .main-action-btn {
-    --box-shadow: 0 6px 18px rgba(84, 119, 146, 0.35);
+  .action-btn-main {
+    --box-shadow: 0 6px 18px rgba(84, 119, 146, 0.32);
   }
 
-  .secondary-action-btn {
+  .action-btn-secondary {
     --background: #ffffff;
   }
 
-  .security-note {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-size: 0.76rem;
-    color: #94a3b8;
+  .login-prompt {
     text-align: center;
-    margin: 8px 0 0 0;
+    font-size: 0.85rem;
+    color: #64748b;
+    padding: 4px 0;
 
-    ion-icon {
-      color: #10b981;
-      font-size: 0.9rem;
+    .login-link-btn {
+      background: transparent;
+      border: none;
+      color: #547792;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+
+      &:active {
+        text-decoration: underline;
+      }
     }
   }
 }
 
+/* Campus Footer */
+.campus-footer-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: #94a3b8;
+  margin-top: 4px;
+
+  ion-icon {
+    font-size: 0.88rem;
+    color: #547792;
+  }
+}

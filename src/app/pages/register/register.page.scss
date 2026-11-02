@@ -1,0 +1,484 @@
+.register-content {
+  --background: #f8fafc;
+}
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: calc(env(safe-area-inset-top, 24px) + 12px) 20px calc(env(safe-area-inset-bottom, 24px) + 20px);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Top Nav */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+
+  .back-btn {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+
+    &:active {
+      background: #f1f5f9;
+    }
+  }
+
+  .demo-fill-btn {
+    background: #eef4f8;
+    border: 1px solid #cbdde9;
+    color: #547792;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 0.95rem;
+    }
+
+    &:active {
+      background: #dde8f1;
+    }
+  }
+}
+
+/* Brand Header */
+.brand-header {
+  margin-bottom: 22px;
+
+  .brand-full-logo {
+    max-width: 140px;
+    height: 38px;
+    object-fit: contain;
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.4px;
+  }
+
+  .page-subtitle {
+    font-size: 0.86rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.45;
+  }
+}
+
+/* Stepper Indicator */
+.wizard-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+
+  .step-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 1;
+
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+
+      ion-icon {
+        font-size: 1.25rem;
+      }
+    }
+
+    .step-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    &.active {
+      .step-circle {
+        background: #e8eef3;
+        color: #547792;
+      }
+
+      .step-label {
+        color: #334155;
+      }
+    }
+
+    &.current {
+      .step-circle {
+        background: #547792;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(84, 119, 146, 0.35);
+      }
+
+      .step-label {
+        color: #547792;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: #e2e8f0;
+    margin: -14px 8px 0 8px;
+    transition: background 0.3s ease;
+
+    &.filled {
+      background: #547792;
+    }
+  }
+}
+
+/* Error Banner */
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  margin-bottom: 16px;
+  font-weight: 500;
+
+  ion-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+}
+
+/* Form Styles */
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeIn 0.25s ease-out;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #547792;
+    margin-bottom: 4px;
+
+    ion-icon {
+      font-size: 1.25rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  .form-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+
+    .req {
+      color: #ef4444;
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+
+  .flex-1 {
+    flex: 1;
+  }
+}
+
+.input-shell {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 12px;
+  height: 48px;
+  transition: all 0.2s ease;
+
+  input, select {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.92rem;
+    color: #0f172a;
+    outline: none;
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+  }
+
+  &:focus-within {
+    border-color: #547792;
+    box-shadow: 0 0 0 3px rgba(84, 119, 146, 0.12);
+  }
+
+  &.error {
+    border-color: #ef4444;
+    background: #fffbfa;
+  }
+
+  &.with-toggle {
+    padding-right: 6px;
+
+    .eye-btn {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.2rem;
+      padding: 6px;
+      cursor: pointer;
+    }
+  }
+
+  &.select-shell select {
+    cursor: pointer;
+  }
+}
+
+.field-hint {
+  font-size: 0.74rem;
+  color: #ef4444;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Summary Card */
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+
+  h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #547792;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    padding: 4px 0;
+
+    .s-label {
+      color: #64748b;
+    }
+
+    .s-val {
+      font-weight: 600;
+      color: #1e293b;
+
+      &.highlight {
+        color: #10b981;
+      }
+    }
+  }
+
+  .api-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f0;
+    font-size: 0.74rem;
+    color: #547792;
+    font-weight: 600;
+
+    ion-icon {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+/* Wizard Footer */
+.wizard-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+
+  .step-prev-btn {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.9rem;
+    height: 48px;
+    padding: 0 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:active {
+      background: #f1f5f9;
+    }
+  }
+
+  .step-next-btn {
+    flex: 1;
+    margin: 0;
+
+    &.submit-btn {
+      --background: #10b981;
+    }
+  }
+}
+
+/* Login redirect */
+.login-redirect {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 0.84rem;
+  color: #64748b;
+
+  .redirect-btn {
+    background: transparent;
+    border: none;
+    color: #547792;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+
+    &:active {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Date Picker Touch Shell */
+.date-picker-shell {
+  cursor: pointer;
+  justify-content: space-between;
+
+  .date-text {
+    font-size: 0.92rem;
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  .calendar-btn-icon {
+    font-size: 1.25rem;
+    color: #547792;
+  }
+
+  &:active {
+    background: #f1f5f9;
+  }
+}
+
+/* Calendar Modal */
+.calendar-modal {
+  --border-radius: 20px;
+  --max-width: 360px;
+  --height: auto;
+
+  .calendar-wrapper {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 16px;
+
+    .calendar-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
+
+      h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      .close-cal-btn {
+        background: transparent;
+        border: none;
+        font-size: 1.6rem;
+        color: #64748b;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+
+        &:active {
+          color: #0f172a;
+        }
+      }
+    }
+
+    .custom-datetime {
+      border-radius: 14px;
+      --background: #f8fafc;
+      width: 100%;
+    }
+  }
+}
+

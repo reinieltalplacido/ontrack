@@ -1,5 +1,5 @@
 export interface User {
-  id: number | string;
+  id: number;
   student_id: string;
   full_name: string;
   email: string;
@@ -12,7 +12,7 @@ export interface User {
   target_date?: string;
   required_hours: number;
   rendered_hours?: number;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 export interface AuthResponse {
@@ -21,4 +21,3 @@ export interface AuthResponse {
   user?: User;
   token?: string;
 }
-

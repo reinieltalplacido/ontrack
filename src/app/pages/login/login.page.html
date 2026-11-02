@@ -15,8 +15,7 @@
     <!-- Title & Greeting -->
     <div class="header-section">
       <div class="header-brand-row">
-        <img src="assets/icon/logo.png" alt="OnTrack Logo" class="login-logo-img" />
-        <div class="brand-tag">OnTrack Portal</div>
+        <img src="assets/icon/ontrack-logo.png" alt="OnTrack Logo" class="login-full-logo" />
       </div>
       <h1 class="page-title">Welcome Back</h1>
       <p class="page-subtitle">Enter your student credentials to log your OJT hours and access your tasks.</p>
@@ -31,25 +30,21 @@
     <!-- Login Form -->
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-container">
       
-      <!-- Email Field -->
+      <!-- Student Number / Email Field -->
       <div class="input-group">
-        <label class="input-label" for="email">Student Email</label>
+        <label class="input-label" for="email">Student No. or Email</label>
         <div class="custom-input-box" [class.has-error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
           <ion-icon name="mail-outline" class="input-icon"></ion-icon>
           <input 
             id="email"
-            type="email" 
+            type="text" 
             formControlName="email"
-            placeholder="e.g. student@neust.edu.ph"
-            autocomplete="email"
-            inputmode="email"
+            placeholder="e.g. 2026-0001 or student@neust.edu.ph"
+            autocomplete="username"
           />
         </div>
         <p class="error-hint" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')">
-          Email is required.
-        </p>
-        <p class="error-hint" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')">
-          Please enter a valid email address.
+          Student number or email is required.
         </p>
       </div>
 

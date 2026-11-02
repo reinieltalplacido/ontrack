@@ -1,95 +1,211 @@
-<ion-content [fullscreen]="true" class="landing-content">
-  <div class="landing-container">
+<ion-content [fullscreen]="true" class="onboarding-content">
+  <div 
+    class="onboarding-wrapper"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)">
     
-    <!-- Top Branding Header -->
-    <header class="app-header">
-      <div class="brand-badge">
-        <ion-icon name="school-outline" class="badge-icon"></ion-icon>
-        <span>NEUST Sumacab Campus</span>
+    <!-- Top Navigation Header -->
+    <header class="top-bar">
+      <div class="logo-box">
+        <img src="assets/icon/ontrack-logo.png" alt="OnTrack Logo" class="brand-logo" />
       </div>
 
-      <div class="logo-row">
-        <img src="assets/icon/ontrack-logo.png" alt="OnTrack Logo" class="brand-full-logo" />
-      </div>
+      <button 
+        type="button" 
+        class="skip-btn" 
+        *ngIf="!isLastSlide" 
+        (click)="skip()">
+        Skip
+      </button>
+      <div class="top-spacer" *ngIf="isLastSlide"></div>
     </header>
 
-    <!-- Hero Title & Subtitle -->
-    <section class="hero-section">
-      <h2 class="hero-title">OJT Tracking &<br/>Monitoring System</h2>
-      <p class="hero-subtitle">
-        Empowering interns with automated DTR logging, verified photo proof, and real-time progress tracking.
-      </p>
-    </section>
-
-    <!-- 4 Main Feature Cards -->
-    <section class="features-list">
+    <!-- Center Carousel / Visual Card Area -->
+    <main class="carousel-body">
       
-      <div class="feature-card">
-        <div class="feature-icon-wrapper">
-          <ion-icon name="clipboard-outline"></ion-icon>
-        </div>
-        <div class="feature-text">
-          <h3>Daily Activity Logging</h3>
-          <p>Track time-in/out, GPS location, and tasks accomplished with one tap.</p>
+      <!-- Slide 0: Attendance -->
+      <div class="visual-card-container" *ngIf="currentSlide === 0">
+        <div class="mockup-card attendance-card">
+          <div class="card-header-row">
+            <div class="status-indicator live">
+              <span class="pulse-dot"></span>
+              Live Duty
+            </div>
+            <div class="time-badge">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>08:00 AM</span>
+            </div>
+          </div>
+
+          <div class="checkin-preview">
+            <div class="icon-bubble checkin">
+              <ion-icon name="camera-outline"></ion-icon>
+            </div>
+            <div class="checkin-details">
+              <h4>Duty Photo Captured</h4>
+              <p>Selfie verification stored</p>
+            </div>
+            <ion-icon name="checkmark-circle-outline" class="verified-icon"></ion-icon>
+          </div>
+
+          <div class="location-stamp">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>Assigned Workplace (GPS Validated)</span>
+          </div>
         </div>
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon-wrapper">
-          <ion-icon name="trending-up-outline"></ion-icon>
-        </div>
-        <div class="feature-text">
-          <h3>Progress Monitoring</h3>
-          <p>Visualize completed vs. required hours through interactive metrics.</p>
+      <!-- Slide 1: Progress -->
+      <div class="visual-card-container" *ngIf="currentSlide === 1">
+        <div class="mockup-card progress-card">
+          <div class="progress-header">
+            <span class="sub-label">Rendered Hours</span>
+            <span class="target-label">Target: 486 hrs</span>
+          </div>
+
+          <div class="hours-display">
+            <span class="current-hrs">142.5</span>
+            <span class="total-hrs">/ 486 hrs</span>
+          </div>
+
+          <div class="progress-bar-shell">
+            <div class="progress-bar-fill" style="width: 30%;"></div>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-item">
+              <span class="m-val">29%</span>
+              <span class="m-label">Completed</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-item">
+              <span class="m-val">42</span>
+              <span class="m-label">Days Left</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-item">
+              <span class="m-val">343.5</span>
+              <span class="m-label">Remaining</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon-wrapper">
-          <ion-icon name="document-text-outline"></ion-icon>
-        </div>
-        <div class="feature-text">
-          <h3>PDF Reports</h3>
-          <p>Generate formal Daily Time Records (DTR) ready for coordinator submission.</p>
+      <!-- Slide 2: Reports -->
+      <div class="visual-card-container" *ngIf="currentSlide === 2">
+        <div class="mockup-card report-card">
+          <div class="doc-header">
+            <div class="doc-icon-wrap">
+              <ion-icon name="document-text-outline"></ion-icon>
+            </div>
+            <div class="doc-info">
+              <h4>Daily Time Record (DTR)</h4>
+              <p>Monthly Accomplishment Report</p>
+            </div>
+          </div>
+
+          <div class="doc-lines">
+            <div class="line full"></div>
+            <div class="line medium"></div>
+            <div class="line short"></div>
+          </div>
+
+          <div class="doc-footer-stamp">
+            <div class="approval-badge">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              <span>Supervisor Verified</span>
+            </div>
+            <span class="format-tag">PDF / AutoTable</span>
+          </div>
         </div>
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon-wrapper">
-          <ion-icon name="checkbox-outline"></ion-icon>
-        </div>
-        <div class="feature-text">
-          <h3>Task Management</h3>
-          <p>Organize supervisor-assigned tasks with due dates and priority alerts.</p>
+      <!-- Slide 3: Tasks -->
+      <div class="visual-card-container" *ngIf="currentSlide === 3">
+        <div class="mockup-card task-card">
+          <div class="task-item active-task">
+            <div class="task-checkbox checked">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <div class="task-body">
+              <h5>Database API Implementation</h5>
+              <span class="priority high">High Priority</span>
+            </div>
+          </div>
+
+          <div class="task-item">
+            <div class="task-checkbox pending"></div>
+            <div class="task-body">
+              <h5>Attendance Geolocation Testing</h5>
+              <span class="priority medium">Due Tomorrow</span>
+            </div>
+          </div>
         </div>
       </div>
 
-    </section>
+      <!-- Text Content for Current Slide -->
+      <div class="slide-text-wrapper">
+        <div class="slide-tag">
+          <ion-icon name="sparkles-outline"></ion-icon>
+          <span>{{ slides[currentSlide].tag }}</span>
+        </div>
+        <h2 class="slide-title">{{ slides[currentSlide].title }}</h2>
+        <p class="slide-subtitle">{{ slides[currentSlide].subtitle }}</p>
+      </div>
 
-    <!-- Bottom Action Bar (Fixed feel) -->
-    <footer class="action-footer">
-      <ion-button 
-        expand="block" 
-        class="ot-btn-primary main-action-btn"
-        (click)="goToLogin()">
-        Get Started
-        <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
-      </ion-button>
+    </main>
 
-      <ion-button 
-        expand="block" 
-        fill="outline" 
-        class="ot-btn-outline secondary-action-btn"
-        (click)="goToRegister()">
-        Create Account
-      </ion-button>
+    <!-- Bottom Action & Pagination Section -->
+    <footer class="bottom-controls">
+      
+      <!-- Pagination Dots -->
+      <div class="pagination-dots">
+        <button 
+          *ngFor="let slide of slides; let i = index" 
+          type="button"
+          class="dot" 
+          [class.active]="i === currentSlide"
+          (click)="goToSlide(i)"
+          [attr.aria-label]="'Go to slide ' + (i + 1)">
+        </button>
+      </div>
 
-      <p class="security-note">
-        <ion-icon name="shield-checkmark-outline"></ion-icon>
-        Official OJT Monitoring Application
-      </p>
+      <!-- Action Buttons -->
+      <div class="buttons-stack">
+        
+        <!-- Next / Get Started Main Button -->
+        <ion-button 
+          expand="block" 
+          class="ot-btn-primary action-btn-main"
+          (click)="nextSlide()">
+          <span *ngIf="!isLastSlide">Next</span>
+          <span *ngIf="isLastSlide">Get Started</span>
+          <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+
+        <!-- Secondary Option -->
+        <ion-button 
+          *ngIf="isLastSlide"
+          expand="block" 
+          fill="outline" 
+          class="ot-btn-outline action-btn-secondary"
+          (click)="goToRegister()">
+          Create Student Account
+        </ion-button>
+
+        <div class="login-prompt" *ngIf="!isLastSlide">
+          <span>Already registered? </span>
+          <button type="button" class="login-link-btn" (click)="goToLogin()">Sign In</button>
+        </div>
+
+      </div>
+
+      <div class="campus-footer-note">
+        <ion-icon name="school-outline"></ion-icon>
+        <span>NEUST Sumacab Campus • OJT Department</span>
+      </div>
+
     </footer>
 
   </div>
 </ion-content>
-

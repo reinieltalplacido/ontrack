@@ -65,8 +65,8 @@ export class LoginPage {
     });
 
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      email: ['2026-0001', [Validators.required]],
+      password: ['Password123!', [Validators.required]],
       rememberMe: [true],
     });
   }
@@ -88,7 +88,7 @@ export class LoginPage {
       email: 'student@neust.edu.ph',
       password: 'Password123!',
     });
-    this.toastMessage = 'Demo student credentials loaded!';
+    this.toastMessage = 'Sample credentials loaded!';
     this.showToast = true;
   }
 

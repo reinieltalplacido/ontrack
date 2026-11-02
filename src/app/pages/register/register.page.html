@@ -1,0 +1,337 @@
+<ion-content [fullscreen]="true" class="register-content">
+  <div class="register-container">
+    
+    <!-- Top Nav Header -->
+    <div class="top-nav">
+      <button class="back-btn" (click)="prevStep()" aria-label="Go back">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+
+      <button class="demo-fill-btn" (click)="fillSampleOjtData()">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        <span>Sample Fill</span>
+      </button>
+    </div>
+
+    <!-- Brand Header -->
+    <div class="brand-header">
+      <img src="assets/icon/ontrack-logo.png" alt="OnTrack Logo" class="brand-full-logo" />
+      <h1 class="page-title">Student Registration</h1>
+      <p class="page-subtitle">Set up your OJT profile and register directly to the student portal.</p>
+    </div>
+
+    <!-- Step Progress Indicator -->
+    <div class="wizard-stepper">
+      <div class="step-node" [class.active]="currentStep >= 1" [class.current]="currentStep === 1">
+        <div class="step-circle">
+          <span *ngIf="currentStep <= 1">1</span>
+          <ion-icon *ngIf="currentStep > 1" name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <span class="step-label">Academic</span>
+      </div>
+
+      <div class="step-line" [class.filled]="currentStep >= 2"></div>
+
+      <div class="step-node" [class.active]="currentStep >= 2" [class.current]="currentStep === 2">
+        <div class="step-circle">
+          <span *ngIf="currentStep <= 2">2</span>
+          <ion-icon *ngIf="currentStep > 2" name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <span class="step-label">OJT Details</span>
+      </div>
+
+      <div class="step-line" [class.filled]="currentStep >= 3"></div>
+
+      <div class="step-node" [class.active]="currentStep === 3" [class.current]="currentStep === 3">
+        <div class="step-circle">3</div>
+        <span class="step-label">Security</span>
+      </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner" *ngIf="errorMessage">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Form Container -->
+    <form [formGroup]="registerForm" class="form-wrapper">
+
+      <!-- ================= STEP 1: Academic & Personal Details ================= -->
+      <div class="step-content" *ngIf="currentStep === 1">
+        
+        <div class="section-title">
+          <ion-icon name="school-outline"></ion-icon>
+          <h3>Personal & Academic Info</h3>
+        </div>
+
+        <!-- Student Number -->
+        <div class="form-group">
+          <label class="form-label" for="student_no">Student ID / Number <span class="req">*</span></label>
+          <div class="input-shell" [class.error]="registerForm.get('student_no')?.touched && registerForm.get('student_no')?.invalid">
+            <input 
+              id="student_no"
+              type="text" 
+              formControlName="student_no" 
+              placeholder="e.g. 2026-0150" 
+            />
+          </div>
+          <p class="field-hint" *ngIf="registerForm.get('student_no')?.touched && registerForm.get('student_no')?.invalid">
+            Student number is required.
+          </p>
+        </div>
+
+        <!-- Full Name -->
+        <div class="form-group">
+          <label class="form-label" for="full_name">Full Name <span class="req">*</span></label>
+          <div class="input-shell" [class.error]="registerForm.get('full_name')?.touched && registerForm.get('full_name')?.invalid">
+            <input 
+              id="full_name"
+              type="text" 
+              formControlName="full_name" 
+              placeholder="First Name, M.I., Last Name" 
+            />
+          </div>
+          <p class="field-hint" *ngIf="registerForm.get('full_name')?.touched && registerForm.get('full_name')?.invalid">
+            Full name is required.
+          </p>
+        </div>
+
+        <!-- Course & Year Level Row -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label" for="course">Course <span class="req">*</span></label>
+            <div class="input-shell select-shell">
+              <select id="course" formControlName="course">
+                <option *ngFor="let c of courses" [value]="c.code">{{ c.code }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label" for="year_level">Year Level <span class="req">*</span></label>
+            <div class="input-shell select-shell">
+              <select id="year_level" formControlName="year_level">
+                <option *ngFor="let y of yearLevels" [value]="y.value">{{ y.label }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Email -->
+        <div class="form-group">
+          <label class="form-label" for="email">Student Email <span class="req">*</span></label>
+          <div class="input-shell" [class.error]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+            <input 
+              id="email"
+              type="email" 
+              formControlName="email" 
+              placeholder="e.g. juan@neust.edu.ph"
+              inputmode="email" 
+            />
+          </div>
+          <p class="field-hint" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+            Student email is required.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- ================= STEP 2: OJT & Company Details ================= -->
+      <div class="step-content" *ngIf="currentStep === 2">
+        
+        <div class="section-title">
+          <ion-icon name="business-outline"></ion-icon>
+          <h3>OJT Internship Placement</h3>
+        </div>
+
+        <!-- Host Company / Agency -->
+        <div class="form-group">
+          <label class="form-label" for="company_name">Company / Agency Name <span class="req">*</span></label>
+          <div class="input-shell" [class.error]="registerForm.get('company_name')?.touched && registerForm.get('company_name')?.invalid">
+            <input 
+              id="company_name"
+              type="text" 
+              formControlName="company_name" 
+              placeholder="e.g. TechCorp Solutions Inc." 
+            />
+          </div>
+        </div>
+
+        <!-- OJT Coordinator / Adviser -->
+        <div class="form-group">
+          <label class="form-label" for="adviser_name">OJT Adviser / Coordinator <span class="req">*</span></label>
+          <div class="input-shell">
+            <input 
+              id="adviser_name"
+              type="text" 
+              formControlName="adviser_name" 
+              placeholder="e.g. Prof. Maria Santos" 
+            />
+          </div>
+        </div>
+
+        <!-- Required Hours & Target Completion Date -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label" for="required_hours">Required Hours <span class="req">*</span></label>
+            <div class="input-shell">
+              <input 
+                id="required_hours"
+                type="number" 
+                formControlName="required_hours" 
+                placeholder="486" 
+              />
+            </div>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label" for="target_date">Target End Date <span class="req">*</span></label>
+            <div class="input-shell date-picker-shell" (click)="openCalendar()">
+              <span class="date-text">{{ getFormattedDate(registerForm.get('target_date')?.value) }}</span>
+              <ion-icon name="calendar-outline" class="calendar-btn-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= STEP 3: Security & Review ================= -->
+      <div class="step-content" *ngIf="currentStep === 3">
+        
+        <div class="section-title">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <h3>Account Security & Review</h3>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="password">Create Password <span class="req">*</span></label>
+          <div class="input-shell with-toggle">
+            <input 
+              id="password"
+              [type]="showPassword ? 'text' : 'password'" 
+              formControlName="password" 
+              placeholder="At least 6 characters" 
+            />
+            <button type="button" class="eye-btn" (click)="togglePassword()">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label class="form-label" for="confirm_password">Confirm Password <span class="req">*</span></label>
+          <div class="input-shell with-toggle">
+            <input 
+              id="confirm_password"
+              [type]="showConfirmPassword ? 'text' : 'password'" 
+              formControlName="confirm_password" 
+              placeholder="Re-enter password" 
+            />
+            <button type="button" class="eye-btn" (click)="toggleConfirmPassword()">
+              <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Review Summary Card -->
+        <div class="summary-card">
+          <h4>Registration Summary</h4>
+          <div class="summary-line">
+            <span class="s-label">Student:</span>
+            <span class="s-val">{{ registerForm.get('full_name')?.value || '—' }} ({{ registerForm.get('student_no')?.value }})</span>
+          </div>
+          <div class="summary-line">
+            <span class="s-label">Program:</span>
+            <span class="s-val">{{ registerForm.get('course')?.value }} • Year {{ registerForm.get('year_level')?.value }}</span>
+          </div>
+          <div class="summary-line">
+            <span class="s-label">Company:</span>
+            <span class="s-val">{{ registerForm.get('company_name')?.value || '—' }}</span>
+          </div>
+          <div class="summary-line">
+            <span class="s-label">Required:</span>
+            <span class="s-val highlight">{{ registerForm.get('required_hours')?.value }} Hours</span>
+          </div>
+          <div class="api-tag">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            <span>Official OJT Student Record</span>
+          </div>
+        </div>
+
+      </div>
+
+    </form>
+
+    <!-- Bottom Navigation Controls -->
+    <div class="wizard-footer">
+      
+      <!-- Back / Cancel -->
+      <button 
+        type="button" 
+        class="step-prev-btn" 
+        (click)="prevStep()"
+        [disabled]="isLoading">
+        {{ currentStep === 1 ? 'Cancel' : 'Back' }}
+      </button>
+
+      <!-- Next Step Button (Steps 1 & 2) -->
+      <ion-button 
+        *ngIf="currentStep < totalSteps" 
+        class="ot-btn-primary step-next-btn"
+        (click)="nextStep()">
+        Next Step
+        <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+      </ion-button>
+
+      <!-- Final Submit Button (Step 3) -->
+      <ion-button 
+        *ngIf="currentStep === totalSteps" 
+        class="ot-btn-primary step-next-btn submit-btn"
+        (click)="onSubmit()"
+        [disabled]="isLoading">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">Confirm & Register</span>
+        <ion-icon *ngIf="!isLoading" name="checkmark-circle-outline" slot="end"></ion-icon>
+      </ion-button>
+
+    </div>
+
+    <!-- Sign in redirect -->
+    <div class="login-redirect">
+      <span>Already have an account? </span>
+      <button class="redirect-btn" (click)="goToLogin()">Sign In</button>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <ion-toast 
+    [isOpen]="showToast" 
+    [message]="toastMessage" 
+    [duration]="2500" 
+    (didDismiss)="showToast = false">
+  </ion-toast>
+
+  <!-- Interactive Mobile Calendar Modal -->
+  <ion-modal [isOpen]="isCalendarOpen" (didDismiss)="closeCalendar()" class="calendar-modal">
+    <ng-template>
+      <div class="calendar-wrapper">
+        <div class="calendar-modal-header">
+          <h3>Select Target End Date</h3>
+          <button type="button" class="close-cal-btn" (click)="closeCalendar()">&times;</button>
+        </div>
+        <ion-datetime 
+          presentation="date"
+          [value]="registerForm.get('target_date')?.value"
+          (ionChange)="onDateSelected($event)"
+          class="custom-datetime">
+        </ion-datetime>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>
+

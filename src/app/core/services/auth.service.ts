@@ -12,9 +12,7 @@ const SESSION_KEY = 'ontrack_user_session';
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = environment.production
-    ? '/ontrack-api/api'
-    : 'http://localhost/ontrack-api/api';
+  private apiUrl = environment.apiUrl;
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -29,8 +27,14 @@ export class AuthService {
     return !!this.currentUserSubject.value;
   }
 
-  login(email: string, password: string): Observable<AuthResponse> {
-    const payload = { email, password };
+  /**
+   * Login against ontrack-api (validates BCrypt hash in MySQL)
+   */
+  login(identifier: string, password: string): Observable<AuthResponse> {
+    const payload = {
+      email: identifier,
+      password: password,
+    };
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login.php`, payload).pipe(
       tap((res) => {
@@ -38,73 +42,51 @@ export class AuthService {
           this.setSession(res.user);
         }
       }),
-      catchError(() => {
-        // Fallback demo login for offline/UI testing
-        if (email.toLowerCase().includes('demo') || email.toLowerCase().includes('neust') || email === 'student@ontrack.app') {
-          const demoUser: User = {
-            id: 1,
-            student_id: '2022-00486',
-            full_name: 'Juan Dela Cruz',
-            email: email,
-            course_section: 'BSIT 4-A',
-            school_campus: 'NEUST - Sumacab Campus',
-            company_name: 'TechCorp Solutions Inc.',
-            adviser_name: 'Prof. Maria Santos',
-            adviser_email: 'maria.santos@neust.edu.ph',
-            start_date: '2026-08-15',
-            target_date: '2026-12-15',
-            required_hours: 486,
-            rendered_hours: 142.5,
-          };
-          this.setSession(demoUser);
-          return of({ success: true, message: 'Demo login successful', user: demoUser });
-        }
-
-        // Generic mock for any input if backend is not yet started
-        const fallbackUser: User = {
-          id: Date.now(),
-          student_id: '2022-' + Math.floor(1000 + Math.random() * 9000),
-          full_name: email.split('@')[0].toUpperCase(),
-          email: email,
-          course_section: 'BSIT 4-A',
-          school_campus: 'NEUST - Sumacab Campus',
-          company_name: 'Assigned Partner Agency',
-          required_hours: 486,
-          rendered_hours: 0,
-        };
-        this.setSession(fallbackUser);
-        return of({ success: true, message: 'Logged in locally', user: fallbackUser });
+      catchError((err) => {
+        const errorMsg = err?.error?.message || 'Invalid email or password.';
+        return of({ success: false, message: errorMsg });
       })
     );
   }
 
-  register(userData: Partial<User> & { password?: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register.php`, userData).pipe(
+  /**
+   * Register new student into ontrack_db.users table
+   */
+  register(userData: any): Observable<AuthResponse> {
+    const payload = {
+      student_id: userData.student_id || userData.student_no,
+      full_name: userData.full_name,
+      email: userData.email,
+      password: userData.password,
+      course_section: userData.course || userData.course_section || 'BSIT 4-A',
+      school_campus: userData.school_campus || 'NEUST - Sumacab Campus',
+      company_name: userData.company_name,
+      adviser_name: userData.adviser_name,
+      adviser_email: userData.adviser_email || 'adviser@neust.edu.ph',
+      start_date: userData.start_date || '2026-08-15',
+      target_date: userData.target_date || '2026-12-15',
+      required_hours: Number(userData.required_hours) || 486,
+    };
+
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register.php`, payload).pipe(
       tap((res) => {
         if (res.success && res.user) {
           this.setSession(res.user);
         }
       }),
-      catchError(() => {
-        const newUser: User = {
-          id: Date.now(),
-          student_id: userData.student_id || '2022-00123',
-          full_name: userData.full_name || 'New Student',
-          email: userData.email || 'student@neust.edu.ph',
-          course_section: userData.course_section || 'BSIT 4-A',
-          school_campus: userData.school_campus || 'NEUST - Sumacab Campus',
-          company_name: userData.company_name || 'Host Training Establishment',
-          adviser_name: userData.adviser_name,
-          adviser_email: userData.adviser_email,
-          start_date: userData.start_date,
-          target_date: userData.target_date,
-          required_hours: userData.required_hours || 486,
-          rendered_hours: 0,
-        };
-        this.setSession(newUser);
-        return of({ success: true, message: 'Account registered locally', user: newUser });
+      catchError((err) => {
+        const errorMsg = err?.error?.message || 'Registration failed. Please check inputs.';
+        return of({ success: false, message: errorMsg });
       })
     );
+  }
+
+  updateSessionUser(updatedUser: Partial<User>): void {
+    const current = this.currentUserValue;
+    if (current) {
+      const merged = { ...current, ...updatedUser };
+      this.setSession(merged);
+    }
   }
 
   logout(): void {
@@ -126,4 +108,3 @@ export class AuthService {
     }
   }
 }
-
