@@ -38,26 +38,13 @@
 .logo-row {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
 
-.brand-logo-img {
-  width: 44px;
-  height: 44px;
+.brand-full-logo {
+  max-width: 170px;
+  height: 48px;
   object-fit: contain;
-  border-radius: 10px;
-}
-
-.logo-text {
-  font-size: 1.85rem;
-  font-weight: 800;
-  color: #1e293b;
-  margin: 0;
-  letter-spacing: -0.5px;
-
-  span {
-    color: #547792;
-  }
+  display: block;
 }
 
 /* Hero Section */
