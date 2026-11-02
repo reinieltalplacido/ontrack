@@ -64,13 +64,27 @@
 .header-section {
   margin-bottom: 28px;
 
+  .header-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .login-logo-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
   .brand-tag {
     font-size: 0.78rem;
     font-weight: 700;
     color: #547792;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    margin-bottom: 6px;
+    margin-bottom: 0;
   }
 
   .page-title {
@@ -274,3 +288,4 @@
     }
   }
 }
+

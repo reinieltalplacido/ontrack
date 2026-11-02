@@ -41,17 +41,11 @@
   gap: 12px;
 }
 
-.logo-mark {
+.brand-logo-img {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #547792, #3c5b73);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-size: 24px;
-  box-shadow: 0 4px 12px rgba(84, 119, 146, 0.28);
+  object-fit: contain;
+  border-radius: 10px;
 }
 
 .logo-text {
@@ -172,3 +166,4 @@
     }
   }
 }
+
