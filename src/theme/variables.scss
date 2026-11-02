@@ -1,2 +1,62 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+/** Ionic CSS Variables **/
+:root {
+  /** Primary: OnTrack Slate Blue #547792 **/
+  --ion-color-primary: #547792;
+  --ion-color-primary-rgb: 84, 119, 146;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #4a6981;
+  --ion-color-primary-tint: #65859d;
+
+  /** Secondary: Dark Teal Accent #2B4C6F **/
+  --ion-color-secondary: #2b4c6f;
+  --ion-color-secondary-rgb: 43, 76, 111;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #264362;
+  --ion-color-secondary-tint: #405e7d;
+
+  /** Tertiary: Soft Ice Blue #E8EEF3 **/
+  --ion-color-tertiary: #e8eef3;
+  --ion-color-tertiary-rgb: 232, 238, 243;
+  --ion-color-tertiary-contrast: #1e293b;
+  --ion-color-tertiary-contrast-rgb: 30, 41, 59;
+  --ion-color-tertiary-shade: #ccd1d6;
+  --ion-color-tertiary-tint: #eaf0f4;
+
+  /** Success: Forest Mint #10b981 **/
+  --ion-color-success: #10b981;
+  --ion-color-success-rgb: 16, 185, 129;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #0ea372;
+  --ion-color-success-tint: #28c08e;
+
+  /** Warning: Amber Warmth #f59e0b **/
+  --ion-color-warning: #f59e0b;
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade: #d88b0a;
+  --ion-color-warning-tint: #f6a823;
+
+  /** Danger: Rose Coral #ef4444 **/
+  --ion-color-danger: #ef4444;
+  --ion-color-danger-rgb: 239, 68, 68;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #d23c3c;
+  --ion-color-danger-tint: #f15757;
+
+  /** Light Background & Cards **/
+  --ion-background-color: #f8fafc;
+  --ion-background-color-rgb: 248, 250, 252;
+  --ion-text-color: #1e293b;
+  --ion-text-color-rgb: 30, 41, 59;
+
+  --ontrack-card-bg: #ffffff;
+  --ontrack-border-color: #e2e8f0;
+  --ontrack-subtext: #64748b;
+  --ontrack-radius: 16px;
+  --ontrack-shadow: 0 4px 14px rgba(84, 119, 146, 0.08);
+}

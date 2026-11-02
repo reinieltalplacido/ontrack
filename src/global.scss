@@ -1,14 +1,3 @@
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 
@@ -18,20 +7,81 @@
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
+/* Optional CSS utils */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+/* Modern Mobile Styling Defaults */
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+body {
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+/* Custom Card Container */
+.ot-card {
+  background: var(--ontrack-card-bg);
+  border: 1px solid var(--ontrack-border-color);
+  border-radius: var(--ontrack-radius);
+  box-shadow: var(--ontrack-shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* Primary Action Buttons */
+.ot-btn-primary {
+  --background: var(--ion-color-primary);
+  --background-activated: var(--ion-color-primary-shade);
+  --color: #ffffff;
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 48px;
+  letter-spacing: 0.3px;
+  text-transform: none;
+}
+
+.ot-btn-outline {
+  --border-color: var(--ion-color-primary);
+  --border-width: 1.5px;
+  --color: var(--ion-color-primary);
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 48px;
+  text-transform: none;
+}
+
+/* Form Inputs */
+.ot-input-item {
+  --background: #f8fafc;
+  --border-color: #e2e8f0;
+  --border-radius: 12px;
+  --highlight-color-focused: var(--ion-color-primary);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  margin-bottom: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: border-color 0.2s ease;
+
+  &.ion-focused {
+    border-color: var(--ion-color-primary);
+    background: #ffffff;
+  }
+}
+
+/* Badge styles */
+.ot-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

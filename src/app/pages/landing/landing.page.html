@@ -1,0 +1,97 @@
+<ion-content [fullscreen]="true" class="landing-content">
+  <div class="landing-container">
+    
+    <!-- Top Branding Header -->
+    <header class="app-header">
+      <div class="brand-badge">
+        <ion-icon name="school-outline" class="badge-icon"></ion-icon>
+        <span>NEUST Sumacab Campus</span>
+      </div>
+
+      <div class="logo-row">
+        <div class="logo-mark">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <h1 class="logo-text">On<span>Track</span></h1>
+      </div>
+    </header>
+
+    <!-- Hero Title & Subtitle -->
+    <section class="hero-section">
+      <h2 class="hero-title">OJT Tracking &<br/>Monitoring System</h2>
+      <p class="hero-subtitle">
+        Empowering interns with automated DTR logging, verified photo proof, and real-time progress tracking.
+      </p>
+    </section>
+
+    <!-- 4 Main Feature Cards -->
+    <section class="features-list">
+      
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <ion-icon name="clipboard-outline"></ion-icon>
+        </div>
+        <div class="feature-text">
+          <h3>Daily Activity Logging</h3>
+          <p>Track time-in/out, GPS location, and tasks accomplished with one tap.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <ion-icon name="trending-up-outline"></ion-icon>
+        </div>
+        <div class="feature-text">
+          <h3>Progress Monitoring</h3>
+          <p>Visualize completed vs. required hours through interactive metrics.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <div class="feature-text">
+          <h3>PDF Reports</h3>
+          <p>Generate formal Daily Time Records (DTR) ready for coordinator submission.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <ion-icon name="checkbox-outline"></ion-icon>
+        </div>
+        <div class="feature-text">
+          <h3>Task Management</h3>
+          <p>Organize supervisor-assigned tasks with due dates and priority alerts.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Bottom Action Bar (Fixed feel) -->
+    <footer class="action-footer">
+      <ion-button 
+        expand="block" 
+        class="ot-btn-primary main-action-btn"
+        (click)="goToLogin()">
+        Get Started
+        <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+      </ion-button>
+
+      <ion-button 
+        expand="block" 
+        fill="outline" 
+        class="ot-btn-outline secondary-action-btn"
+        (click)="goToRegister()">
+        Create Account
+      </ion-button>
+
+      <p class="security-note">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        Official OJT Monitoring Application
+      </p>
+    </footer>
+
+  </div>
+</ion-content>

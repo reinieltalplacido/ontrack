@@ -1,0 +1,129 @@
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="login-container">
+    
+    <!-- Top Back Navigation -->
+    <div class="top-nav">
+      <button class="back-btn" (click)="goBack()" aria-label="Go back">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+      <button class="demo-chip-btn" (click)="fillDemoCredentials()">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        <span>Demo Fill</span>
+      </button>
+    </div>
+
+    <!-- Title & Greeting -->
+    <div class="header-section">
+      <div class="brand-tag">OnTrack Portal</div>
+      <h1 class="page-title">Welcome Back</h1>
+      <p class="page-subtitle">Enter your student credentials to log your OJT hours and access your tasks.</p>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner" *ngIf="errorMessage">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-container">
+      
+      <!-- Email Field -->
+      <div class="input-group">
+        <label class="input-label" for="email">Student Email</label>
+        <div class="custom-input-box" [class.has-error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
+          <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+          <input 
+            id="email"
+            type="email" 
+            formControlName="email"
+            placeholder="e.g. student@neust.edu.ph"
+            autocomplete="email"
+            inputmode="email"
+          />
+        </div>
+        <p class="error-hint" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')">
+          Email is required.
+        </p>
+        <p class="error-hint" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')">
+          Please enter a valid email address.
+        </p>
+      </div>
+
+      <!-- Password Field -->
+      <div class="input-group">
+        <div class="label-row">
+          <label class="input-label" for="password">Password</label>
+          <button type="button" class="forgot-link" (click)="forgotPassword()">Forgot?</button>
+        </div>
+        <div class="custom-input-box" [class.has-error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+          <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+          <input 
+            id="password"
+            [type]="showPassword ? 'text' : 'password'" 
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          />
+          <button type="button" class="eye-toggle-btn" (click)="togglePasswordVisibility()" aria-label="Toggle password">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+        <p class="error-hint" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')">
+          Password is required.
+        </p>
+        <p class="error-hint" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')">
+          Password must be at least 6 characters.
+        </p>
+      </div>
+
+      <!-- Remember Me Checkbox -->
+      <div class="options-row">
+        <label class="remember-label">
+          <input type="checkbox" formControlName="rememberMe" />
+          <span>Keep me signed in</span>
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="submit-wrapper">
+        <ion-button 
+          expand="block" 
+          type="submit" 
+          class="ot-btn-primary login-btn"
+          [disabled]="isLoading">
+          <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+          <span *ngIf="!isLoading">Sign In</span>
+          <ion-icon *ngIf="!isLoading" name="log-in-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+    </form>
+
+    <!-- Bottom Signup Prompt -->
+    <div class="signup-footer">
+      <p>Don't have an OnTrack account?</p>
+      <button class="signup-btn" (click)="goToRegister()">Create Student Account</button>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <ion-toast 
+    [isOpen]="showToast" 
+    [message]="toastMessage" 
+    [duration]="2500" 
+    (didDismiss)="showToast = false">
+  </ion-toast>
+
+  <!-- Forgot Password Alert -->
+  <ion-alert
+    [isOpen]="showForgotAlert"
+    header="Reset Password"
+    subHeader="Student Self-Service"
+    message="A password reset link will be sent to your registered academic email address."
+    [buttons]="['OK']"
+    (didDismiss)="showForgotAlert = false">
+  </ion-alert>
+
+</ion-content>
