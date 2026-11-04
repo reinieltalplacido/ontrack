@@ -38,4 +38,17 @@ export const routes: Routes = [
     path: 'reports',
     loadComponent: () => import('./pages/reports/reports.page').then((m) => m.ReportsPage),
   },
+  {
+    path: 'admin/login',
+    loadComponent: () => import('./pages/admin/admin-login/admin-login.page').then((m) => m.AdminLoginPage),
+  },
+  {
+    path: 'admin/dashboard',
+    loadComponent: () => import('./pages/admin/admin-dashboard/admin-dashboard.page').then((m) => m.AdminDashboardPage),
+  },
+  {
+    path: 'admin',
+    redirectTo: 'admin/dashboard',
+    pathMatch: 'full',
+  },
 ];

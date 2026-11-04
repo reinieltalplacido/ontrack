@@ -2,10 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { User, AuthResponse } from '../../models/user.model';
+import { User, AuthResponse, Professor } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
 
 const SESSION_KEY = 'ontrack_user_session';
+const ADMIN_SESSION_KEY = 'ontrack_admin_session';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +29,7 @@ export class AuthService {
   }
 
   /**
-   * Login against ontrack-api (validates BCrypt hash in MySQL)
+   * Login against ontrack-api (validates BCrypt hash in MySQL for students & professors)
    */
   login(identifier: string, password: string): Observable<AuthResponse> {
     const payload = {
@@ -38,8 +39,22 @@ export class AuthService {
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login.php`, payload).pipe(
       tap((res) => {
-        if (res.success && res.user) {
-          this.setSession(res.user);
+        if (res.success) {
+          if (res.role === 'professor' || res.professor) {
+            const prof = res.professor || {
+              id: res.user?.id,
+              employee_id: res.user?.student_id,
+              full_name: res.user?.full_name,
+              email: res.user?.email,
+              department: 'College of Information and Communications Technology',
+              role: 'coordinator',
+              assigned_section: res.user?.course_section || 'BSIT 4-A',
+            };
+            localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(prof));
+          }
+          if (res.user) {
+            this.setSession(res.user);
+          }
         }
       }),
       catchError((err) => {

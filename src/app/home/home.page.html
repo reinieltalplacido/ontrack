@@ -1,10 +1,10 @@
-<ion-header class="ion-no-border mobile-top-bar">
+<ion-header class="ion-no-border mobile-header">
   <ion-toolbar class="header-toolbar">
-    <div class="header-content">
-      <div class="brand-logo-wrap">
+    <div class="toolbar-flex-row">
+      <div class="logo-box">
         <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
       </div>
-      <button class="menu-icon-btn" (click)="openSideMenu()" aria-label="Open student menu">
+      <button class="header-menu-btn" (click)="openSideMenu()" aria-label="Open menu">
         <ion-icon name="menu-outline"></ion-icon>
       </button>
     </div>
@@ -18,400 +18,418 @@
   </ion-refresher>
 
   <div class="dashboard-container">
-    <!-- Notification Feedback Toast Banner -->
+    <!-- Feedback Notification Banner -->
     @if (feedbackMessage) {
-      <div class="feedback-banner" [class.success]="feedbackType === 'success'" [class.error]="feedbackType === 'error'">
-        <ion-icon [name]="feedbackType === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'"></ion-icon>
-        <span>{{ feedbackMessage }}</span>
-      </div>
+    <div class="feedback-banner" [class.success]="feedbackType === 'success'" [class.error]="feedbackType === 'error'">
+      <ion-icon [name]="feedbackType === 'success' ? 'checkmark-circle-outline' : 'alert-circle-outline'"></ion-icon>
+      <span>{{ feedbackMessage }}</span>
+    </div>
     }
 
-    <!-- Welcome Greeting -->
-    <header class="welcome-header">
-      <h1 class="welcome-title">Welcome, {{ currentUser?.full_name || 'Intern' }}</h1>
-      <p class="welcome-subtitle">Here's your OJT progress summary</p>
-      @if (currentUser?.company_name) {
-        <div class="company-chip">
-          <ion-icon name="business-outline"></ion-icon>
-          <span>{{ currentUser!.company_name }}</span>
+    <!-- Welcome Greeting Header with Avatar -->
+    <header class="welcome-header-card">
+      <div class="welcome-profile-row">
+        <div class="student-avatar-wrap">
+          <span class="avatar-letter">{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
+          <span class="online-indicator"></span>
         </div>
+        <div class="welcome-meta">
+          <span class="greeting-eyebrow">Welcome back,</span>
+          <h1 class="welcome-title">{{ currentUser?.full_name || 'Intern Student' }}</h1>
+          <p class="welcome-subtitle">
+            <span class="dept-badge">{{ currentUser?.course_section || 'BSIT 4-A' }}</span>
+            <span class="id-separator">•</span>
+            <span class="id-text">{{ currentUser?.student_id || '2026-0001' }}</span>
+          </p>
+        </div>
+      </div>
+      @if (currentUser?.company_name) {
+      <div class="company-badge-pill">
+        <ion-icon name="business-outline"></ion-icon>
+        <span>{{ currentUser!.company_name }}</span>
+      </div>
       }
     </header>
 
-    <!-- Main Duty Action Button / Card -->
-    <section class="duty-action-section">
-      @if (stats.is_clocked_in) {
-        <div class="duty-live-badge">
-          <span class="pulse-dot"></span>
-          <span>Duty Ongoing since {{ formatTime(stats.today_log?.time_in) }}</span>
-        </div>
-      }
-
-      <button
-        class="duty-primary-btn"
-        [class.clocked-in]="stats.is_clocked_in"
-        (click)="onPrimaryDutyAction()"
-      >
-        <ion-icon [name]="stats.is_clocked_in ? 'stopwatch-outline' : 'time-outline'"></ion-icon>
-        <span>{{ stats.is_clocked_in ? 'Clock Out Duty' : 'Log Activity' }}</span>
-      </button>
-    </section>
-
-    <!-- 4 Core Metric Cards (Exact Reference Layout) -->
-    <section class="metrics-grid">
-      <!-- Card 1: Total Hours -->
-      <div class="metric-card">
-        <span class="metric-label">Total Hours</span>
-        <div class="metric-value-row">
-          <span class="metric-hero-num">{{ stats.accumulated_hours }}</span>
-        </div>
-        <div class="metric-footer-row">
-          <span class="metric-subtext">out of {{ stats.required_hours }} required hours</span>
-          <button class="edit-icon-btn" (click)="openEditGoalModal()" aria-label="Edit target hours">
-            <ion-icon name="create-outline"></ion-icon>
-          </button>
-        </div>
-      </div>
-
-      <!-- Card 2: Completion -->
-      <div class="metric-card">
-        <span class="metric-label">Completion</span>
-        <div class="metric-value-row">
-          <span class="metric-hero-num">{{ stats.completion_percent }}%</span>
-        </div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar-fill" [style.width.%]="stats.completion_percent"></div>
-        </div>
-      </div>
-
-      <!-- Card 3: Days Left -->
-      <div class="metric-card">
-        <span class="metric-label">Days Left</span>
-        <div class="metric-value-row">
-          <span class="metric-hero-num">{{ stats.days_remaining }}</span>
-        </div>
-        <div class="metric-footer-row">
-          <span class="metric-subtext">until {{ formatDate(currentUser?.target_date) }}</span>
-          <button class="edit-icon-btn" (click)="openEditGoalModal()" aria-label="Edit target date">
-            <ion-icon name="create-outline"></ion-icon>
-          </button>
-        </div>
-      </div>
-
-      <!-- Card 4: Pending Tasks -->
-      <div class="metric-card">
-        <span class="metric-label">Pending Tasks</span>
-        <div class="metric-value-row">
-          <span class="metric-hero-num">{{ stats.pending_tasks }}</span>
-        </div>
-        <div class="metric-footer-row">
-          <button class="text-link-btn" (click)="goToTasks()">
-            View all tasks
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Recent Activities Card (Exact Reference Layout) -->
-    <section class="recent-activities-card">
-      <div class="card-header-row">
+    <!-- 1. Daily Duty Attendance Card -->
+    <section class="neat-card duty-card" [class.is-active]="stats.is_clocked_in">
+      <div class="card-top-header">
         <div class="card-title-group">
-          <ion-icon name="time-outline" class="title-icon"></ion-icon>
-          <h2 class="card-title">Recent Activities</h2>
+          <span class="location-eyebrow">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ stats.today_log?.location_name || currentUser?.company_name || 'Assigned Workplace' }}
+          </span>
+          <h2 class="card-main-title">Daily Attendance</h2>
         </div>
-        <button class="view-all-btn" (click)="goToTimeLogs()">
-          View All
-        </button>
+        <div class="status-badge-wrap">
+          @if (stats.is_clocked_in) {
+          <span class="duty-badge active">
+            <span class="beacon-dot"></span>
+            Duty Active
+          </span>
+          } @else {
+          <span class="duty-badge off">
+            <span class="off-dot"></span>
+            Off Duty
+          </span>
+          }
+        </div>
       </div>
 
-      <!-- Activities Table / List -->
-      <div class="table-container">
-        <div class="table-header-row">
-          <span class="col-head col-date">Date</span>
-          <span class="col-head col-time">Time</span>
-          <span class="col-head col-status">Status</span>
+      <div class="card-inner-body">
+        <div class="duty-status-callout">
+          @if (stats.is_clocked_in) {
+          <div class="active-shift-info">
+            <ion-icon name="timer-outline" class="shift-icon"></ion-icon>
+            <span>Started today at <strong>{{ formatTime(stats.today_log?.time_in) }}</strong></span>
+          </div>
+          } @else {
+          <p class="ready-subtext">Ready to record today's time-in with GPS verification & photo proof.</p>
+          }
         </div>
 
-        @if (recentLogs.length === 0) {
-          <div class="empty-state">
-            <ion-icon name="hourglass-outline"></ion-icon>
-            <p>No duty activities logged yet.</p>
-            <span>Tap "Log Activity" above to record your first time-in!</span>
-          </div>
+        @if (stats.is_clocked_in) {
+        <button class="duty-action-btn clock-out" (click)="openClockOutModal()">
+          <ion-icon name="stopwatch-outline"></ion-icon>
+          <span>Clock Out & Log Accomplishment</span>
+        </button>
         } @else {
-          <div class="table-body">
-            @for (log of recentLogs; track log.id) {
-              <div class="table-data-row">
-                <div class="col-date">
-                  <span class="date-text">{{ formatDate(log.log_date) }}</span>
-                  @if (log.location_name) {
-                    <span class="location-tag">
-                      <ion-icon name="location-outline"></ion-icon>
-                      GPS Verified
-                    </span>
-                  }
-                </div>
-
-                <div class="col-time">
-                  <span class="time-in-text">{{ formatTime(log.time_in) }}</span>
-                  <span class="time-sep">-</span>
-                  <span class="time-out-text">{{ formatTime(log.time_out) }}</span>
-                  @if (log.total_hours) {
-                    <span class="hours-badge">{{ log.total_hours }}h</span>
-                  }
-                </div>
-
-                <div class="col-status">
-                  <span class="status-badge" [class.completed]="log.status === 'completed'" [class.ongoing]="log.status === 'ongoing'">
-                    {{ log.status === 'completed' ? 'Completed' : 'Ongoing' }}
-                  </span>
-                </div>
-              </div>
-            }
-          </div>
+        <button class="duty-action-btn clock-in" (click)="openClockInModal()">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Clock In (GPS & Photo)</span>
+        </button>
         }
       </div>
     </section>
+
+    <!-- 2. OJT Hours & Completion Progress Card -->
+    <section class="neat-card progress-card">
+      <div class="card-top-header">
+        <div class="progress-title-col">
+          <span class="card-category-label">Target Overview</span>
+          <h2 class="card-main-title">OJT Hours Progress</h2>
+        </div>
+        <button class="edit-target-link" (click)="openEditGoalModal()">
+          <ion-icon name="create-outline"></ion-icon>
+          <span>Edit Goal</span>
+        </button>
+      </div>
+
+      <div class="card-inner-body">
+        <div class="hours-display-row">
+          <div class="hours-numbers">
+            <span class="current-hrs">{{ stats.accumulated_hours }}</span>
+            <span class="total-hrs">/ {{ stats.required_hours }} hrs</span>
+          </div>
+          <span class="percent-chip" [class.completed]="stats.completion_percent >= 100">
+            {{ stats.completion_percent }}%
+          </span>
+        </div>
+
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" [style.width.%]="stats.completion_percent"></div>
+        </div>
+
+        <div class="progress-stats-footer">
+          <div class="stat-pill-box">
+            <div class="stat-icon-wrap amber">
+              <ion-icon name="hourglass-outline"></ion-icon>
+            </div>
+            <div class="stat-pill-meta">
+              <span class="stat-label">Hours Remaining</span>
+              <strong class="stat-value">{{ stats.remaining_hours }} hrs</strong>
+            </div>
+          </div>
+
+          <div class="stat-pill-box">
+            <div class="stat-icon-wrap sky">
+              <ion-icon name="calendar-outline"></ion-icon>
+            </div>
+            <div class="stat-pill-meta">
+              <span class="stat-label">Target Completion</span>
+              <strong class="stat-value">{{ stats.days_remaining }} days left</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Navigation Shortcuts (2x2 Grid) -->
+    <section class="shortcuts-grid">
+      <div class="shortcut-item" (click)="goToTimeLogs()">
+        <div class="icon-square indigo">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <div class="shortcut-text">
+          <h3>Time Logs</h3>
+          <p>View full DTR</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="shortcut-arrow"></ion-icon>
+      </div>
+
+      <div class="shortcut-item" (click)="goToTasks()">
+        <div class="icon-square amber">
+          <ion-icon name="checkbox-outline"></ion-icon>
+        </div>
+        <div class="shortcut-text">
+          <h3>Tasks</h3>
+          <p>{{ stats.pending_tasks }} Pending</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="shortcut-arrow"></ion-icon>
+      </div>
+
+      <div class="shortcut-item" (click)="goToReports()">
+        <div class="icon-square sky">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <div class="shortcut-text">
+          <h3>Reports</h3>
+          <p>Generate PDF</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="shortcut-arrow"></ion-icon>
+      </div>
+
+      <div class="shortcut-item" (click)="goToProfile()">
+        <div class="icon-square emerald">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="shortcut-text">
+          <h3>Profile</h3>
+          <p>OJT Details</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="shortcut-arrow"></ion-icon>
+      </div>
+    </section>
+
+    <!-- 4. Recent Attendance Log List Card -->
+    <section class="neat-card recent-logs-card">
+      <div class="card-top-header">
+        <div>
+          <span class="card-category-label">History</span>
+          <h2 class="card-main-title">Recent Attendance</h2>
+        </div>
+        <button class="view-all-link" (click)="goToTimeLogs()">
+          <span>View All</span>
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="card-inner-body no-pad-top">
+        @if (recentLogs.length === 0) {
+        <div class="empty-logs-box">
+          <div class="empty-icon-circle">
+            <ion-icon name="calendar-clear-outline"></ion-icon>
+          </div>
+          <h4>No attendance records yet</h4>
+          <p>Clock in today to start logging your rendered duty hours.</p>
+        </div>
+        } @else {
+        <div class="logs-list">
+          @for (log of recentLogs; track log.id) {
+          <div class="log-row">
+            <div class="log-calendar-col">
+              <span class="calendar-day">{{ log.log_date.split('-')[2] || '01' }}</span>
+              <span class="calendar-mon">DAY</span>
+            </div>
+            <div class="log-details-col">
+              <h4>{{ formatDate(log.log_date) }}</h4>
+              <p>{{ formatTime(log.time_in) }} — {{ log.time_out ? formatTime(log.time_out) : 'In Progress' }}</p>
+            </div>
+            <div class="log-meta-col">
+              @if (log.total_hours) {
+              <span class="hours-tag">+{{ log.total_hours }} hrs</span>
+              }
+              <span class="status-badge" [class.completed]="log.status === 'completed'"
+                [class.ongoing]="log.status === 'ongoing'">
+                {{ log.status === 'completed' ? 'Completed' : 'Ongoing' }}
+              </span>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </section>
+
+    <!-- Extra Bottom Spacer for Safe Scrolling -->
+    <div class="scroll-bottom-spacer"></div>
+
   </div>
 
   <!-- CLOCK IN MODAL -->
-  <ion-modal [isOpen]="showClockInModal" (didDismiss)="closeClockInModal()" class="app-bottom-sheet">
+  <ion-modal [isOpen]="showClockInModal" (didDismiss)="closeClockInModal()" class="neat-sheet-modal">
     <ng-template>
-      <div class="sheet-container">
-        <div class="sheet-drag-handle"></div>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="modal-toolbar">
+          <ion-title>Duty Clock-In</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeClockInModal()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
 
-        <div class="sheet-header">
-          <div class="sheet-title-group">
-            <ion-icon name="time-outline" class="sheet-icon"></ion-icon>
-            <h3>Duty Time-In</h3>
-          </div>
-          <button class="sheet-close-btn" (click)="closeClockInModal()">
-            <ion-icon name="close-outline"></ion-icon>
-          </button>
-        </div>
-
-        <div class="sheet-body">
-          <!-- Workplace Location Card -->
-          <div class="info-card">
-            <div class="info-icon-col">
-              <ion-icon name="location-outline"></ion-icon>
+      <ion-content class="ion-padding modal-content">
+        <div class="modal-card-block">
+          <div class="modal-row-item">
+            <ion-icon name="location-outline" class="modal-item-icon"></ion-icon>
+            <div class="modal-item-text">
+              <span class="item-label">Workplace Location</span>
+              <strong class="item-val">{{ locationName }}</strong>
             </div>
-            <div class="info-content-col">
-              <span class="info-label">Duty Location</span>
-              <strong class="info-value">{{ locationName }}</strong>
-              @if (isGettingLocation) {
-                <span class="loading-sub">
-                  <ion-spinner name="dots"></ion-spinner> Detecting workplace address...
-                </span>
-              } @else if (currentCoords) {
-                <span class="verified-tag">
-                  <ion-icon name="checkmark-circle-outline"></ion-icon> GPS Location Verified
-                </span>
-              }
-            </div>
-          </div>
-
-          <!-- Camera Selfie Verification Card -->
-          <div class="selfie-card">
-            <span class="selfie-title">Duty Proof Photo</span>
-            @if (selfiePreview) {
-              <div class="selfie-preview-box">
-                <img [src]="selfiePreview" alt="Selfie Verification" class="selfie-img" />
-                <button class="retake-btn" (click)="captureSelfieProof()">
-                  <ion-icon name="camera-outline"></ion-icon> Retake Photo
-                </button>
-              </div>
-            } @else {
-              <button class="capture-btn" (click)="captureSelfieProof()">
-                <ion-icon name="camera-outline"></ion-icon>
-                <span>Take Attendance Selfie</span>
-              </button>
+            @if (isGettingLocation) {
+            <ion-spinner name="dots"></ion-spinner>
+            } @else if (currentCoords) {
+            <span class="verified-pill">GPS Verified</span>
             }
           </div>
+
+          <div class="modal-row-item">
+            <ion-icon name="camera-outline" class="modal-item-icon"></ion-icon>
+            <div class="modal-item-text">
+              <span class="item-label">Selfie Verification</span>
+              <span class="item-desc">{{ selfiePreview ? 'Proof photo attached' : 'Duty selfie photo required' }}</span>
+            </div>
+            <button class="small-action-btn" (click)="captureSelfieProof()">
+              {{ selfiePreview ? 'Retake' : 'Take Photo' }}
+            </button>
+          </div>
         </div>
 
-        <div class="sheet-actions">
-          <button
-            class="submit-duty-btn"
-            [disabled]="isSubmittingClockIn"
-            (click)="submitClockIn()"
-          >
+        @if (selfiePreview) {
+        <div class="photo-preview-wrap">
+          <img [src]="selfiePreview" alt="Duty verification proof" class="preview-img" />
+        </div>
+        }
+      </ion-content>
+
+      <ion-footer class="ion-no-border">
+        <ion-toolbar class="modal-footer-toolbar">
+          <button class="modal-submit-btn primary" [disabled]="isSubmittingClockIn" (click)="submitClockIn()">
             @if (isSubmittingClockIn) {
-              <ion-spinner name="crescent"></ion-spinner>
+            <ion-spinner name="crescent"></ion-spinner>
             } @else {
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              <span>Confirm Time-In</span>
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <span>Confirm Time-In</span>
             }
           </button>
-        </div>
-      </div>
+        </ion-toolbar>
+      </ion-footer>
     </ng-template>
   </ion-modal>
 
   <!-- CLOCK OUT MODAL -->
-  <ion-modal [isOpen]="showClockOutModal" (didDismiss)="closeClockOutModal()" class="app-bottom-sheet">
-    <ng-template>
-      <div class="sheet-container">
-        <div class="sheet-drag-handle"></div>
+    <ion-modal [isOpen]="showClockOutModal" (didDismiss)="closeClockOutModal()" class="neat-sheet-modal clockout-modal">
+      <ng-template>
+        <ion-header class="ion-no-border">
+          <ion-toolbar class="modal-toolbar">
+            <ion-title>End Duty Session</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="closeClockOutModal()">
+                <ion-icon name="close-outline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
 
-        <div class="sheet-header">
-          <div class="sheet-title-group">
-            <ion-icon name="stopwatch-outline" class="sheet-icon"></ion-icon>
-            <h3>Duty Time-Out</h3>
+        <ion-content class="ion-padding modal-content">
+          <div class="clockout-meta-card">
+            <div class="meta-row">
+              <span class="meta-label">Time Started</span>
+              <strong class="meta-val">{{ formatTime(stats.today_log?.time_in) }}</strong>
+            </div>
+            <p class="meta-tip">Clock out now to calculate rendered hours and finalize today's DTR.</p>
           </div>
-          <button class="sheet-close-btn" (click)="closeClockOutModal()">
-            <ion-icon name="close-outline"></ion-icon>
-          </button>
-        </div>
 
-        <div class="sheet-body">
-          <p class="notes-instructions">
-            Please summarize your tasks and accomplishments rendered today before completing your daily time record:
-          </p>
+            <div class="quick-notes-group">
+              <label class="quick-notes-label">Accomplishments (Optional)</label>
+              <div class="quick-chips-wrap">
+                @for (note of quickNotes; track note) {
+                <button type="button" class="note-chip-btn" [class.active]="activityNotes === note"
+                  (click)="selectQuickNote(note)">
+                  {{ note }}
+                </button>
+                }
+              </div>
 
-          <div class="notes-input-box">
-            <ion-textarea
-              [(ngModel)]="activityNotes"
-              placeholder="e.g. Worked on frontend responsive layout and verified database queries..."
-              [rows]="4"
-              [autoGrow]="true"
-            ></ion-textarea>
-          </div>
-        </div>
+              <div class="compact-textarea-wrap">
+                <ion-textarea [(ngModel)]="activityNotes" placeholder="Tap a chip or write brief notes..." [rows]="2"
+                  [autoGrow]="true"></ion-textarea>
+              </div>
+            </div>
+        </ion-content>
 
-        <div class="sheet-actions">
-          <button
-            class="submit-duty-btn clock-out-color"
-            [disabled]="isSubmittingClockOut"
-            (click)="submitClockOut()"
-          >
-            @if (isSubmittingClockOut) {
+        <ion-footer class="ion-no-border">
+          <ion-toolbar class="modal-footer-toolbar">
+            <button class="modal-submit-btn danger" [disabled]="isSubmittingClockOut" (click)="submitClockOut()">
+              @if (isSubmittingClockOut) {
               <ion-spinner name="crescent"></ion-spinner>
-            } @else {
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              <span>Confirm Time-Out & Render Hours</span>
-            }
-          </button>
-        </div>
-      </div>
-    </ng-template>
-  </ion-modal>
+              } @else {
+              <ion-icon name="stopwatch-outline"></ion-icon>
+              <span>Clock Out</span>
+              }
+            </button>
+          </ion-toolbar>
+        </ion-footer>
+      </ng-template>
+    </ion-modal>
 
-  <!-- EDIT GOAL / TARGET MODAL -->
-  <ion-modal [isOpen]="showEditGoalModal" (didDismiss)="closeEditGoalModal()" class="app-bottom-sheet">
-    <ng-template>
-      <div class="sheet-container">
-        <div class="sheet-drag-handle"></div>
+    <!-- EDIT GOAL MODAL -->
+    <ion-modal [isOpen]="showEditGoalModal" (didDismiss)="closeEditGoalModal()" class="neat-sheet-modal">
+      <ng-template>
+        <ion-header class="ion-no-border">
+          <ion-toolbar class="modal-toolbar">
+            <ion-title>Update OJT Target</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="closeEditGoalModal()">
+                <ion-icon name="close-outline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
 
-        <div class="sheet-header">
-          <div class="sheet-title-group">
-            <ion-icon name="create-outline" class="sheet-icon"></ion-icon>
-            <h3>Update OJT Targets</h3>
-          </div>
-          <button class="sheet-close-btn" (click)="closeEditGoalModal()">
-            <ion-icon name="close-outline"></ion-icon>
-          </button>
-        </div>
+        <ion-content class="ion-padding modal-content">
+          <div class="modal-card-block">
+            <div class="input-field-group">
+              <label class="input-label">Required Total Hours</label>
+              <div class="input-box">
+                <ion-input type="number" [(ngModel)]="editRequiredHours" placeholder="e.g. 500"></ion-input>
+              </div>
+            </div>
 
-        <div class="sheet-body">
-          <div class="form-field-group">
-            <label class="field-label">Required Total Hours</label>
-            <div class="custom-input-box">
-              <ion-input
-                type="number"
-                [(ngModel)]="editRequiredHours"
-                placeholder="e.g. 500"
-              ></ion-input>
+            <div class="input-field-group">
+              <label class="input-label">Target Completion Date</label>
+              <div class="input-box">
+                <ion-input type="date" [(ngModel)]="editTargetDate"></ion-input>
+              </div>
             </div>
           </div>
+        </ion-content>
 
-          <div class="form-field-group">
-            <label class="field-label">Target Completion Date</label>
-            <div class="custom-input-box">
-              <ion-input
-                type="date"
-                [(ngModel)]="editTargetDate"
-              ></ion-input>
-            </div>
-          </div>
-        </div>
+        <ion-footer class="ion-no-border">
+          <ion-toolbar class="modal-footer-toolbar">
+            <button class="modal-submit-btn primary" (click)="saveGoalSettings()">
+              Save Target
+            </button>
+          </ion-toolbar>
+        </ion-footer>
+      </ng-template>
+    </ion-modal>
 
-        <div class="sheet-actions">
-          <button class="submit-duty-btn" (click)="saveGoalSettings()">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-            <span>Save Targets</span>
-          </button>
-        </div>
-      </div>
-    </ng-template>
-  </ion-modal>
-
-  <!-- STUDENT PROFILE & MENU MODAL -->
-  <ion-modal [isOpen]="showProfileModal" (didDismiss)="closeProfileModal()" class="app-bottom-sheet">
-    <ng-template>
-      <div class="sheet-container">
-        <div class="sheet-drag-handle"></div>
-
-        <div class="sheet-header">
-          <div class="sheet-title-group">
-            <ion-icon name="person-circle-outline" class="sheet-icon"></ion-icon>
-            <h3>Student Profile</h3>
-          </div>
-          <button class="sheet-close-btn" (click)="closeProfileModal()">
-            <ion-icon name="close-outline"></ion-icon>
-          </button>
-        </div>
-
-        <div class="sheet-body profile-sheet-body">
-          <div class="profile-avatar-row">
-            <div class="avatar-circle">
-              <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
-            </div>
-            <div class="avatar-meta">
-              <h4>{{ currentUser?.full_name }}</h4>
-              <p>{{ currentUser?.student_id }} • {{ currentUser?.course_section || 'BSIT 4-A' }}</p>
-            </div>
-          </div>
-
-          <div class="profile-details-list">
-            <div class="profile-detail-item">
-              <span class="detail-label">Assigned Company</span>
-              <strong class="detail-value">{{ currentUser?.company_name || 'TechCorp Solutions Inc.' }}</strong>
-            </div>
-            <div class="profile-detail-item">
-              <span class="detail-label">OJT Adviser</span>
-              <strong class="detail-value">{{ currentUser?.adviser_name || 'Prof. Maria Santos' }}</strong>
-            </div>
-            <div class="profile-detail-item">
-              <span class="detail-label">Email Address</span>
-              <strong class="detail-value">{{ currentUser?.email }}</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="sheet-actions">
-          <button class="logout-btn" (click)="logout()">
-            <ion-icon name="log-out-outline"></ion-icon>
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </div>
-    </ng-template>
-  </ion-modal>
 </ion-content>
 
-<!-- SIDE DRAWER MENU (EXACT REFERENCE DESIGN - ON TOP OF FULL VIEWPORT) -->
+<!-- SIDE DRAWER NAVIGATION -->
 <div class="side-drawer-backdrop" [class.open]="isSideMenuOpen" (click)="closeSideMenu()"></div>
 <aside class="side-drawer" [class.open]="isSideMenuOpen">
-  <!-- Drawer Header -->
   <div class="drawer-header">
     <div class="student-mini-profile">
       <div class="mini-avatar">
         <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
       </div>
       <div class="mini-details">
-        <h4>{{ currentUser?.full_name || 'Reiniel Talplacido' }}</h4>
-        <p>{{ currentUser?.student_id || 'SUM2023-00980' }}</p>
+        <h4>{{ currentUser?.full_name || 'Intern Student' }}</h4>
+        <p>{{ currentUser?.student_id || 'Student' }} • {{ currentUser?.course_section || 'BSIT' }}</p>
       </div>
     </div>
     <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">
@@ -421,65 +439,42 @@
 
   <div class="drawer-divider"></div>
 
-  <!-- Navigation Menu Items -->
   <nav class="drawer-nav">
-    <!-- 1. Dashboard -->
-    <button
-      class="nav-item"
-      [class.active]="activeMenu === 'dashboard'"
-      (click)="selectMenuItem('dashboard')"
-    >
+    <button class="nav-item" [class.active]="activeMenu === 'dashboard'" (click)="selectMenuItem('dashboard')">
       <ion-icon name="grid-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Dashboard</span>
     </button>
 
-    <!-- 2. Time Logs -->
-    <button
-      class="nav-item"
-      [class.active]="activeMenu === 'timelogs'"
-      (click)="selectMenuItem('timelogs')"
-    >
+    <button class="nav-item" [class.active]="activeMenu === 'timelogs'" (click)="selectMenuItem('timelogs')">
       <ion-icon name="time-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Time Logs</span>
     </button>
 
-    <!-- 3. Tasks -->
-    <button
-      class="nav-item"
-      [class.active]="activeMenu === 'tasks'"
-      (click)="selectMenuItem('tasks')"
-    >
+    <button class="nav-item" [class.active]="activeMenu === 'tasks'" (click)="selectMenuItem('tasks')">
       <ion-icon name="checkbox-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Tasks</span>
     </button>
 
-    <!-- 4. Reports -->
-    <button
-      class="nav-item"
-      [class.active]="activeMenu === 'reports'"
-      (click)="selectMenuItem('reports')"
-    >
-      <ion-icon name="copy-outline" class="nav-icon"></ion-icon>
+    <button class="nav-item" [class.active]="activeMenu === 'reports'" (click)="selectMenuItem('reports')">
+      <ion-icon name="document-text-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Reports</span>
     </button>
 
-    <!-- 5. Profile -->
-    <button
-      class="nav-item"
-      [class.active]="activeMenu === 'profile'"
-      (click)="selectMenuItem('profile')"
-    >
+    <button class="nav-item" [class.active]="activeMenu === 'profile'" (click)="selectMenuItem('profile')">
       <ion-icon name="person-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Profile</span>
     </button>
+    <button class="nav-item admin-nav-item" (click)="selectMenuItem('admin')">
+      <ion-icon name="shield-checkmark-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Coordinator Portal</span>
+    </button>
   </nav>
 
-  <!-- Bottom Sign Out Action (Matches Screenshot) -->
   <div class="drawer-footer">
     <button class="drawer-signout-btn" (click)="logout()">
       <ion-icon name="log-out-outline"></ion-icon>
       <span>Sign Out</span>
     </button>
-    <span class="app-version-tag">OnTrack v1.0 • OJT Attendance</span>
+    <span class="app-version-tag">OnTrack v1.0 • OJT Training Portal</span>
   </div>
 </aside>

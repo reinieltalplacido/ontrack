@@ -1,11 +1,15 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   IonHeader,
   IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonButton,
   IonContent,
+  IonFooter,
   IonIcon,
   IonRefresher,
   IonRefresherContent,
@@ -39,6 +43,10 @@ import {
   checkboxOutline,
   personOutline,
   copyOutline,
+  radioButtonOnOutline,
+  timerOutline,
+  calendarClearOutline,
+  shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../core/services/auth.service';
 import { AttendanceService } from '../core/services/attendance.service';
@@ -56,7 +64,11 @@ import { AttendanceLog, DashboardStats } from '../models/attendance.model';
     FormsModule,
     IonHeader,
     IonToolbar,
+    IonTitle,
+    IonButtons,
+    IonButton,
     IonContent,
+    IonFooter,
     IonIcon,
     IonRefresher,
     IonRefresherContent,
@@ -71,14 +83,26 @@ export class HomePage implements OnInit {
   private attendanceService = inject(AttendanceService);
   private nativeService = inject(NativeService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  quickNotes = [
+    'Routine daily tasks',
+    'System development & testing',
+    'Documentation & reporting',
+    'Meeting & task alignment',
+  ];
+
+  selectQuickNote(note: string) {
+    this.activityNotes = note;
+  }
 
   currentUser: User | null = null;
   stats: DashboardStats = {
     accumulated_hours: 0,
-    required_hours: 500,
-    remaining_hours: 500,
+    required_hours: 486,
+    remaining_hours: 486,
     completion_percent: 0,
-    days_remaining: 180,
+    days_remaining: 40,
     total_days_logged: 0,
     is_clocked_in: false,
     pending_tasks: 0,
@@ -106,7 +130,7 @@ export class HomePage implements OnInit {
 
   // Edit Goal modal state
   showEditGoalModal = false;
-  editRequiredHours = 500;
+  editRequiredHours = 486;
   editTargetDate = '';
 
   // Profile menu modal
@@ -141,6 +165,10 @@ export class HomePage implements OnInit {
       checkboxOutline,
       personOutline,
       copyOutline,
+      radioButtonOnOutline,
+      timerOutline,
+      calendarClearOutline,
+  shieldCheckmarkOutline,
     });
   }
 
@@ -149,19 +177,19 @@ export class HomePage implements OnInit {
     if (!this.currentUser) {
       this.currentUser = {
         id: 1,
-        student_id: 'SUM2023-00980',
-        full_name: 'Reiniel Talplacido',
-        email: 'reiniel@student.neust.edu.ph',
+        student_id: '2026-0001',
+        full_name: 'Juan Dela Cruz',
+        email: 'juan@student.neust.edu.ph',
         course_section: 'BSIT 4-A',
         school_campus: 'NEUST - Sumacab Campus',
-        company_name: 'Project SOLO',
-        adviser_name: 'Prof. Gel Cunanan',
-        required_hours: 500,
+        company_name: 'Innovate Tech Solutions Inc.',
+        adviser_name: 'Engr. Roberto Gomez',
+        required_hours: 486,
         target_date: '2026-12-15',
       };
     }
 
-    this.editRequiredHours = this.currentUser.required_hours || 500;
+    this.editRequiredHours = this.currentUser.required_hours || 486;
     this.editTargetDate = this.currentUser.target_date || '2026-12-15';
 
     this.loadDashboardData();
@@ -217,7 +245,6 @@ export class HomePage implements OnInit {
     this.showClockInModal = true;
     this.selfiePreview = null;
 
-    // Use cached location immediately if available, otherwise show company workplace name
     if (this.nativeService.hasCachedLocation) {
       this.locationName = this.nativeService.lastKnownLocationName!;
       this.currentCoords = this.nativeService.lastKnownCoords;
@@ -227,7 +254,6 @@ export class HomePage implements OnInit {
       this.isGettingLocation = true;
     }
 
-    // Resolve accurate GPS in background without freezing UI
     this.nativeService.getCurrentPosition().then(async (pos) => {
       this.currentCoords = {
         latitude: pos.latitude,
@@ -262,8 +288,8 @@ export class HomePage implements OnInit {
 
     const payload = {
       user_id: this.currentUser.id,
-      latitude: this.currentCoords?.latitude ?? 16.4124,
-      longitude: this.currentCoords?.longitude ?? 120.5933,
+      latitude: this.currentCoords?.latitude ?? 15.4859,
+      longitude: this.currentCoords?.longitude ?? 120.9678,
       location_name: this.locationName || this.currentUser.company_name || 'Assigned Duty Workplace',
       photo_base64: this.selfiePreview,
     };
@@ -274,7 +300,7 @@ export class HomePage implements OnInit {
         this.showClockInModal = false;
         if (res.success) {
           this.nativeService.triggerHapticFeedback('success');
-          this.showFeedback('Successfully Clocked In! Duty is now ongoing.', 'success');
+          this.showFeedback('Clocked In Successfully! Duty session active.', 'success');
           this.loadDashboardData();
         } else {
           this.showFeedback(res.message || 'Could not record clock in.', 'error');
@@ -299,24 +325,24 @@ export class HomePage implements OnInit {
 
   submitClockOut() {
     if (!this.currentUser) return;
-    if (!this.activityNotes.trim()) {
-      this.showFeedback('Please write a brief summary of accomplishments before clocking out.', 'error');
-      return;
-    }
+    const notesToSubmit = this.activityNotes.trim() || 'Duty shift completed';
 
     this.isSubmittingClockOut = true;
+    this.cdr.detectChanges();
 
     this.attendanceService
       .clockOut({
         user_id: this.currentUser.id,
-        activity_notes: this.activityNotes.trim(),
+        activity_notes: notesToSubmit,
       })
       .subscribe({
-        next: async (res) => {
+        next: (res) => {
           this.isSubmittingClockOut = false;
           this.showClockOutModal = false;
+          this.cdr.detectChanges();
+
           if (res.success) {
-            await this.nativeService.triggerHapticFeedback('success');
+            this.nativeService.triggerHapticFeedback('success');
             const hours = res.rendered_today ? ` (${res.rendered_today} hrs rendered)` : '';
             this.showFeedback(`Clocked Out Successfully!${hours}`, 'success');
             this.loadDashboardData();
@@ -324,15 +350,17 @@ export class HomePage implements OnInit {
             this.showFeedback(res.message || 'Could not record clock out.', 'error');
           }
         },
-        error: () => {
+        error: (err) => {
           this.isSubmittingClockOut = false;
-          this.showFeedback('Unable to connect to server. Please try again.', 'error');
+          this.cdr.detectChanges();
+          const msg = err?.error?.message || 'Unable to connect to server. Please try again.';
+          this.showFeedback(msg, 'error');
         },
       });
   }
 
   openEditGoalModal() {
-    this.editRequiredHours = this.stats.required_hours || 500;
+    this.editRequiredHours = this.stats.required_hours || 486;
     this.editTargetDate = this.currentUser?.target_date || '2026-12-15';
     this.showEditGoalModal = true;
   }
@@ -343,7 +371,7 @@ export class HomePage implements OnInit {
 
   saveGoalSettings() {
     if (this.currentUser) {
-      this.currentUser.required_hours = Number(this.editRequiredHours) || 500;
+      this.currentUser.required_hours = Number(this.editRequiredHours) || 486;
       this.currentUser.target_date = this.editTargetDate;
       this.stats.required_hours = this.currentUser.required_hours;
       this.stats.remaining_hours = Math.max(0, this.stats.required_hours - this.stats.accumulated_hours);
@@ -352,15 +380,31 @@ export class HomePage implements OnInit {
       );
     }
     this.showEditGoalModal = false;
-    this.showFeedback('Goal targets updated successfully.', 'success');
+    this.showFeedback('Target requirements updated successfully.', 'success');
   }
 
   openProfileModal() {
-    this.openSideMenu();
+    this.showProfileModal = true;
   }
 
   closeProfileModal() {
     this.showProfileModal = false;
+  }
+
+  goToTasks() {
+    this.router.navigate(['/tasks']);
+  }
+
+  goToTimeLogs() {
+    this.router.navigate(['/timelogs']);
+  }
+
+  goToReports() {
+    this.router.navigate(['/reports']);
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
   }
 
   openSideMenu() {
@@ -374,24 +418,11 @@ export class HomePage implements OnInit {
   selectMenuItem(item: string) {
     this.activeMenu = item;
     this.closeSideMenu();
-
-    if (item === 'profile') {
-      this.router.navigate(['/profile']);
-    } else if (item === 'tasks') {
-      this.router.navigate(['/tasks']);
-    } else if (item === 'timelogs') {
-      this.router.navigate(['/timelogs']);
-    } else if (item === 'reports') {
-      this.router.navigate(['/reports']);
-    }
-  }
-
-  goToTasks() {
-    this.router.navigate(['/tasks']);
-  }
-
-  goToTimeLogs() {
-    this.router.navigate(['/timelogs']);
+    if (item === 'profile') this.goToProfile();
+    else if (item === 'tasks') this.goToTasks();
+    else if (item === 'timelogs') this.goToTimeLogs();
+    else if (item === 'reports') this.goToReports();
+    else if (item === 'admin') this.router.navigate(['/admin/dashboard']);
   }
 
   logout() {

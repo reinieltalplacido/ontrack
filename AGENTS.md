@@ -33,15 +33,30 @@ This project fulfills the requirements of the **Mobile Application Technology Fi
 
 ---
 
-## 3. Database Schema (`ontrack_db`)
+## 3. Database Schema (`ionic_students_api` / `ontrack_db`)
 
-### `users`
+### `professors` (Admin & Academic Supervisors)
 | Column | Type | Description |
 |---|---|---|
-| `id` | INT AUTO_INCREMENT PRIMARY KEY | Unique user ID |
-| `student_id` | VARCHAR(50) UNIQUE | School student ID (e.g. 2022-00123) |
-| `full_name` | VARCHAR(100) | Full student name |
-| `email` | VARCHAR(100) UNIQUE | Email address |
+| `id` | INT AUTO_INCREMENT PRIMARY KEY | Unique professor ID |
+| `employee_id` | VARCHAR(50) UNIQUE | Faculty ID (e.g. PROF-2026-001) |
+| `full_name` | VARCHAR(150) | Full professor / coordinator name |
+| `email` | VARCHAR(100) UNIQUE | Institutional email address |
+| `password` | VARCHAR(255) | BCrypt hashed password |
+| `department` | VARCHAR(150) | Academic department |
+| `role` | ENUM('admin', 'coordinator', 'adviser') | Permission level |
+| `assigned_section` | VARCHAR(100) | Handled section (e.g. BSIT 4-A) |
+| `contact_number` | VARCHAR(50) NULL | Contact details |
+| `created_at` | TIMESTAMP | Registration timestamp |
+
+### `students`
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT AUTO_INCREMENT PRIMARY KEY | Unique student ID |
+| `professor_id` | INT NULL (FK -> professors.id) | Assigned professor / coordinator reference |
+| `student_no` | VARCHAR(50) UNIQUE | School student ID (e.g. 2026-0001) |
+| `full_name` | VARCHAR(150) | Full student name |
+| `email` | VARCHAR(100) | Email address |
 | `password` | VARCHAR(255) | Hashed password |
 | `course_section` | VARCHAR(100) | Course and section (e.g. BSIT 4-A) |
 | `company_name` | VARCHAR(150) | Assigned company / agency name |
@@ -99,6 +114,15 @@ All requests accept and return `application/json` (or `multipart/form-data` for 
   - `GET /api/tasks/list.php?user_id={id}` — Retrieve list of tasks
   - `POST /api/tasks/create.php` — Add a new task
   - `POST /api/tasks/update_status.php` — Mark task as pending / completed
+
+- **Admin & Professor Oversight**:
+  - `POST /api/admin/auth/login.php` — Professor login (returns professor profile & token)
+  - `POST /api/admin/auth/register.php` — Register new professor / coordinator
+  - `GET /api/admin/dashboard/stats.php` — System-wide stats (total interns, active duty, total hours, recent check-ins)
+  - `GET /api/admin/students/list.php` — List all monitored students with rendered hours & duty status
+  - `GET /api/admin/students/detail.php?id={id}` — Full student DTR history, accomplishments, and tasks
+  - `GET /api/admin/attendance/list.php` — Live feed of all attendance logs with GPS coordinates & selfie proof
+  - `POST /api/admin/tasks/assign.php` — Assign tasks to individual student or broadcast to section
 
 ---
 

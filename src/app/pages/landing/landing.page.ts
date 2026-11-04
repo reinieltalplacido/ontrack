@@ -1,37 +1,49 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
   IonContent,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
   IonButton,
+  IonFooter,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonNote,
+  IonBadge,
+  IonChip,
   IonIcon,
+  IonProgressBar,
+  IonCheckbox,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
-  clipboardOutline,
-  trendingUpOutline,
-  documentTextOutline,
-  checkboxOutline,
-  timeOutline,
-  arrowForwardOutline,
-  schoolOutline,
-  shieldCheckmarkOutline,
   locationOutline,
+  timeOutline,
   cameraOutline,
+  checkmarkCircle,
   checkmarkCircleOutline,
-  calendarOutline,
-  documentAttachOutline,
-  pieChartOutline,
-  chevronForwardOutline,
-  sparklesOutline,
+  documentTextOutline,
+  arrowForwardOutline,
+  checkboxOutline,
+  schoolOutline,
+  personAddOutline,
 } from 'ionicons/icons';
+import { NativeService } from '../../core/services/native.service';
 
-interface OnboardingSlide {
-  id: number;
+interface SlideItem {
   tag: string;
+  badgeColor: string;
   title: string;
   subtitle: string;
-  theme: string;
 }
 
 @Component({
@@ -42,64 +54,75 @@ interface OnboardingSlide {
   imports: [
     CommonModule,
     IonContent,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonButtons,
     IonButton,
+    IonFooter,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardSubtitle,
+    IonCardContent,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonNote,
+    IonBadge,
+    IonChip,
     IonIcon,
+    IonProgressBar,
+    IonCheckbox,
   ],
 })
 export class LandingPage {
+  private router = inject(Router);
+  private nativeService = inject(NativeService);
+
   currentSlide = 0;
   private touchStartX = 0;
   private touchEndX = 0;
 
-  slides: OnboardingSlide[] = [
+  slides: SlideItem[] = [
     {
-      id: 0,
-      tag: 'Daily Activity Logging',
-      title: 'Accurate Time & Attendance',
-      subtitle: 'Clock in and out effortlessly with verified workplace GPS coordinates and selfie proof of duty.',
-      theme: 'attendance',
+      tag: 'Attendance',
+      badgeColor: 'primary',
+      title: 'Clock In with GPS & Photo',
+      subtitle: 'Record daily attendance with workplace coordinates and selfie verification directly from your phone.',
     },
     {
-      id: 1,
-      tag: 'Progress Monitoring',
-      title: 'Real-Time Hour Analytics',
-      subtitle: 'Track accumulated hours against your target requirement and monitor completion percentage daily.',
-      theme: 'progress',
+      tag: 'Progress',
+      badgeColor: 'success',
+      title: 'Automated Hour Computation',
+      subtitle: 'Rendered hours calculate automatically each day toward your 486-hour OJT requirement.',
     },
     {
-      id: 2,
-      tag: 'PDF Reports',
-      title: 'Submission-Ready Records',
-      subtitle: 'Generate formal Daily Time Records (DTR) and accomplishment summaries ready for coordinator sign-off.',
-      theme: 'reports',
+      tag: 'Reports',
+      badgeColor: 'secondary',
+      title: 'Submission-Ready DTR',
+      subtitle: 'Generate formal Daily Time Records and accomplishment summaries formatted for coordinator sign-off.',
     },
     {
-      id: 3,
-      tag: 'Task Management',
-      title: 'Stay on Top of Deliverables',
-      subtitle: 'Organize supervisor-assigned tasks, manage subtasks, and meet deadlines with confidence.',
-      theme: 'tasks',
+      tag: 'Tasks',
+      badgeColor: 'warning',
+      title: 'Daily Task Management',
+      subtitle: 'Organize supervisor-assigned activities and attach accomplishment notes to your daily logs.',
     },
   ];
 
-  constructor(private router: Router) {
+  constructor() {
     addIcons({
-      clipboardOutline,
-      trendingUpOutline,
-      documentTextOutline,
-      checkboxOutline,
-      timeOutline,
-      arrowForwardOutline,
-      schoolOutline,
-      shieldCheckmarkOutline,
       locationOutline,
+      timeOutline,
       cameraOutline,
+      checkmarkCircle,
       checkmarkCircleOutline,
-      calendarOutline,
-      documentAttachOutline,
-      pieChartOutline,
-      chevronForwardOutline,
-      sparklesOutline,
+      documentTextOutline,
+      arrowForwardOutline,
+      checkboxOutline,
+      schoolOutline,
+      personAddOutline,
     });
   }
 
@@ -110,47 +133,42 @@ export class LandingPage {
   nextSlide() {
     if (this.currentSlide < this.slides.length - 1) {
       this.currentSlide++;
+      this.nativeService.triggerHapticFeedback('medium');
     } else {
       this.goToLogin();
     }
   }
 
   goToSlide(index: number) {
-    this.currentSlide = index;
-  }
-
-  skip() {
-    this.currentSlide = this.slides.length - 1;
+    if (index !== this.currentSlide) {
+      this.currentSlide = index;
+      this.nativeService.triggerHapticFeedback('medium');
+    }
   }
 
   goToLogin() {
+    this.nativeService.triggerHapticFeedback('medium');
     this.router.navigate(['/login']);
   }
 
   goToRegister() {
+    this.nativeService.triggerHapticFeedback('medium');
     this.router.navigate(['/register']);
   }
 
-  // Swipe gesture detection
   onTouchStart(e: TouchEvent) {
     this.touchStartX = e.changedTouches[0].screenX;
   }
 
   onTouchEnd(e: TouchEvent) {
     this.touchEndX = e.changedTouches[0].screenX;
-    this.handleSwipe();
-  }
-
-  private handleSwipe() {
-    const swipeDistance = this.touchEndX - this.touchStartX;
-    const threshold = 45;
-
-    if (swipeDistance < -threshold && this.currentSlide < this.slides.length - 1) {
-      // Swiped Left -> Next Slide
+    const diff = this.touchEndX - this.touchStartX;
+    if (diff < -40 && this.currentSlide < this.slides.length - 1) {
       this.currentSlide++;
-    } else if (swipeDistance > threshold && this.currentSlide > 0) {
-      // Swiped Right -> Previous Slide
+      this.nativeService.triggerHapticFeedback('medium');
+    } else if (diff > 40 && this.currentSlide > 0) {
       this.currentSlide--;
+      this.nativeService.triggerHapticFeedback('medium');
     }
   }
 }

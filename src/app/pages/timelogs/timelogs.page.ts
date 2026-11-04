@@ -31,6 +31,7 @@ import {
   logOutOutline,
   chevronForwardOutline,
   arrowDownOutline,
+  arrowBackOutline,
 } from 'ionicons/icons';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -95,6 +96,7 @@ export class TimeLogsPage implements OnInit {
       logOutOutline,
       chevronForwardOutline,
       arrowDownOutline,
+      arrowBackOutline,
     });
   }
 
@@ -160,6 +162,10 @@ export class TimeLogsPage implements OnInit {
     }
 
     this.filteredLogs = result;
+  }
+
+  goBack() {
+    this.router.navigate(['/home']);
   }
 
   // Side Drawer navigation

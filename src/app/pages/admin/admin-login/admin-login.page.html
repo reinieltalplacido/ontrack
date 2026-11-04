@@ -1,0 +1,93 @@
+<ion-content [fullscreen]="true" class="admin-login-content">
+  <div class="admin-login-container">
+    
+    <!-- Top Nav with Back to Student App & Demo Fill -->
+    <div class="top-nav">
+      <button class="back-btn" (click)="goToStudentLogin()" aria-label="Back to student login">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+
+      <button type="button" class="demo-fill-btn" (click)="fillDemoAdmin()">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        <span>Demo Coordinator</span>
+      </button>
+    </div>
+
+    <!-- Header Hero -->
+    <header class="header-section">
+      <div class="admin-badge-row">
+        <span class="admin-pill">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          Faculty & Admin Portal
+        </span>
+      </div>
+      <h1 class="page-title">Professor Sign In</h1>
+      <p class="page-subtitle">Academic OJT Supervision, Attendance Approval & Student Monitoring</p>
+    </header>
+
+    <!-- Error Banner -->
+    @if (errorMessage) {
+      <div class="error-banner">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    <!-- Login Form -->
+    <form (ngSubmit)="submitLogin()" class="login-form">
+      <div class="form-group">
+        <label>Faculty Email or Employee ID</label>
+        <div class="custom-input-box">
+          <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+          <input
+            type="text"
+            [(ngModel)]="identifier"
+            name="identifier"
+            placeholder="e.g. admin@neust.edu.ph or PROF-2026-001"
+            autocomplete="username"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="custom-input-box">
+          <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="••••••••••••"
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" class="eye-toggle-btn" (click)="togglePassword()">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="submit-wrap">
+        <button type="submit" class="admin-submit-btn" [disabled]="isLoading">
+          @if (isLoading) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <span>Access Coordinator Portal</span>
+          }
+        </button>
+      </div>
+    </form>
+
+    <!-- Footer Switch -->
+    <footer class="footer-section">
+      <p>Are you an intern student?</p>
+      <button type="button" class="student-switch-btn" (click)="goToStudentLogin()">
+        <ion-icon name="school-outline"></ion-icon>
+        <span>Switch to Student App</span>
+      </button>
+    </footer>
+
+  </div>
+</ion-content>
+

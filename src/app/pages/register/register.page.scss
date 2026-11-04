@@ -1,5 +1,5 @@
 .register-content {
-  --background: #f8fafc;
+  --background: #f1f5f9;
 }
 
 .register-container {
@@ -40,7 +40,7 @@
   .demo-fill-btn {
     background: #eef4f8;
     border: 1px solid #cbdde9;
-    color: #547792;
+    color: #2b5578;
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 0.78rem;
@@ -132,7 +132,7 @@
     &.active {
       .step-circle {
         background: #e8eef3;
-        color: #547792;
+        color: #2b5578;
       }
 
       .step-label {
@@ -142,13 +142,13 @@
 
     &.current {
       .step-circle {
-        background: #547792;
+        background: #2b5578;
         color: #ffffff;
-        box-shadow: 0 4px 10px rgba(84, 119, 146, 0.35);
+        box-shadow: 0 4px 10px rgba(43, 85, 120, 0.35);
       }
 
       .step-label {
-        color: #547792;
+        color: #2b5578;
         font-weight: 700;
       }
     }
@@ -162,7 +162,7 @@
     transition: background 0.3s ease;
 
     &.filled {
-      background: #547792;
+      background: #2b5578;
     }
   }
 }
@@ -204,7 +204,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #547792;
+    color: #2b5578;
     margin-bottom: 4px;
 
     ion-icon {
@@ -269,8 +269,8 @@
   }
 
   &:focus-within {
-    border-color: #547792;
-    box-shadow: 0 0 0 3px rgba(84, 119, 146, 0.12);
+    border-color: #2b5578;
+    box-shadow: 0 0 0 3px rgba(43, 85, 120, 0.12);
   }
 
   &.error {
@@ -316,7 +316,7 @@
     margin: 0 0 10px 0;
     font-size: 0.88rem;
     font-weight: 700;
-    color: #547792;
+    color: #2b5578;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -349,7 +349,7 @@
     padding-top: 8px;
     border-top: 1px dashed #e2e8f0;
     font-size: 0.74rem;
-    color: #547792;
+    color: #2b5578;
     font-weight: 600;
 
     ion-icon {
@@ -402,7 +402,7 @@
   .redirect-btn {
     background: transparent;
     border: none;
-    color: #547792;
+    color: #2b5578;
     font-weight: 700;
     cursor: pointer;
     padding: 0;
@@ -426,7 +426,7 @@
 
   .calendar-btn-icon {
     font-size: 1.25rem;
-    color: #547792;
+    color: #2b5578;
   }
 
   &:active {
@@ -476,7 +476,7 @@
 
     .custom-datetime {
       border-radius: 14px;
-      --background: #f8fafc;
+      --background: #f1f5f9;
       width: 100%;
     }
   }

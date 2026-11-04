@@ -1,169 +1,186 @@
-<ion-content [fullscreen]="true" class="onboarding-content">
-  <div 
-    class="onboarding-wrapper"
-    (touchstart)="onTouchStart($event)"
-    (touchend)="onTouchEnd($event)">
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>
+      <div class="brand-toolbar">
+        <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="primary" (click)="goToLogin()">
+        Log In
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content 
+  [fullscreen]="true"
+  class="ion-padding"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)">
+
+  <div class="onboard-container">
     
-    <!-- Top Navigation Header -->
-    <header class="top-bar">
-      <div class="logo-box">
-        <img src="assets/icon/ontrack-logo.png" alt="OnTrack Logo" class="brand-logo" />
-      </div>
-
-      <button 
-        type="button" 
-        class="skip-btn" 
-        *ngIf="!isLastSlide" 
-        (click)="skip()">
-        Skip
-      </button>
-      <div class="top-spacer" *ngIf="isLastSlide"></div>
-    </header>
-
-    <!-- Center Carousel / Visual Card Area -->
-    <main class="carousel-body">
-      
-      <!-- Slide 0: Attendance -->
-      <div class="visual-card-container" *ngIf="currentSlide === 0">
-        <div class="mockup-card attendance-card">
-          <div class="card-header-row">
-            <div class="status-indicator live">
-              <span class="pulse-dot"></span>
-              Live Duty
-            </div>
-            <div class="time-badge">
-              <ion-icon name="time-outline"></ion-icon>
-              <span>08:00 AM</span>
-            </div>
-          </div>
-
-          <div class="checkin-preview">
-            <div class="icon-bubble checkin">
-              <ion-icon name="camera-outline"></ion-icon>
-            </div>
-            <div class="checkin-details">
-              <h4>Duty Photo Captured</h4>
-              <p>Selfie verification stored</p>
-            </div>
-            <ion-icon name="checkmark-circle-outline" class="verified-icon"></ion-icon>
-          </div>
-
-          <div class="location-stamp">
-            <ion-icon name="location-outline"></ion-icon>
-            <span>Assigned Workplace (GPS Validated)</span>
-          </div>
+    <!-- Slide 0: Attendance Card -->
+    <ion-card *ngIf="currentSlide === 0" class="feature-card">
+      <ion-card-header>
+        <div class="card-top-row">
+          <ion-badge color="success">Clocked In</ion-badge>
+          <ion-note>08:00 AM</ion-note>
         </div>
-      </div>
+        <ion-card-title>Attendance Verification</ion-card-title>
+        <ion-card-subtitle>GPS & Selfie Proof</ion-card-subtitle>
+      </ion-card-header>
 
-      <!-- Slide 1: Progress -->
-      <div class="visual-card-container" *ngIf="currentSlide === 1">
-        <div class="mockup-card progress-card">
-          <div class="progress-header">
-            <span class="sub-label">Rendered Hours</span>
-            <span class="target-label">Target: 486 hrs</span>
-          </div>
+      <ion-card-content>
+        <ion-list [inset]="true" class="card-list">
+          <ion-item lines="full">
+            <ion-icon name="location-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Workplace Geofence</h3>
+              <p>GPS within assigned company radius</p>
+            </ion-label>
+            <ion-note slot="end" color="success">Validated</ion-note>
+          </ion-item>
 
-          <div class="hours-display">
-            <span class="current-hrs">142.5</span>
-            <span class="total-hrs">/ 486 hrs</span>
-          </div>
+          <ion-item lines="none">
+            <ion-icon name="camera-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Selfie Capture</h3>
+              <p>Photo proof stored for coordinator</p>
+            </ion-label>
+            <ion-note slot="end" color="success">Attached</ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
 
-          <div class="progress-bar-shell">
-            <div class="progress-bar-fill" style="width: 30%;"></div>
-          </div>
-
-          <div class="metrics-row">
-            <div class="metric-item">
-              <span class="m-val">29%</span>
-              <span class="m-label">Completed</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-item">
-              <span class="m-val">42</span>
-              <span class="m-label">Days Left</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-item">
-              <span class="m-val">343.5</span>
-              <span class="m-label">Remaining</span>
-            </div>
-          </div>
+    <!-- Slide 1: Progress Card -->
+    <ion-card *ngIf="currentSlide === 1" class="feature-card">
+      <ion-card-header>
+        <div class="card-top-row">
+          <ion-badge color="primary">Rendering Hours</ion-badge>
+          <ion-note>Target: 486 hrs</ion-note>
         </div>
-      </div>
+        <ion-card-title>142.5 / 486 Hours</ion-card-title>
+        <ion-card-subtitle>29.3% Completed</ion-card-subtitle>
+      </ion-card-header>
 
-      <!-- Slide 2: Reports -->
-      <div class="visual-card-container" *ngIf="currentSlide === 2">
-        <div class="mockup-card report-card">
-          <div class="doc-header">
-            <div class="doc-icon-wrap">
-              <ion-icon name="document-text-outline"></ion-icon>
-            </div>
-            <div class="doc-info">
-              <h4>Daily Time Record (DTR)</h4>
-              <p>Monthly Accomplishment Report</p>
-            </div>
-          </div>
+      <ion-card-content>
+        <ion-progress-bar [value]="0.293" color="primary" class="progress-indicator"></ion-progress-bar>
 
-          <div class="doc-lines">
-            <div class="line full"></div>
-            <div class="line medium"></div>
-            <div class="line short"></div>
-          </div>
+        <ion-list [inset]="true" class="card-list">
+          <ion-item lines="full">
+            <ion-icon name="time-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>Remaining Hours</ion-label>
+            <ion-note slot="end">343.5 hrs</ion-note>
+          </ion-item>
 
-          <div class="doc-footer-stamp">
-            <div class="approval-badge">
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              <span>Supervisor Verified</span>
-            </div>
-            <span class="format-tag">PDF / AutoTable</span>
-          </div>
+          <ion-item lines="none">
+            <ion-icon name="checkmark-circle-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>Days Remaining</ion-label>
+            <ion-note slot="end">42 Days</ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Slide 2: Reports Card -->
+    <ion-card *ngIf="currentSlide === 2" class="feature-card">
+      <ion-card-header>
+        <div class="card-top-row">
+          <ion-badge color="secondary">Official DTR</ion-badge>
+          <ion-note>PDF Ready</ion-note>
         </div>
-      </div>
+        <ion-card-title>Daily Time Record</ion-card-title>
+        <ion-card-subtitle>Submission-Ready Export</ion-card-subtitle>
+      </ion-card-header>
 
-      <!-- Slide 3: Tasks -->
-      <div class="visual-card-container" *ngIf="currentSlide === 3">
-        <div class="mockup-card task-card">
-          <div class="task-item active-task">
-            <div class="task-checkbox checked">
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-            </div>
-            <div class="task-body">
-              <h5>Database API Implementation</h5>
-              <span class="priority high">High Priority</span>
-            </div>
-          </div>
+      <ion-card-content>
+        <ion-list [inset]="true" class="card-list">
+          <ion-item lines="full">
+            <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Monthly Summary</h3>
+              <p>22 days logged • 176.0 hrs rendered</p>
+            </ion-label>
+            <ion-note slot="end">Verified</ion-note>
+          </ion-item>
 
-          <div class="task-item">
-            <div class="task-checkbox pending"></div>
-            <div class="task-body">
-              <h5>Attendance Geolocation Testing</h5>
-              <span class="priority medium">Due Tomorrow</span>
-            </div>
-          </div>
+          <ion-item lines="none">
+            <ion-icon name="checkmark-circle-outline" slot="start" color="success"></ion-icon>
+            <ion-label>
+              <h3>Coordinator Review</h3>
+              <p>Includes supervisor approval field</p>
+            </ion-label>
+            <ion-note slot="end" color="success">Ready</ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Slide 3: Tasks Card -->
+    <ion-card *ngIf="currentSlide === 3" class="feature-card">
+      <ion-card-header>
+        <div class="card-top-row">
+          <ion-badge color="warning">Workplace Tasks</ion-badge>
+          <ion-note>Training Journal</ion-note>
         </div>
-      </div>
+        <ion-card-title>Assigned Deliverables</ion-card-title>
+        <ion-card-subtitle>Daily Activity Log</ion-card-subtitle>
+      </ion-card-header>
 
-      <!-- Text Content for Current Slide -->
-      <div class="slide-text-wrapper">
-        <div class="slide-tag">
-          <ion-icon name="sparkles-outline"></ion-icon>
-          <span>{{ slides[currentSlide].tag }}</span>
-        </div>
-        <h2 class="slide-title">{{ slides[currentSlide].title }}</h2>
-        <p class="slide-subtitle">{{ slides[currentSlide].subtitle }}</p>
-      </div>
+      <ion-card-content>
+        <ion-list [inset]="true" class="card-list">
+          <ion-item lines="full">
+            <ion-checkbox [checked]="true" [disabled]="true" slot="start"></ion-checkbox>
+            <ion-label>
+              <h3>Database Setup & API</h3>
+              <p>Completed</p>
+            </ion-label>
+          </ion-item>
 
-    </main>
+          <ion-item lines="full">
+            <ion-checkbox [checked]="true" [disabled]="true" slot="start"></ion-checkbox>
+            <ion-label>
+              <h3>Attendance Geofence Testing</h3>
+              <p>Completed</p>
+            </ion-label>
+          </ion-item>
 
-    <!-- Bottom Action & Pagination Section -->
-    <footer class="bottom-controls">
-      
-      <!-- Pagination Dots -->
+          <ion-item lines="none">
+            <ion-checkbox [checked]="false" [disabled]="true" slot="start"></ion-checkbox>
+            <ion-label>
+              <h3>Weekly Accomplishment Journal</h3>
+              <p>Due Friday</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Slide Headline & Description -->
+    <div class="slide-text-block ion-text-center">
+      <ion-chip [color]="slides[currentSlide].badgeColor" class="slide-chip">
+        <ion-label>{{ slides[currentSlide].tag }}</ion-label>
+      </ion-chip>
+      <h2 class="slide-heading">{{ slides[currentSlide].title }}</h2>
+      <p class="slide-subtext">{{ slides[currentSlide].subtitle }}</p>
+    </div>
+
+  </div>
+
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar class="footer-toolbar">
+    <div class="footer-inner">
+      <!-- Dots Indicator -->
       <div class="pagination-dots">
-        <button 
-          *ngFor="let slide of slides; let i = index" 
+        <button
+          *ngFor="let s of slides; let i = index"
           type="button"
-          class="dot" 
+          class="dot"
           [class.active]="i === currentSlide"
           (click)="goToSlide(i)"
           [attr.aria-label]="'Go to slide ' + (i + 1)">
@@ -171,41 +188,30 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="buttons-stack">
-        
-        <!-- Next / Get Started Main Button -->
-        <ion-button 
-          expand="block" 
-          class="ot-btn-primary action-btn-main"
-          (click)="nextSlide()">
-          <span *ngIf="!isLastSlide">Next</span>
-          <span *ngIf="isLastSlide">Get Started</span>
-          <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
-        </ion-button>
+      <ion-button
+        expand="block"
+        color="primary"
+        class="action-button"
+        (click)="nextSlide()">
+        <span *ngIf="!isLastSlide">Continue</span>
+        <span *ngIf="isLastSlide">Get Started</span>
+        <ion-icon name="arrow-forward-outline" slot="end" *ngIf="!isLastSlide"></ion-icon>
+      </ion-button>
 
-        <!-- Secondary Option -->
-        <ion-button 
-          *ngIf="isLastSlide"
-          expand="block" 
-          fill="outline" 
-          class="ot-btn-outline action-btn-secondary"
-          (click)="goToRegister()">
-          Create Student Account
-        </ion-button>
+      <ion-button
+        *ngIf="isLastSlide"
+        expand="block"
+        fill="clear"
+        color="primary"
+        class="secondary-button"
+        (click)="goToRegister()">
+        Register as New Student
+      </ion-button>
 
-        <div class="login-prompt" *ngIf="!isLastSlide">
-          <span>Already registered? </span>
-          <button type="button" class="login-link-btn" (click)="goToLogin()">Sign In</button>
-        </div>
-
-      </div>
-
-      <div class="campus-footer-note">
+      <ion-note class="institution-caption">
         <ion-icon name="school-outline"></ion-icon>
         <span>NEUST Sumacab Campus • OJT Department</span>
-      </div>
-
-    </footer>
-
-  </div>
-</ion-content>
+      </ion-note>
+    </div>
+  </ion-toolbar>
+</ion-footer>

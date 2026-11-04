@@ -1,0 +1,1546 @@
+<ion-header class="ion-no-border admin-header">
+  <ion-toolbar class="admin-toolbar">
+    <!-- Brand / Title -->
+    <div class="toolbar-brand-row">
+      <div class="brand-left">
+        <img src="assets/icon/ontrack-logo.png" alt="OnTrack Logo" class="admin-logo" />
+        <span class="portal-badge">Coordinator</span>
+      </div>
+      
+      <div class="brand-right">
+        <span class="section-tag">{{ currentSection }}</span>
+        <button class="header-menu-btn" (click)="openSideMenu()" aria-label="Open navigation menu">
+          <ion-icon name="menu-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="admin-content">
+  <ion-refresher slot="fixed" (ionRefresh)="loadAllData($event)">
+    <ion-refresher-content pullingIcon="arrow-down-outline" refreshingSpinner="crescent"></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="admin-body">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: OVERVIEW -->
+    <!-- ========================================== -->
+    <section *ngIf="selectedSegment === 'overview'" class="tab-pane fade-in">
+      
+      <!-- Welcome Supervisor Card -->
+      <div class="welcome-card">
+        <div class="welcome-meta">
+          <div class="avatar-ring">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+          </div>
+          <div class="welcome-text">
+            <span class="greeting-sub">Academic Supervisor & Coordinator</span>
+            <h2 class="professor-name">{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</h2>
+            <p class="prof-dept">{{ currentProfessor?.department || 'College of Information & Communications Tech' }}</p>
+          </div>
+        </div>
+        <div class="duty-badge-row">
+          <span class="date-chip">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ stats.today_date }}
+          </span>
+          <span class="section-badge-chip">Section: {{ currentSection }}</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Strip -->
+      <div class="quick-actions-bar">
+        <button class="quick-action-btn primary" (click)="openAssignTaskModal()">
+          <ion-icon name="add-outline"></ion-icon>
+          <span>Assign Task</span>
+        </button>
+        <button class="quick-action-btn" (click)="switchSegment('attendance'); setAttendanceMode('weekly')">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>Weekly Timesheet</span>
+        </button>
+        <button class="quick-action-btn" (click)="switchSegment('students')">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>View Interns</span>
+        </button>
+      </div>
+
+      <!-- 4 KPI Metrics Grid -->
+      <div class="metrics-grid">
+        
+        <!-- Total Students -->
+        <div class="metric-card" (click)="switchSegment('students')">
+          <div class="metric-header">
+            <div class="metric-icon-box blue">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+            <span class="metric-trend">Monitored</span>
+          </div>
+          <div class="metric-value">{{ stats.total_students }}</div>
+          <div class="metric-label">Enrolled Interns</div>
+          <div class="metric-footer">Class of {{ currentSection }}</div>
+        </div>
+
+        <!-- Active On Duty -->
+        <div class="metric-card" (click)="switchSegment('attendance')">
+          <div class="metric-header">
+            <div class="metric-icon-box green">
+              <ion-icon name="time-outline"></ion-icon>
+            </div>
+            <span class="metric-live-dot">
+              <span class="pulse-dot"></span>
+              Live
+            </span>
+          </div>
+          <div class="metric-value text-green">{{ stats.active_on_duty }}</div>
+          <div class="metric-label">On Duty Right Now</div>
+          <div class="metric-footer">{{ stats.completed_duty_today }} shifts completed today</div>
+        </div>
+
+
+
+        <!-- Tasks Tracked -->
+        <div class="metric-card full-width" (click)="switchSegment('tasks')">
+          <div class="metric-header">
+            <div class="metric-icon-box purple">
+              <ion-icon name="checkbox-outline"></ion-icon>
+            </div>
+            <span class="metric-trend">{{ stats.pending_tasks }} Pending</span>
+          </div>
+          <div class="metric-tasks-split">
+            <div class="split-col">
+              <span class="split-num">{{ stats.total_tasks }}</span>
+              <span class="split-txt">Total Assigned</span>
+            </div>
+            <div class="split-divider"></div>
+            <div class="split-col">
+              <span class="split-num text-amber">{{ stats.pending_tasks }}</span>
+              <span class="split-txt">In Progress / Pending</span>
+            </div>
+            <div class="split-divider"></div>
+            <div class="split-col">
+              <span class="split-num text-green">{{ stats.completed_tasks }}</span>
+              <span class="split-txt">Completed</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Duty Feed (Recent Check-ins) -->
+      <div class="section-container">
+        <div class="section-title-row">
+          <h3 class="section-heading">Live Duty Activity Feed</h3>
+          <button class="view-all-link" (click)="switchSegment('attendance')">
+            <span>View All</span>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
+
+        <!-- Activity Cards -->
+        <div class="recent-list" *ngIf="recentActivities.length > 0; else noRecent">
+          <div class="activity-card" *ngFor="let act of recentActivities">
+            <div class="activity-top">
+              <div class="activity-student">
+                <div class="student-avatar-circle">
+                  {{ act.student_name ? act.student_name.charAt(0) : 'S' }}
+                </div>
+                <div class="student-info">
+                  <span class="name">{{ act.student_name }}</span>
+                  <span class="id-sec">{{ act.student_no }} • {{ act.course_section || currentSection }}</span>
+                </div>
+              </div>
+
+              <!-- Status Badge -->
+              <span class="duty-pill" [class.ongoing]="act.status === 'ongoing'" [class.completed]="act.status === 'completed'">
+                <span class="indicator-dot"></span>
+                {{ act.status === 'ongoing' ? 'Clocked In' : (act.total_hours + ' hrs logged') }}
+              </span>
+            </div>
+
+            <!-- Meta details -->
+            <div class="activity-meta">
+              <div class="meta-item">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>In: {{ act.time_in }}</span>
+                <span *ngIf="act.time_out">| Out: {{ act.time_out }}</span>
+              </div>
+              <div class="meta-item location" *ngIf="act.location_name">
+                <ion-icon name="location-outline"></ion-icon>
+                <span class="truncate">{{ act.location_name }}</span>
+              </div>
+            </div>
+
+            <!-- Notes preview if present -->
+            <div class="activity-notes-preview" *ngIf="act.activity_notes">
+              <p>“{{ act.activity_notes }}”</p>
+            </div>
+
+            <!-- Photo proof button -->
+            <div class="activity-actions" *ngIf="act.photo_url">
+              <button class="photo-btn" (click)="openPhotoPreview(act.photo_url, act.student_name || 'Intern', act.log_date + ' • ' + act.time_in)">
+                <ion-icon name="camera-outline"></ion-icon>
+                <span>View Verification Selfie</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noRecent>
+          <div class="empty-state-card">
+            <ion-icon name="hourglass-outline"></ion-icon>
+            <h4>No attendance logs recorded yet today</h4>
+            <p>Monitored intern check-ins and GPS verifications will appear here in real-time.</p>
+          </div>
+        </ng-template>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: INTERNS / STUDENTS -->
+    <!-- ========================================== -->
+    <section *ngIf="selectedSegment === 'students'" class="tab-pane fade-in">
+      
+      <!-- Search & Filters -->
+      <div class="filter-header">
+        <div class="search-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <input 
+            type="text" 
+            [(ngModel)]="studentSearchTerm" 
+            (ngModelChange)="applyStudentFilters()" 
+            placeholder="Search student by name, ID, agency..."
+          />
+          <button *ngIf="studentSearchTerm" class="clear-search-btn" (click)="studentSearchTerm = ''; applyStudentFilters()">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="chips-row">
+          <button 
+            class="filter-chip" 
+            [class.active]="studentStatusFilter === 'all'" 
+            (click)="setStudentStatusFilter('all')">
+            All ({{ students.length }})
+          </button>
+          <button 
+            class="filter-chip on-duty-chip" 
+            [class.active]="studentStatusFilter === 'on_duty'" 
+            (click)="setStudentStatusFilter('on_duty')">
+            <span class="dot"></span>
+            On Duty
+          </button>
+          <button 
+            class="filter-chip" 
+            [class.active]="studentStatusFilter === 'off_duty'" 
+            (click)="setStudentStatusFilter('off_duty')">
+            Off Duty
+          </button>
+        </div>
+      </div>
+
+      <!-- Students List -->
+      <div class="students-list" *ngIf="filteredStudents.length > 0; else noStudents">
+        <div class="student-card" *ngFor="let s of filteredStudents" (click)="openStudentDossier(s)">
+          
+          <div class="card-main-row">
+            <div class="student-avatar">
+              {{ s.full_name ? s.full_name.charAt(0) : 'S' }}
+            </div>
+
+            <div class="student-details">
+              <div class="student-title-line">
+                <h4 class="student-name">{{ s.full_name }}</h4>
+                <span class="status-pill" [class.on-duty]="s.is_on_duty" [class.off-duty]="!s.is_on_duty">
+                  <span class="status-dot"></span>
+                  {{ s.is_on_duty ? 'On Duty' : 'Off Duty' }}
+                </span>
+              </div>
+              <p class="student-sub">
+                <span class="sno">{{ s.student_no }}</span>
+                <span class="sep">•</span>
+                <span class="agency">{{ s.company_name || 'Assigned Agency' }}</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Hours Progress Bar -->
+          <div class="student-progress-box">
+            <div class="progress-labels">
+              <span class="hours-rendered">
+                <strong>{{ s.accumulated_hours }}</strong> / {{ s.required_hours }} hrs
+              </span>
+              <span class="percent-label">{{ s.completion_percent }}%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" [style.width.%]="s.completion_percent"></div>
+            </div>
+          </div>
+
+          <!-- Bottom Meta & Actions -->
+          <div class="card-footer-row">
+            <div class="footer-left-info">
+              <span *ngIf="s.is_on_duty && s.current_shift" class="shift-info text-green">
+                <ion-icon name="time-outline"></ion-icon>
+                In: {{ s.current_shift.time_in }}
+              </span>
+              <span *ngIf="!s.is_on_duty" class="remaining-hours-text">
+                {{ s.remaining_hours }} hrs remaining
+              </span>
+            </div>
+
+            <div class="footer-actions" (click)="$event.stopPropagation()">
+              <button class="action-btn-sm" (click)="openAssignTaskModal(s)" aria-label="Assign Task">
+                <ion-icon name="add-outline"></ion-icon>
+                <span>Task</span>
+              </button>
+              <button class="action-btn-sm primary" (click)="openStudentDossier(s)" aria-label="View Profile">
+                <span>Dossier</span>
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <ng-template #noStudents>
+        <div class="empty-state-card">
+          <ion-icon name="people-outline"></ion-icon>
+          <h4>No interns match your filter</h4>
+          <p>Try clearing your search query or switching filter tabs.</p>
+        </div>
+      </ng-template>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: ATTENDANCE VERIFICATION FEED & WEEKLY TIMESHEET -->
+    <!-- ========================================== -->
+    <section *ngIf="selectedSegment === 'attendance'" class="tab-pane fade-in">
+      
+      <!-- View Mode Selector: Weekly Timesheet vs Daily Feed -->
+      <div class="attendance-mode-selector">
+        <button 
+          class="mode-btn" 
+          [class.active]="attendanceViewMode === 'weekly'" 
+          (click)="setAttendanceMode('weekly')">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>Weekly Timesheet</span>
+        </button>
+        <button 
+          class="mode-btn" 
+          [class.active]="attendanceViewMode === 'daily'" 
+          (click)="setAttendanceMode('daily')">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Daily Live Feed</span>
+        </button>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 1: WEEKLY ATTENDANCE TIMESHEET -->
+      <!-- ========================================== -->
+      <div *ngIf="attendanceViewMode === 'weekly'" class="weekly-view-container fade-in">
+        
+        <!-- Week Navigator Card -->
+        <div class="week-navigator-card">
+          <div class="nav-control-row">
+            <button class="week-arrow-btn" (click)="prevWeek()" aria-label="Previous Week">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </button>
+            
+            <div class="week-title-box">
+              <div class="week-kicker">
+                <span>OJT Weekly Period</span>
+                <span *ngIf="currentWeekOffset === 0" class="current-week-tag">Current Week</span>
+              </div>
+              <h3 class="week-range-text">{{ weekDateRangeLabel }}</h3>
+              <p class="week-sub">Monday – Sunday Schedule</p>
+            </div>
+
+            <button class="week-arrow-btn" (click)="nextWeek()" aria-label="Next Week">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+          </div>
+
+          <div class="week-quick-actions" *ngIf="currentWeekOffset !== 0">
+            <button class="jump-today-btn" (click)="resetToCurrentWeek()">
+              <ion-icon name="today-outline"></ion-icon>
+              <span>Jump to Current Week</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Weekly Summary KPI Strip -->
+        <div class="weekly-metrics-strip">
+          <div class="weekly-metric-box">
+            <span class="m-val">{{ weeklyTotalHours }} hrs</span>
+            <span class="m-lbl">Rendered This Week</span>
+          </div>
+          <div class="weekly-metric-box">
+            <span class="m-val text-green">{{ weeklyTotalShifts }}</span>
+            <span class="m-lbl">Duty Shifts Logged</span>
+          </div>
+          <div class="weekly-metric-box">
+            <span class="m-val text-blue">{{ students.length }}</span>
+            <span class="m-lbl">Monitored Interns</span>
+          </div>
+        </div>
+
+        <!-- Students Weekly Timesheet Cards -->
+        <div class="weekly-students-list" *ngIf="weeklyAttendanceList.length > 0; else noWeeklyData">
+          <div class="weekly-student-card" *ngFor="let item of weeklyAttendanceList">
+            
+            <!-- Student Header Line -->
+            <div class="student-header-row" (click)="toggleStudentWeekExpand(item)">
+              <div class="student-info-left">
+                <div class="student-mini-avatar">{{ item.student.full_name.charAt(0) }}</div>
+                <div class="student-text">
+                  <h4 class="name">{{ item.student.full_name }}</h4>
+                  <span class="meta">{{ item.student.student_no }} • {{ item.student.company_name || 'Assigned Agency' }}</span>
+                </div>
+              </div>
+
+              <div class="student-header-right">
+                <span class="weekly-hrs-badge" [class.has-hours]="item.weeklyHours > 0">
+                  {{ item.weeklyHours }} hrs
+                </span>
+                <button class="expand-icon-btn" aria-label="Toggle details">
+                  <ion-icon [name]="item.isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- 7-Day Visual Strip (Mon to Sun) -->
+            <div class="days-strip-grid">
+              <div 
+                class="day-column" 
+                *ngFor="let dayLog of item.days"
+                [class.has-duty]="dayLog.hasDuty"
+                [class.ongoing]="dayLog.status === 'ongoing'"
+                [class.selected]="item.activeSelectedDay?.dateStr === dayLog.dateStr"
+                (click)="selectStudentDay(item, dayLog)">
+                
+                <span class="col-day-name">{{ getDayShortName(dayLog.dateStr) }}</span>
+                <span class="col-day-num" [class.today]="isDateToday(dayLog.dateStr)">
+                  {{ getDayNumber(dayLog.dateStr) }}
+                </span>
+
+                <!-- Day Status Pill -->
+                <div class="col-status-pill" [class.done]="dayLog.status === 'completed'" [class.live]="dayLog.status === 'ongoing'" [class.empty]="!dayLog.hasDuty">
+                  <span *ngIf="dayLog.status === 'completed'">{{ dayLog.totalHours }}h</span>
+                  <span *ngIf="dayLog.status === 'ongoing'" class="live-pulse">Live</span>
+                  <span *ngIf="!dayLog.hasDuty" class="dash">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Day Inspection Card (if tapped) -->
+            <div class="day-inspection-box fade-in" *ngIf="item.activeSelectedDay">
+              <div class="inspection-header">
+                <span class="insp-title">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  {{ formatInspectionDate(item.activeSelectedDay.dateStr) }}
+                </span>
+                <button class="insp-close-btn" (click)="item.activeSelectedDay = null" aria-label="Close day inspection">
+                  <ion-icon name="close-outline"></ion-icon>
+                </button>
+              </div>
+
+              <div class="inspection-content" *ngIf="item.activeSelectedDay.hasDuty; else noDutyDay">
+                <div class="insp-times-row">
+                  <span>In: <strong>{{ item.activeSelectedDay.timeIn }}</strong></span>
+                  <span *ngIf="item.activeSelectedDay.timeOut">Out: <strong>{{ item.activeSelectedDay.timeOut }}</strong></span>
+                  <span class="hrs-tag">{{ item.activeSelectedDay.totalHours }} hrs rendered</span>
+                </div>
+
+                <div class="insp-location" *ngIf="item.activeSelectedDay.locationName">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ item.activeSelectedDay.locationName }}</span>
+                </div>
+
+                <div class="insp-notes" *ngIf="item.activeSelectedDay.notes">
+                  <p>“{{ item.activeSelectedDay.notes }}”</p>
+                </div>
+
+                <div class="insp-actions" *ngIf="item.activeSelectedDay.photoUrl">
+                  <button class="insp-photo-btn" (click)="openPhotoPreview(item.activeSelectedDay.photoUrl, item.student.full_name, item.activeSelectedDay.dateStr + ' • ' + item.activeSelectedDay.timeIn)">
+                    <ion-icon name="camera-outline"></ion-icon>
+                    <span>View Duty Proof Photo</span>
+                  </button>
+                </div>
+              </div>
+
+              <ng-template #noDutyDay>
+                <p class="no-duty-text">No attendance shift logged on this day.</p>
+              </ng-template>
+            </div>
+
+          </div>
+        </div>
+
+        <ng-template #noWeeklyData>
+          <div class="empty-state-card">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <h4>No interns found for this week</h4>
+            <p>Verify students are assigned to {{ currentSection }}.</p>
+          </div>
+        </ng-template>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: DAILY LIVE FEED (Existing View) -->
+      <!-- ========================================== -->
+      <div *ngIf="attendanceViewMode === 'daily'" class="daily-view-container fade-in">
+        
+        <!-- Date & Search Toolbar -->
+        <div class="attendance-filter-bar">
+        
+        <div class="search-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <input 
+            type="text" 
+            [(ngModel)]="attendanceSearchTerm" 
+            (ngModelChange)="applyAttendanceFilters()" 
+            placeholder="Search by student name, ID, location..."
+          />
+        </div>
+
+        <div class="filters-row-secondary">
+          <!-- Date Filter Picker -->
+          <div class="date-picker-wrap">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <input 
+              type="date" 
+              [(ngModel)]="attendanceDateFilter" 
+              (change)="applyAttendanceFilters()" 
+            />
+            <button *ngIf="attendanceDateFilter" class="clear-date-btn" (click)="clearAttendanceDateFilter()">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+          </div>
+
+          <!-- Status Filters -->
+          <div class="status-toggle-group">
+            <button 
+              class="toggle-btn" 
+              [class.active]="attendanceStatusFilter === 'all'" 
+              (click)="setAttendanceStatusFilter('all')">
+              All
+            </button>
+            <button 
+              class="toggle-btn" 
+              [class.active]="attendanceStatusFilter === 'ongoing'" 
+              (click)="setAttendanceStatusFilter('ongoing')">
+              Active
+            </button>
+            <button 
+              class="toggle-btn" 
+              [class.active]="attendanceStatusFilter === 'completed'" 
+              (click)="setAttendanceStatusFilter('completed')">
+              Done
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Attendance Feed Cards -->
+      <div class="attendance-feed-list" *ngIf="filteredAttendanceLogs.length > 0; else noAttendanceLogs">
+        <div class="attendance-log-card" *ngFor="let log of filteredAttendanceLogs">
+          
+          <div class="log-card-header">
+            <div class="log-student-meta">
+              <h4 class="name">{{ log.student_name || 'Intern' }}</h4>
+              <p class="sub">{{ log.student_no }} • {{ log.course_section || currentSection }}</p>
+            </div>
+            
+            <span class="hours-badge" [class.ongoing]="log.status === 'ongoing'">
+              {{ log.status === 'ongoing' ? 'ONGOING' : (log.total_hours + ' HRS') }}
+            </span>
+          </div>
+
+          <!-- Timestamp details -->
+          <div class="log-times-row">
+            <div class="time-block in">
+              <span class="time-label">CLOCK IN</span>
+              <span class="time-val">{{ log.time_in }}</span>
+              <span class="date-val">{{ log.log_date }}</span>
+            </div>
+            
+            <div class="time-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+
+            <div class="time-block out">
+              <span class="time-label">CLOCK OUT</span>
+              <span class="time-val">{{ log.time_out || '--:--:--' }}</span>
+              <span class="date-val">{{ log.status === 'ongoing' ? 'In progress' : log.log_date }}</span>
+            </div>
+          </div>
+
+          <!-- GPS Location verification badge -->
+          <div class="log-location-box">
+            <ion-icon name="location-outline"></ion-icon>
+            <div class="loc-text">
+              <span class="loc-title">{{ log.location_name || 'GPS Verified Workplace' }}</span>
+              <span class="loc-coords" *ngIf="log.latitude && log.longitude">
+                Coordinates: {{ log.latitude.toFixed(5) }}, {{ log.longitude.toFixed(5) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Accomplishments Notes -->
+          <div class="log-accomplishment-box" *ngIf="log.activity_notes">
+            <div class="acc-label">
+              <ion-icon name="document-text-outline"></ion-icon>
+              <span>Daily Tasks Accomplished:</span>
+            </div>
+            <p class="acc-text">“{{ log.activity_notes }}”</p>
+          </div>
+
+          <!-- Photo Verification Proof Thumbnail -->
+          <div class="log-proof-row" *ngIf="log.photo_url">
+            <button class="proof-preview-btn" (click)="openPhotoPreview(log.photo_url, log.student_name || 'Intern', log.log_date + ' • ' + log.time_in)">
+              <div class="thumb-container">
+                <img [src]="getPhotoUrl(log.photo_url)" alt="Proof Selfie" />
+              </div>
+              <div class="thumb-text">
+                <span class="thumb-title">Duty Selfie Proof</span>
+                <span class="thumb-sub">Tap to view full verification image</span>
+              </div>
+              <ion-icon name="eye-outline" class="thumb-arrow"></ion-icon>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <ng-template #noAttendanceLogs>
+        <div class="empty-state-card">
+          <ion-icon name="time-outline"></ion-icon>
+          <h4>No attendance logs match your filter</h4>
+          <p>Try choosing a different date or clearing your search term.</p>
+        </div>
+      </ng-template>
+
+      </div> <!-- /daily-view-container -->
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: TASKS MANAGEMENT -->
+    <!-- ========================================== -->
+    <section *ngIf="selectedSegment === 'tasks'" class="tab-pane fade-in">
+      
+      <!-- Broadcast Callout Card -->
+      <div class="broadcast-task-card">
+        <div class="callout-header">
+          <div class="icon-wrap">
+            <ion-icon name="flag-outline"></ion-icon>
+          </div>
+          <div class="callout-title">
+            <h3>Supervisor Task Assignment</h3>
+            <p>Broadcast required OJT tasks or agency projects to {{ currentSection }} interns.</p>
+          </div>
+        </div>
+
+        <button class="assign-broadcast-btn" (click)="openAssignTaskModal()">
+          <ion-icon name="add-outline"></ion-icon>
+          <span>Assign New Task</span>
+        </button>
+      </div>
+
+      <!-- Task Stats Strip -->
+      <div class="tasks-summary-strip">
+        <div class="summary-box">
+          <span class="val">{{ stats.total_tasks }}</span>
+          <span class="lbl">Total Tasks</span>
+        </div>
+        <div class="summary-box">
+          <span class="val text-amber">{{ stats.pending_tasks }}</span>
+          <span class="lbl">Pending</span>
+        </div>
+        <div class="summary-box">
+          <span class="val text-green">{{ stats.completed_tasks }}</span>
+          <span class="lbl">Completed</span>
+        </div>
+      </div>
+
+      <!-- TASK MONITORING SECTION (MATCHING USER SCREENSHOT) -->
+      <div class="task-monitoring-card">
+        <div class="monitoring-header">
+          <div class="monitoring-title-box">
+            <h3 class="monitoring-title">Task Monitoring</h3>
+            <p class="monitoring-sub">Oversee student deliverables and progress</p>
+          </div>
+        </div>
+
+        <div class="task-table-wrapper">
+          <div class="table-card-topbar">
+            <div class="topbar-left">
+              <ion-icon name="reorder-three-outline" class="card-icon"></ion-icon>
+              <h4>Student Tasks</h4>
+            </div>
+            <div class="topbar-right">
+              <div class="select-chip-box">
+                <select [(ngModel)]="taskStudentFilter" (change)="applyTaskFilters()" class="filter-dropdown" aria-label="Filter tasks by student">
+                  <option value="all">All Students</option>
+                  <option *ngFor="let s of students" [value]="s.id">{{ s.full_name }}</option>
+                </select>
+              </div>
+              <div class="select-chip-box">
+                <select [(ngModel)]="taskStatusFilter" (change)="applyTaskFilters()" class="filter-dropdown" aria-label="Filter tasks by status">
+                  <option value="all">All Statuses</option>
+                  <option value="completed">Completed</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clean Responsive Tasks List (No horizontal scroll, with View Modal) -->
+          <div class="tasks-clean-container">
+            <!-- Table Header -->
+            <div class="tasks-table-header">
+              <span class="th-student">Student</span>
+              <span class="th-task">Task Title</span>
+              <span class="th-action text-right">Action</span>
+            </div>
+
+            <!-- Task Rows -->
+            <div class="tasks-table-body" *ngIf="!isLoadingTasks && filteredTasksList.length > 0">
+              <div 
+                class="task-row-item" 
+                *ngFor="let t of filteredTasksList"
+                (click)="openTaskProof(t)">
+                
+                <!-- Col 1: Student -->
+                <div class="col-student-wrap">
+                  <div class="mini-avatar">{{ (t.student_name || 'S').charAt(0) }}</div>
+                  <div class="student-meta">
+                    <span class="s-name">{{ t.student_name }}</span>
+                    <span class="s-id">{{ t.student_no }}</span>
+                  </div>
+                </div>
+
+                <!-- Col 2: Task Info & Badges -->
+                <div class="col-task-wrap">
+                  <span class="task-title-text">{{ t.title }}</span>
+                  <div class="task-meta-pills">
+                    <span class="status-badge" [class.badge-completed]="t.status === 'completed'" [class.badge-progress]="t.status === 'in_progress'" [class.badge-pending]="t.status === 'pending'">
+                      {{ t.status === 'in_progress' ? 'In Progress' : (t.status | titlecase) }}
+                    </span>
+                    <span class="proof-badge" *ngIf="t.proof_file">
+                      <ion-icon [name]="isProofDocument(t.proof_file) ? 'document-text-outline' : 'image-outline'"></ion-icon>
+                      <span>{{ t.proof_file }}</span>
+                    </span>
+                    <span class="due-badge" *ngIf="t.deadline">
+                      <ion-icon name="calendar-outline"></ion-icon>
+                      <span>{{ formatFriendlyDate(t.deadline) }}</span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Col 3: View Action Button -->
+                <div class="col-action-wrap" (click)="$event.stopPropagation()">
+                  <button class="btn-view-modal" (click)="openTaskProof(t)" aria-label="View task and proof">
+                    <ion-icon name="eye-outline"></ion-icon>
+                    <span>View</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="table-loading-box" *ngIf="isLoadingTasks">
+              <ion-spinner name="crescent"></ion-spinner>
+              <p>Loading student tasks & deliverables...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div class="table-empty-box" *ngIf="!isLoadingTasks && filteredTasksList.length === 0">
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <p>No student tasks found matching the selected filters.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitored Interns Strip (For quick assignment) -->
+        <div class="section-container" style="margin-top: 20px;">
+          <h3 class="section-heading">Assign Tasks by Intern</h3>
+          <p class="section-subtext">Click on any intern below to assign targeted duties or inspect their dossier.</p>
+          
+          <div class="students-task-grid">
+            <div class="task-student-tile" *ngFor="let s of students" (click)="openAssignTaskModal(s)">
+              <div class="tile-avatar">{{ s.full_name.charAt(0) }}</div>
+              <div class="tile-info">
+                <span class="tile-name">{{ s.full_name }}</span>
+                <span class="tile-tasks-count">{{ s.pending_tasks_count }} pending tasks</span>
+              </div>
+              <ion-icon name="add-outline" class="tile-add-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: STUDENT DOSSIER -->
+  <!-- ========================================== -->
+  <ion-modal [isOpen]="isStudentModalOpen" (didDismiss)="closeStudentDossier()" class="student-dossier-modal">
+    <ng-template>
+      <div class="modal-wrapper">
+        
+        <!-- Modal Top Bar -->
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-kicker">Intern Dossier</span>
+            <h3 class="modal-title">{{ selectedStudent?.full_name }}</h3>
+          </div>
+          <button class="modal-close-btn" (click)="closeStudentDossier()" aria-label="Close">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="modal-scrollable-body" *ngIf="selectedStudent">
+          
+          <!-- Student Info Card -->
+          <div class="dossier-profile-card">
+            <div class="profile-meta-row">
+              <div class="dossier-avatar">{{ selectedStudent.full_name.charAt(0) }}</div>
+              <div class="profile-details">
+                <span class="sno-badge">{{ selectedStudent.student_no }}</span>
+                <h4 class="student-name">{{ selectedStudent.full_name }}</h4>
+                <p class="detail-line">
+                  <ion-icon name="school-outline"></ion-icon>
+                  <span>{{ selectedStudent.course_section }} • {{ selectedStudent.school_campus }}</span>
+                </p>
+                <p class="detail-line">
+                  <ion-icon name="business-outline"></ion-icon>
+                  <span>{{ selectedStudent.company_name }}</span>
+                </p>
+                <p class="detail-line">
+                  <ion-icon name="mail-outline"></ion-icon>
+                  <span>{{ selectedStudent.email }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="dossier-stats-grid">
+              <div class="dossier-stat">
+                <span class="val">{{ selectedStudent.accumulated_hours }} hrs</span>
+                <span class="lbl">Rendered</span>
+              </div>
+              <div class="dossier-stat">
+                <span class="val text-amber">{{ selectedStudent.remaining_hours }} hrs</span>
+                <span class="lbl">Remaining</span>
+              </div>
+              <div class="dossier-stat">
+                <span class="val text-green">{{ selectedStudent.completion_percent }}%</span>
+                <span class="lbl">Completed</span>
+              </div>
+              <div class="dossier-stat">
+                <span class="val">{{ selectedStudent.days_logged || studentDossierLogs.length }}</span>
+                <span class="lbl">Days Logged</span>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="dossier-progress">
+              <div class="progress-track">
+                <div class="progress-fill" [style.width.%]="selectedStudent.completion_percent"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dossier Segment Switcher -->
+          <div class="dossier-tab-row">
+            <button 
+              class="dossier-tab-btn" 
+              [class.active]="studentDossierTab === 'logs'" 
+              (click)="studentDossierTab = 'logs'">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Attendance History ({{ studentDossierLogs.length }})</span>
+            </button>
+            <button 
+              class="dossier-tab-btn" 
+              [class.active]="studentDossierTab === 'tasks'" 
+              (click)="studentDossierTab = 'tasks'">
+              <ion-icon name="checkbox-outline"></ion-icon>
+              <span>Assigned Tasks ({{ studentDossierTasks.length }})</span>
+            </button>
+          </div>
+
+          <!-- Loading State inside modal -->
+          <div class="modal-loading-box" *ngIf="isLoadingStudentDossier">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Loading intern records...</p>
+          </div>
+
+          <!-- Dossier Tab: Attendance Logs -->
+          <div *ngIf="!isLoadingStudentDossier && studentDossierTab === 'logs'" class="dossier-logs-list">
+            <div *ngIf="studentDossierLogs.length > 0; else noDossierLogs">
+              
+              <!-- Sub navigation: Weekly vs All Logs -->
+              <div class="dossier-sub-nav">
+                <button 
+                  class="sub-nav-pill" 
+                  [class.active]="studentDossierViewMode === 'weekly'"
+                  (click)="studentDossierViewMode = 'weekly'">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>Weekly Timesheet ({{ dossierWeekGroups.length }})</span>
+                </button>
+                <button 
+                  class="sub-nav-pill" 
+                  [class.active]="studentDossierViewMode === 'list'"
+                  (click)="studentDossierViewMode = 'list'">
+                  <ion-icon name="list-outline"></ion-icon>
+                  <span>All Entries ({{ studentDossierLogs.length }})</span>
+                </button>
+              </div>
+
+              <!-- VIEW 1: WEEKLY BREAKDOWN -->
+              <div *ngIf="studentDossierViewMode === 'weekly'" class="dossier-weekly-container">
+                <div *ngFor="let week of dossierWeekGroups" class="dossier-week-card">
+                  <!-- Week Header Card -->
+                  <div class="dossier-week-header" (click)="toggleDossierWeek(week)">
+                    <div class="week-left">
+                      <div class="week-title-row">
+                        <span class="week-title-text">{{ week.weekLabel }}</span>
+                        <span class="current-week-tag" *ngIf="week.isCurrentWeek">This Week</span>
+                      </div>
+                      <div class="week-meta-row">
+                        <span class="meta-item"><ion-icon name="time-outline"></ion-icon> {{ week.totalWeeklyHours }} hrs</span>
+                        <span class="meta-item"><ion-icon name="checkmark-circle-outline"></ion-icon> {{ week.daysPresent }} / 5 days</span>
+                      </div>
+                    </div>
+                    <div class="week-right">
+                      <ion-icon [name]="week.isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-icon"></ion-icon>
+                    </div>
+                  </div>
+
+                  <!-- 7-day mini calendar strip (Clickable) -->
+                  <div class="dossier-week-strip">
+                    <button 
+                      type="button"
+                      class="mini-day-pill" 
+                      *ngFor="let d of week.days" 
+                      [class.has-duty]="d.hasDuty" 
+                      [class.ongoing]="d.status === 'ongoing'"
+                      [class.completed]="d.status === 'completed'"
+                      [class.selected]="week.selectedDay?.dateStr === d.dateStr"
+                      (click)="selectDossierDay(week, d)"
+                      [attr.aria-label]="d.dayName + ' ' + d.dateStr + (d.hasDuty ? ' duty logged' : ' no attendance')">
+                      <span class="day-lbl">{{ d.dayName }}</span>
+                      <span class="day-num">{{ d.dayNumber }}</span>
+                      <div class="day-indicator">
+                        <ion-icon *ngIf="d.status === 'completed'" name="checkmark" class="check-icon"></ion-icon>
+                        <ion-icon *ngIf="d.status === 'ongoing'" name="time" class="ongoing-icon"></ion-icon>
+                        <span *ngIf="d.status === 'none'" class="dash">•</span>
+                      </div>
+                    </button>
+                  </div>
+
+                  <!-- Expanded view inside this week -->
+                  <div class="dossier-week-body" *ngIf="week.isExpanded">
+
+                    <!-- SCENARIO 1: A SPECIFIC DAY IS CLICKED / SELECTED -->
+                    <div class="dossier-day-inspector" *ngIf="week.selectedDay as sDay">
+                      <div class="day-inspector-header">
+                        <div class="inspector-date-box">
+                          <span class="insp-kicker">Day Inspection</span>
+                          <h5 class="insp-title">{{ formatFriendlyDate(sDay.dateStr) }}</h5>
+                        </div>
+                        <div class="inspector-header-right">
+                          <span class="day-status-badge" [class.badge-completed]="sDay.hasDuty && sDay.status === 'completed'" [class.badge-ongoing]="sDay.status === 'ongoing'" [class.badge-none]="!sDay.hasDuty">
+                            {{ sDay.hasDuty ? (sDay.status === 'ongoing' ? 'Ongoing Shift' : (sDay.log?.total_hours + ' hrs rendered')) : 'No Attendance' }}
+                          </span>
+                          <button class="clear-day-btn" (click)="clearDossierSelectedDay(week)" title="View all logs for this week">
+                            <ion-icon name="close-circle-outline"></ion-icon>
+                            <span>Show All</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- 1A: ATTENDANCE ON THIS DAY -->
+                      <div class="inspector-attendance-box" *ngIf="sDay.hasDuty && sDay.log as l">
+                        <div class="dossier-log-item highlighted">
+                          <div class="log-item-header">
+                            <span class="log-section-label">
+                              <ion-icon name="time-outline"></ion-icon> Attendance Duty Record
+                            </span>
+                            <span class="log-hrs-pill" [class.ongoing]="l.status === 'ongoing'">
+                              {{ l.status === 'ongoing' ? 'ONGOING' : (l.total_hours + ' hrs') }}
+                            </span>
+                          </div>
+                          
+                          <div class="log-item-times">
+                            <span>In: <strong>{{ l.time_in }}</strong></span>
+                            <span *ngIf="l.time_out">Out: <strong>{{ l.time_out }}</strong></span>
+                          </div>
+
+                          <div class="log-item-loc" *ngIf="l.location_name">
+                            <ion-icon name="location-outline"></ion-icon>
+                            <span>{{ l.location_name }}</span>
+                          </div>
+
+                          <div class="log-item-notes" *ngIf="l.activity_notes">
+                            <span class="notes-lbl">Accomplishment / Work Log:</span>
+                            <p>“{{ l.activity_notes }}”</p>
+                          </div>
+
+                          <div class="log-item-photo" *ngIf="l.photo_url">
+                            <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + l.time_in)">
+                              <ion-icon name="camera-outline"></ion-icon>
+                              <span>View Selfie Proof</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 1B: NO ATTENDANCE ON THIS DAY -->
+                      <div class="inspector-no-attendance-box" *ngIf="!sDay.hasDuty">
+                        <div class="no-attendance-banner">
+                          <div class="banner-icon-circle">
+                            <ion-icon name="calendar-clear-outline"></ion-icon>
+                          </div>
+                          <div class="banner-text">
+                            <span class="banner-title">No attendance on this day</span>
+                            <p class="banner-desc">No check-in or duty hours were logged for this student on {{ formatFriendlyDate(sDay.dateStr) }}. Intern was off-duty or absent.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 1C: PREVIOUS & ASSIGNED TASKS ON THIS DAY -->
+                      <div class="inspector-tasks-container">
+                        <div class="inspector-tasks-header">
+                          <div class="tasks-heading-left">
+                            <ion-icon name="checkbox-outline"></ion-icon>
+                            <span>Tasks & Assignments ({{ getTasksForDossierDay(sDay.dateStr).length }})</span>
+                          </div>
+                          <span class="tasks-hint-tag">On or prior to this date</span>
+                        </div>
+
+                        <div *ngIf="getTasksForDossierDay(sDay.dateStr).length > 0; else noDayTasks">
+                          <div class="dossier-task-item mini-task" *ngFor="let t of getTasksForDossierDay(sDay.dateStr)">
+                            <div class="task-item-top">
+                              <h5 class="task-title">{{ t.title }}</h5>
+                              <span class="task-status-pill" [class.completed]="t.status === 'completed'" [class.pending]="t.status !== 'completed'">
+                                {{ t.status === 'completed' ? 'Done' : 'Pending' }}
+                              </span>
+                            </div>
+                            <p class="task-desc" *ngIf="t.description">{{ t.description }}</p>
+                            <div class="task-meta">
+                              <span class="meta-tag priority" *ngIf="t.priority">{{ t.priority | uppercase }}</span>
+                              <span class="meta-tag deadline" *ngIf="t.deadline">
+                                <ion-icon name="calendar-outline"></ion-icon> Due: {{ t.deadline }}
+                              </span>
+                              <span class="meta-tag created" *ngIf="t.created_at">
+                                <ion-icon name="time-outline"></ion-icon> {{ t.created_at | slice:0:10 }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <ng-template #noDayTasks>
+                          <div class="empty-day-tasks">
+                            <ion-icon name="clipboard-outline"></ion-icon>
+                            <span>No previous tasks recorded for this date.</span>
+                          </div>
+                        </ng-template>
+                      </div>
+
+                    </div>
+
+                    <!-- SCENARIO 2: NO DAY CLICKED YET (SHOW ALL LOGS IN THIS WEEK) -->
+                    <div class="dossier-all-week-logs" *ngIf="!week.selectedDay">
+                      <div class="tap-day-hint">
+                        <ion-icon name="finger-print-outline"></ion-icon>
+                        <span>Tap any date above to inspect attendance and tasks for that day</span>
+                      </div>
+
+                      <div class="dossier-log-item" *ngFor="let l of week.logs">
+                        <div class="log-item-header">
+                          <div class="log-date-tag">
+                            <span class="log-date">{{ l.log_date }}</span>
+                            <span class="log-day-name">{{ getDayOfWeekName(l.log_date) }}</span>
+                          </div>
+                          <span class="log-hrs-pill" [class.ongoing]="l.status === 'ongoing'">
+                            {{ l.status === 'ongoing' ? 'ONGOING' : (l.total_hours + ' hrs') }}
+                          </span>
+                        </div>
+                        
+                        <div class="log-item-times">
+                          <span>In: <strong>{{ l.time_in }}</strong></span>
+                          <span *ngIf="l.time_out">Out: <strong>{{ l.time_out }}</strong></span>
+                        </div>
+
+                        <div class="log-item-loc" *ngIf="l.location_name">
+                          <ion-icon name="location-outline"></ion-icon>
+                          <span>{{ l.location_name }}</span>
+                        </div>
+
+                        <div class="log-item-notes" *ngIf="l.activity_notes">
+                          <p>“{{ l.activity_notes }}”</p>
+                        </div>
+
+                        <div class="log-item-photo" *ngIf="l.photo_url">
+                          <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + l.time_in)">
+                            <ion-icon name="camera-outline"></ion-icon>
+                            <span>View Selfie Proof</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- VIEW 2: FLAT ALL LOGS -->
+              <div *ngIf="studentDossierViewMode === 'list'" class="dossier-flat-logs">
+                <div class="dossier-log-item" *ngFor="let l of studentDossierLogs">
+                  <div class="log-item-header">
+                    <div class="log-date-tag">
+                      <span class="log-date">{{ l.log_date }}</span>
+                      <span class="log-day-name">{{ getDayOfWeekName(l.log_date) }}</span>
+                    </div>
+                    <span class="log-hrs-pill" [class.ongoing]="l.status === 'ongoing'">
+                      {{ l.status === 'ongoing' ? 'ONGOING' : (l.total_hours + ' hrs') }}
+                    </span>
+                  </div>
+                  
+                  <div class="log-item-times">
+                    <span>In: <strong>{{ l.time_in }}</strong></span>
+                    <span *ngIf="l.time_out">Out: <strong>{{ l.time_out }}</strong></span>
+                  </div>
+
+                  <div class="log-item-loc" *ngIf="l.location_name">
+                    <ion-icon name="location-outline"></ion-icon>
+                    <span>{{ l.location_name }}</span>
+                  </div>
+
+                  <div class="log-item-notes" *ngIf="l.activity_notes">
+                    <p>“{{ l.activity_notes }}”</p>
+                  </div>
+
+                  <div class="log-item-photo" *ngIf="l.photo_url">
+                    <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + l.time_in)">
+                      <ion-icon name="camera-outline"></ion-icon>
+                      <span>View Selfie Proof</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <ng-template #noDossierLogs>
+              <div class="dossier-empty">
+                <ion-icon name="hourglass-outline"></ion-icon>
+                <p>No past attendance logs on record for this student.</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Dossier Tab: Assigned Tasks -->
+          <div *ngIf="!isLoadingStudentDossier && studentDossierTab === 'tasks'" class="dossier-tasks-list">
+            <div *ngIf="studentDossierTasks.length > 0; else noDossierTasks">
+              <div class="dossier-task-item" *ngFor="let t of studentDossierTasks">
+                <div class="task-item-top">
+                  <h5 class="task-title">{{ t.title }}</h5>
+                  <span class="task-status-pill" [class.completed]="t.status === 'completed'" [class.pending]="t.status !== 'completed'">
+                    {{ t.status === 'completed' ? 'Done' : 'Pending' }}
+                  </span>
+                </div>
+                <p class="task-desc" *ngIf="t.description">{{ t.description }}</p>
+                <div class="task-meta">
+                  <span class="meta-tag deadline" *ngIf="t.deadline">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    Due: {{ t.deadline }}
+                  </span>
+                  <span class="meta-tag priority" [class.high]="t.priority === 'high'" [class.medium]="t.priority === 'medium'">
+                    {{ t.priority | titlecase }} Priority
+                  </span>
+                </div>
+                <div class="task-proof-row" *ngIf="t.proof_file">
+                  <button class="view-proof-btn" (click)="openTaskProof(t)">
+                    <ion-icon [name]="isProofDocument(t.proof_file) ? 'document-text-outline' : 'image-outline'"></ion-icon>
+                    <span>View Proof: {{ t.proof_file }}</span>
+                  </button>
+                  <span class="verified-tag" *ngIf="t.verified_at">
+                    <ion-icon name="checkmark-circle"></ion-icon> Verified
+                  </span>
+                </div>
+              </div>
+            </div>
+            <ng-template #noDossierTasks>
+              <div class="dossier-empty">
+                <ion-icon name="checkbox-outline"></ion-icon>
+                <p>No assigned tasks yet for this student.</p>
+              </div>
+            </ng-template>
+          </div>
+
+        </div>
+
+        <!-- Modal Bottom Actions -->
+        <div class="modal-footer-actions">
+          <button class="modal-action-btn secondary" (click)="openAssignTaskModal(selectedStudent)">
+            <ion-icon name="add-outline"></ion-icon>
+            <span>Assign Task</span>
+          </button>
+          <button class="modal-action-btn primary" (click)="closeStudentDossier()">
+            <span>Done</span>
+          </button>
+        </div>
+
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ASSIGN TASK -->
+  <!-- ========================================== -->
+  <ion-modal [isOpen]="isAssignModalOpen" (didDismiss)="closeAssignTaskModal()" class="assign-task-modal">
+    <ng-template>
+      <div class="modal-wrapper">
+        
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-kicker">Faculty Management</span>
+            <h3 class="modal-title">Assign OJT Task</h3>
+          </div>
+          <button class="modal-close-btn" (click)="closeAssignTaskModal()" aria-label="Close">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="modal-scrollable-body">
+          
+          <!-- Target selector -->
+          <div class="input-group">
+            <label class="input-label">Assign To</label>
+            <div class="target-toggle-group">
+              <button 
+                type="button" 
+                class="target-btn" 
+                [class.active]="newTask.target_type === 'section'" 
+                (click)="newTask.target_type = 'section'">
+                <ion-icon name="people-outline"></ion-icon>
+                <span>Entire Section ({{ currentSection }})</span>
+              </button>
+              <button 
+                type="button" 
+                class="target-btn" 
+                [class.active]="newTask.target_type === 'student'" 
+                (click)="newTask.target_type = 'student'">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>Specific Student</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Student Dropdown (if specific student) -->
+          <div class="input-group" *ngIf="newTask.target_type === 'student'">
+            <label class="input-label" for="taskStudent">Select Intern</label>
+            <div class="custom-select-box">
+              <select id="taskStudent" [(ngModel)]="newTask.user_id">
+                <option [ngValue]="undefined" disabled>-- Choose Student --</option>
+                <option *ngFor="let s of students" [ngValue]="s.id">
+                  {{ s.full_name }} ({{ s.student_no }})
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Task Title -->
+          <div class="input-group">
+            <label class="input-label" for="taskTitle">Task Title *</label>
+            <div class="custom-input-box">
+              <input 
+                id="taskTitle" 
+                type="text" 
+                [(ngModel)]="newTask.title" 
+                placeholder="e.g. Weekly Progress Report / System Prototype" 
+              />
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="input-group">
+            <label class="input-label" for="taskDesc">Task Instructions & Scope</label>
+            <div class="custom-textarea-box">
+              <textarea 
+                id="taskDesc" 
+                rows="3" 
+                [(ngModel)]="newTask.description" 
+                placeholder="Detail the deliverables, format, and agency supervisor sign-off requirements...">
+              </textarea>
+            </div>
+          </div>
+
+          <!-- Priority & Deadline Row -->
+          <div class="form-dual-row">
+            <div class="input-group">
+              <label class="input-label" for="taskPriority">Priority</label>
+              <div class="custom-select-box">
+                <select id="taskPriority" [(ngModel)]="newTask.priority">
+                  <option value="low">Low Priority</option>
+                  <option value="medium">Medium Priority</option>
+                  <option value="high">High Priority</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="taskDeadline">Deadline</label>
+              <div class="custom-input-box">
+                <input 
+                  id="taskDeadline" 
+                  type="date" 
+                  [(ngModel)]="newTask.deadline" 
+                />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer-actions">
+          <button class="modal-action-btn secondary" (click)="closeAssignTaskModal()" [disabled]="isSubmittingTask">
+            <span>Cancel</span>
+          </button>
+          <button class="modal-action-btn primary" (click)="submitAssignTask()" [disabled]="isSubmittingTask">
+            <ion-spinner *ngIf="isSubmittingTask" name="crescent"></ion-spinner>
+            <span *ngIf="!isSubmittingTask">
+              <ion-icon name="send-outline"></ion-icon>
+              Publish Task
+            </span>
+          </button>
+        </div>
+
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ========================================== -->
+  <!-- MODAL: PHOTO PROOF PREVIEW -->
+  <!-- ========================================== -->
+  <ion-modal [isOpen]="isPhotoModalOpen" (didDismiss)="closePhotoPreview()" class="photo-preview-modal">
+    <ng-template>
+      <div class="photo-modal-wrap">
+        <div class="photo-modal-header">
+          <div class="photo-info">
+            <h4>{{ previewPhotoTitle }}</h4>
+            <p>{{ previewPhotoSubtitle }}</p>
+          </div>
+          <button class="photo-close-btn" (click)="closePhotoPreview()" aria-label="Close">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="photo-viewer-body">
+          <img *ngIf="previewPhotoUrl" [src]="previewPhotoUrl" alt="Verification Selfie" class="full-proof-img" />
+        </div>
+
+        <div class="photo-modal-footer">
+          <span class="verified-badge">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            GPS Validated Duty Check-in
+          </span>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Toast Feedback -->
+  <ion-toast 
+    [isOpen]="showToast" 
+    [message]="toastMessage" 
+    [duration]="2500" 
+    (didDismiss)="showToast = false">
+  </ion-toast>
+
+  <!-- ========================================== -->
+  <!-- MODAL: TASK DELIVERABLE PROOF PREVIEW -->
+  <!-- ========================================== -->
+  <ion-modal [isOpen]="isTaskProofModalOpen" (didDismiss)="closeTaskProofModal()" class="task-proof-modal">
+    <ng-template>
+      <div class="modal-wrapper">
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-kicker">Deliverable Proof Verification</span>
+            <h3 class="modal-title">{{ selectedTaskProof?.title }}</h3>
+          </div>
+          <button class="modal-close-btn" (click)="closeTaskProofModal()" aria-label="Close">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="modal-scrollable-body" *ngIf="selectedTaskProof">
+          <!-- Student & Task Details Card -->
+          <div class="proof-meta-card">
+            <div class="meta-row">
+              <div class="meta-avatar">{{ (selectedTaskProof.student_name || 'S').charAt(0) }}</div>
+              <div class="meta-info">
+                <span class="meta-sno">{{ selectedTaskProof.student_no }}</span>
+                <h4 class="meta-name">{{ selectedTaskProof.student_name }}</h4>
+                <p class="meta-desc" *ngIf="selectedTaskProof.description">{{ selectedTaskProof.description }}</p>
+              </div>
+            </div>
+            <div class="meta-badges-row">
+              <span class="meta-pill" [class.badge-completed]="selectedTaskProof.status === 'completed'" [class.badge-progress]="selectedTaskProof.status === 'in_progress'" [class.badge-pending]="selectedTaskProof.status === 'pending'">
+                Status: {{ selectedTaskProof.status === 'in_progress' ? 'In Progress' : (selectedTaskProof.status | titlecase) }}
+              </span>
+              <span class="meta-pill" *ngIf="selectedTaskProof.deadline">
+                <ion-icon name="calendar-outline"></ion-icon> Due: {{ formatFriendlyDate(selectedTaskProof.deadline) }}
+              </span>
+              <span class="meta-pill verified" *ngIf="selectedTaskProof.verified_at">
+                <ion-icon name="checkmark-circle"></ion-icon> Verified
+              </span>
+            </div>
+          </div>
+
+          <!-- Document or Image Preview Box -->
+          <div class="proof-preview-frame">
+            <div class="proof-header-bar">
+              <div class="file-name-row">
+                <ion-icon [name]="isProofDocument(selectedTaskProof.proof_file) ? 'document-attach-outline' : 'image-outline'"></ion-icon>
+                <span class="fname">{{ selectedTaskProof.proof_file || 'Attached Proof' }}</span>
+              </div>
+              <span class="fsize-tag">Submitted Deliverable</span>
+            </div>
+
+            <!-- PDF / Document Preview Card -->
+            <div class="document-showcase" *ngIf="isProofDocument(selectedTaskProof.proof_file)">
+              <div class="doc-badge-icon">
+                <ion-icon name="document-text"></ion-icon>
+              </div>
+              <div class="doc-text-meta">
+                <h5>{{ selectedTaskProof.proof_file }}</h5>
+                <p>Official student internship deliverable submitted for supervisor verification.</p>
+              </div>
+              <div class="doc-actions-row">
+                <button class="open-file-btn" (click)="presentToast('Deliverable file downloaded for academic audit: ' + selectedTaskProof.proof_file)">
+                  <ion-icon name="download-outline"></ion-icon>
+                  <span>Download / Inspect Document</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Image Proof Preview -->
+            <div class="image-showcase" *ngIf="!isProofDocument(selectedTaskProof.proof_file)">
+              <img [src]="selectedTaskProof.proof_url || ('assets/icon/ontrack-logo.png')" alt="Submitted Proof Preview" class="proof-render-img" />
+            </div>
+          </div>
+
+          <!-- Verification Stamp Box -->
+          <div class="verification-stamp-box" [class.is-verified]="selectedTaskProof.verified_at">
+            <div class="stamp-icon">
+              <ion-icon [name]="selectedTaskProof.verified_at ? 'shield-checkmark' : 'alert-circle-outline'"></ion-icon>
+            </div>
+            <div class="stamp-details">
+              <h6 *ngIf="selectedTaskProof.verified_at">Academic Verification Approved</h6>
+              <p *ngIf="selectedTaskProof.verified_at">Verified by <strong>{{ selectedTaskProof.verified_by || 'Coordinator' }}</strong> on {{ selectedTaskProof.verified_at }}.</p>
+              
+              <h6 *ngIf="!selectedTaskProof.verified_at">Pending Supervisor Verification</h6>
+              <p *ngIf="!selectedTaskProof.verified_at">Inspect the deliverable document or proof above, then click Verify below to approve this internship milestone.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" *ngIf="selectedTaskProof">
+          <button class="modal-btn secondary" (click)="closeTaskProofModal()">Close</button>
+          <button 
+            *ngIf="!selectedTaskProof.verified_at" 
+            class="modal-btn primary verify-btn" 
+            [disabled]="isVerifyingTask"
+            (click)="verifyTask(selectedTaskProof)">
+            <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+            <span>Verify Deliverable</span>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>
+
+<!-- SIDE DRAWER NAVIGATION -->
+<div class="side-drawer-backdrop" [class.open]="isSideMenuOpen" (click)="closeSideMenu()"></div>
+<aside class="side-drawer" [class.open]="isSideMenuOpen">
+  <div class="drawer-header">
+    <div class="prof-mini-profile">
+      <div class="mini-avatar">
+        <span>{{ (currentProfessor?.full_name || 'Prof').charAt(0) }}</span>
+      </div>
+      <div class="mini-details">
+        <h4>{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</h4>
+        <p>{{ currentProfessor?.role === 'admin' ? 'Lead Admin' : 'Coordinator' }} • {{ currentSection }}</p>
+      </div>
+    </div>
+    <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <nav class="drawer-nav">
+    <button class="nav-item" [class.active]="selectedSegment === 'overview'" (click)="selectMenuItem('overview')">
+      <ion-icon name="grid-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Overview</span>
+    </button>
+
+    <button class="nav-item" [class.active]="selectedSegment === 'students'" (click)="selectMenuItem('students')">
+      <ion-icon name="people-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Monitored Interns</span>
+      <span class="drawer-count-badge" *ngIf="students.length > 0">{{ students.length }}</span>
+    </button>
+
+    <button class="nav-item" [class.active]="selectedSegment === 'attendance'" (click)="selectMenuItem('attendance')">
+      <ion-icon name="time-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Live Attendance</span>
+      <span class="drawer-count-badge active" *ngIf="stats.active_on_duty > 0">{{ stats.active_on_duty }} On Duty</span>
+    </button>
+
+    <button class="nav-item" [class.active]="selectedSegment === 'tasks'" (click)="selectMenuItem('tasks')">
+      <ion-icon name="checkbox-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Tasks Management</span>
+      <span class="drawer-count-badge" *ngIf="stats.pending_tasks > 0">{{ stats.pending_tasks }}</span>
+    </button>
+
+    <div class="drawer-nav-divider"></div>
+
+    <button class="nav-item switch-portal" (click)="goToStudentPortal()">
+      <ion-icon name="school-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Student Portal</span>
+    </button>
+
+    <button class="nav-item" (click)="loadAllData(); closeSideMenu()">
+      <ion-icon name="refresh-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Refresh Duty Data</span>
+    </button>
+  </nav>
+
+  <div class="drawer-footer">
+    <button class="drawer-signout-btn" (click)="logout()">
+      <ion-icon name="log-out-outline"></ion-icon>
+      <span>Sign Out</span>
+    </button>
+    <span class="app-version-tag">OnTrack v1.0 • Academic Supervisor Portal</span>
+  </div>
+</aside>

@@ -34,6 +34,7 @@ import {
   checkmarkOutline,
   flagOutline,
   swapVerticalOutline,
+  arrowBackOutline,
 } from 'ionicons/icons';
 import { TaskService } from '../../core/services/task.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -114,6 +115,7 @@ export class TasksPage implements OnInit {
       checkmarkOutline,
       flagOutline,
       swapVerticalOutline,
+      arrowBackOutline,
     });
   }
 
@@ -315,6 +317,10 @@ export class TasksPage implements OnInit {
         this.showFeedback('Unable to connect to server.', 'error');
       },
     });
+  }
+
+  goBack() {
+    this.router.navigate(['/home']);
   }
 
   // Side Drawer navigation
