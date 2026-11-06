@@ -1,8 +1,13 @@
 <ion-header class="ion-no-border mobile-top-bar">
   <ion-toolbar class="header-toolbar">
     <div class="header-content">
-      <div class="brand-logo-wrap" (click)="selectMenuItem('dashboard')">
-        <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
+      <div class="left-nav-group">
+        <button class="back-btn" (click)="goBack()" aria-label="Go back to Dashboard">
+          <ion-icon name="arrow-back-outline"></ion-icon>
+        </button>
+        <div class="brand-logo-wrap" (click)="selectMenuItem('dashboard')">
+          <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
+        </div>
       </div>
       <button class="menu-icon-btn" (click)="openSideMenu()" aria-label="Open student menu">
         <ion-icon name="menu-outline"></ion-icon>

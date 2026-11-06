@@ -30,6 +30,7 @@ import {
   logOutOutline,
   shareOutline,
   eyeOutline,
+  arrowBackOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceService } from '../../core/services/attendance.service';
@@ -116,6 +117,7 @@ export class ReportsPage implements OnInit {
       logOutOutline,
       shareOutline,
       eyeOutline,
+      arrowBackOutline,
     });
   }
 
@@ -218,6 +220,10 @@ export class ReportsPage implements OnInit {
     }
 
     this.filteredReports = list;
+  }
+
+  goBack() {
+    this.router.navigate(['/home']);
   }
 
   // Side Drawer navigation

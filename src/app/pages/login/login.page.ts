@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,6 +20,8 @@ import {
   logInOutline,
   sparklesOutline,
   alertCircleOutline,
+  shieldCheckmarkOutline,
+  personOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -43,6 +45,7 @@ export class LoginPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   loginForm: FormGroup;
   showPassword = false;
@@ -62,6 +65,8 @@ export class LoginPage {
       logInOutline,
       sparklesOutline,
       alertCircleOutline,
+      shieldCheckmarkOutline,
+      personOutline,
     });
 
     this.loginForm = this.fb.group({
@@ -83,13 +88,34 @@ export class LoginPage {
     this.router.navigate(['/register']);
   }
 
-  fillDemoCredentials() {
+  goToAdminLogin() {
+    this.router.navigate(['/admin/login']);
+  }
+
+  fillDemoStudent() {
     this.loginForm.patchValue({
-      email: 'student@neust.edu.ph',
+      email: '2026-0001',
       password: 'Password123!',
     });
-    this.toastMessage = 'Sample credentials loaded!';
+    this.errorMessage = '';
+    this.toastMessage = 'Student demo credentials loaded!';
     this.showToast = true;
+    this.cdr.detectChanges();
+  }
+
+  fillDemoCoordinator() {
+    this.loginForm.patchValue({
+      email: 'admin@neust.edu.ph',
+      password: 'AdminPassword123!',
+    });
+    this.errorMessage = '';
+    this.toastMessage = 'Coordinator demo credentials loaded!';
+    this.showToast = true;
+    this.cdr.detectChanges();
+  }
+
+  fillDemoCredentials() {
+    this.fillDemoStudent();
   }
 
   onSubmit() {
@@ -100,21 +126,28 @@ export class LoginPage {
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     const { email, password } = this.loginForm.value;
 
-    this.authService.login(email, password).subscribe({
+    this.authService.login(email.trim(), password).subscribe({
       next: (res) => {
         this.isLoading = false;
         if (res.success) {
-          this.router.navigate(['/home']);
+          if (res.role === 'professor' || res.professor) {
+            this.router.navigate(['/admin/dashboard']);
+          } else {
+            this.router.navigate(['/home']);
+          }
         } else {
           this.errorMessage = res.message || 'Invalid email or password.';
         }
+        this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.isLoading = false;
-        this.errorMessage = 'Unable to connect to server. Please try again.';
+        this.errorMessage = err?.error?.message || 'Unable to connect to server. Please try again.';
+        this.cdr.detectChanges();
       },
     });
   }

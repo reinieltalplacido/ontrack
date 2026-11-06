@@ -16,8 +16,9 @@
 
 /* Modern Mobile Styling Defaults */
 * {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -32,7 +33,7 @@ body {
   border-radius: var(--ontrack-radius);
   box-shadow: var(--ontrack-shadow);
   padding: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* Primary Action Buttons */
@@ -43,7 +44,7 @@ body {
   --border-radius: 12px;
   font-weight: 600;
   height: 48px;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   text-transform: none;
 }
 
@@ -58,30 +59,33 @@ body {
 }
 
 /* Form Inputs */
-.ot-input-item {
-  --background: #f8fafc;
-  --border-color: #e2e8f0;
-  --border-radius: 12px;
-  --highlight-color-focused: var(--ion-color-primary);
-  --padding-start: 14px;
-  --padding-end: 14px;
+.ot-input-group {
   margin-bottom: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  transition: border-color 0.2s ease;
 
-  &.ion-focused {
-    border-color: var(--ion-color-primary);
-    background: #ffffff;
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+    letter-spacing: 0.2px;
   }
-}
 
-/* Badge styles */
-.ot-badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  .ot-input {
+    width: 100%;
+    height: 46px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-size: 0.92rem;
+    color: #0f172a;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--ion-color-primary);
+      box-shadow: 0 0 0 3px rgba(43, 85, 120, 0.15);
+    }
+  }
 }

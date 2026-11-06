@@ -1,10 +1,10 @@
-$primary: #547792;
-$primary-hover: #45637a;
+$primary: #2b5578;
+$primary-hover: #234563;
 $text-main: #0f172a;
 $text-muted: #64748b;
 $card-bg: #ffffff;
-$border-color: #e2e8f0;
-$bg-canvas: #f8fafc;
+$border-color: rgba(226, 232, 240, 0.95);
+$bg-canvas: #f1f5f9;
 
 .mobile-top-bar {
   .header-toolbar {
@@ -19,6 +19,22 @@ $bg-canvas: #f8fafc;
     align-items: center;
     justify-content: space-between;
     width: 100%;
+  }
+  .left-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: #334155;
+      padding: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
   }
   .brand-logo-wrap {
     cursor: pointer;

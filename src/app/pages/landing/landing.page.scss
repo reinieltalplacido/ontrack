@@ -1,555 +1,146 @@
-.onboarding-content {
-  --background: #f8fafc;
+.header-logo {
+  height: 28px;
+  width: auto;
+  vertical-align: middle;
 }
 
-.onboarding-wrapper {
+.onboard-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-height: 100%;
-  padding: calc(env(safe-area-inset-top, 24px) + 12px) 20px calc(env(safe-area-inset-bottom, 24px) + 16px);
-  max-width: 480px;
+  max-width: 440px;
   margin: 0 auto;
-  user-select: none;
 }
 
-/* Top Navigation Header */
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 48px;
-  margin-bottom: 20px;
-
-  .brand-logo {
-    max-width: 140px;
-    height: 38px;
-    object-fit: contain;
-  }
-
-  .skip-btn {
-    background: transparent;
-    border: none;
-    color: #64748b;
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-
-    &:active {
-      color: #0f172a;
-      background: #e2e8f0;
-    }
-  }
-
-  .top-spacer {
-    width: 48px;
-    height: 38px;
-  }
-}
-
-/* Carousel Body */
-.carousel-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-}
-
-/* Visual Mockup Container */
-.visual-card-container {
+/* Ionic Card Styling */
+.feature-card {
   width: 100%;
-  min-height: 230px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  animation: fadeIn 0.35s ease-out;
-}
+  margin: 0 0 24px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Shared Mockup Card Styling */
-.mockup-card {
-  width: 100%;
-  background: #ffffff;
-  border-radius: 20px;
-  border: 1.5px solid #eef2f6;
-  box-shadow: 0 10px 25px -5px rgba(84, 119, 146, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  padding: 20px;
-}
-
-/* Slide 0: Attendance Mockup */
-.attendance-card {
-  .card-header-row {
+  .card-top-row {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-
-    .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #10b981;
-      background: #ecfdf5;
-      padding: 4px 10px;
-      border-radius: 12px;
-
-      .pulse-dot {
-        width: 8px;
-        height: 8px;
-        background: #10b981;
-        border-radius: 50%;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-      }
-    }
-
-    .time-badge {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      color: #547792;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-  }
-
-  .checkin-preview {
-    display: flex;
-    align-items: center;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 12px;
-    gap: 12px;
-    margin-bottom: 14px;
-
-    .icon-bubble {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: #e8eef3;
-      color: #547792;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-    }
-
-    .checkin-details {
-      flex: 1;
-
-      h4 {
-        margin: 0 0 2px 0;
-        font-size: 0.92rem;
-        font-weight: 700;
-        color: #1e293b;
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.78rem;
-        color: #64748b;
-      }
-    }
-
-    .verified-icon {
-      color: #10b981;
-      font-size: 1.4rem;
-    }
-  }
-
-  .location-stamp {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #547792;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: #f0f5f9;
-    padding: 8px 12px;
-    border-radius: 10px;
-
-    ion-icon {
-      font-size: 1.1rem;
-    }
-  }
-}
-
-/* Slide 1: Progress Mockup */
-.progress-card {
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #64748b;
     margin-bottom: 8px;
-
-    .target-label {
-      color: #547792;
-    }
   }
 
-  .hours-display {
-    margin-bottom: 14px;
-
-    .current-hrs {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: -1px;
-    }
-
-    .total-hrs {
-      font-size: 1.1rem;
-      color: #94a3b8;
-      font-weight: 600;
-      margin-left: 6px;
-    }
-  }
-
-  .progress-bar-shell {
-    height: 10px;
-    background: #e2e8f0;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-bottom: 20px;
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #547792, #3c5b73);
-      border-radius: 6px;
-      transition: width 0.4s ease;
-    }
-  }
-
-  .metrics-row {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 10px 0;
-
-    .metric-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .m-val {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #1e293b;
-      }
-
-      .m-label {
-        font-size: 0.72rem;
-        color: #64748b;
-        font-weight: 500;
-        margin-top: 2px;
-      }
-    }
-
-    .metric-divider {
-      width: 1px;
-      height: 28px;
-      background: #e2e8f0;
-    }
-  }
-}
-
-/* Slide 2: Reports Mockup */
-.report-card {
-  .doc-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-
-    .doc-icon-wrap {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: #fdf2f2;
-      color: #ef4444;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
-
-    .doc-info {
-      h4 {
-        margin: 0 0 2px 0;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #1e293b;
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.78rem;
-        color: #64748b;
-      }
-    }
-  }
-
-  .doc-lines {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 18px;
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 10px;
-
-    .line {
-      height: 7px;
-      background: #e2e8f0;
-      border-radius: 4px;
-
-      &.full { width: 100%; }
-      &.medium { width: 75%; }
-      &.short { width: 45%; }
-    }
-  }
-
-  .doc-footer-stamp {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .approval-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #10b981;
-      font-size: 0.78rem;
-      font-weight: 700;
-
-      ion-icon {
-        font-size: 1.1rem;
-      }
-    }
-
-    .format-tag {
-      font-size: 0.72rem;
-      background: #eef2f6;
-      color: #475569;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-  }
-}
-
-/* Slide 3: Tasks Mockup */
-.task-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  .task-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: #f8fafc;
-    border: 1px solid #eef2f6;
-    border-radius: 12px;
-
-    &.active-task {
-      background: #ffffff;
-      border-color: #cbdde9;
-      box-shadow: 0 2px 8px rgba(84, 119, 146, 0.08);
-    }
-
-    .task-checkbox {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      &.checked {
-        color: #10b981;
-        font-size: 1.4rem;
-      }
-
-      &.pending {
-        border: 2px solid #cbd5e1;
-      }
-    }
-
-    .task-body {
-      flex: 1;
-
-      h5 {
-        margin: 0 0 4px 0;
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #1e293b;
-      }
-
-      .priority {
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        padding: 2px 6px;
-        border-radius: 4px;
-
-        &.high {
-          background: #fef2f2;
-          color: #ef4444;
-        }
-
-        &.medium {
-          background: #fffbeb;
-          color: #f59e0b;
-        }
-      }
-    }
-  }
-}
-
-/* Slide Text Details */
-.slide-text-wrapper {
-  text-align: center;
-  max-width: 380px;
-
-  .slide-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #e8eef3;
-    color: #547792;
-    font-size: 0.78rem;
+  ion-card-title {
+    font-size: 1.15rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    margin-bottom: 12px;
-
-    ion-icon {
-      font-size: 0.95rem;
-    }
   }
 
-  .slide-title {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1.25;
-    margin: 0 0 8px 0;
-    letter-spacing: -0.4px;
+  ion-card-subtitle {
+    font-size: 0.8rem;
+    font-weight: 500;
   }
 
-  .slide-subtitle {
-    font-size: 0.9rem;
-    color: #64748b;
-    line-height: 1.5;
-    margin: 0;
+  .card-list {
+    margin: 8px -8px 0 -8px;
+    background: transparent;
   }
-}
 
-/* Bottom Controls */
-.bottom-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: auto;
-  padding-top: 20px;
-}
-
-/* Pagination Dots */
-.pagination-dots {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-
-  .dot {
-    width: 8px;
+  .progress-indicator {
     height: 8px;
     border-radius: 4px;
-    background: #cbd5e1;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &.active {
-      width: 24px;
-      background: #547792;
-    }
+    margin: 4px 0 12px 0;
   }
 }
 
-/* Action Buttons Stack */
-.buttons-stack {
+/* Slide Text Block */
+.slide-text-block {
+  max-width: 380px;
+  padding: 0 8px;
+
+  .slide-chip {
+    margin-bottom: 8px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  .slide-heading {
+    margin: 0 0 8px 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--ion-text-color, #0f172a);
+    line-height: 1.3;
+  }
+
+  .slide-subtext {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--ion-color-step-600, #64748b);
+    line-height: 1.45;
+  }
+}
+
+/* Footer Toolbar & Buttons */
+.footer-toolbar {
+  --background: transparent;
+}
+
+.footer-inner {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 8px 16px 12px 16px;
+  width: 100%;
 
-  .action-btn-main {
-    --box-shadow: 0 6px 18px rgba(84, 119, 146, 0.32);
-  }
+  .pagination-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
 
-  .action-btn-secondary {
-    --background: #ffffff;
-  }
-
-  .login-prompt {
-    text-align: center;
-    font-size: 0.85rem;
-    color: #64748b;
-    padding: 4px 0;
-
-    .login-link-btn {
-      background: transparent;
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--ion-color-step-300, #cbd5e1);
       border: none;
-      color: #547792;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 0.85rem;
       padding: 0;
+      cursor: pointer;
+      transition: all 0.25s ease;
 
-      &:active {
-        text-decoration: underline;
+      &.active {
+        width: 22px;
+        background: var(--ion-color-primary, #2b5578);
       }
     }
   }
-}
 
-/* Campus Footer */
-.campus-footer-note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 0.74rem;
-  color: #94a3b8;
-  margin-top: 4px;
+  .action-button {
+    margin: 0;
+    --border-radius: 12px;
+    font-weight: 600;
+    height: 48px;
+  }
 
-  ion-icon {
-    font-size: 0.88rem;
-    color: #547792;
+  .secondary-button {
+    margin: 0;
+    font-weight: 600;
+    height: 40px;
+  }
+
+  .institution-caption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    text-align: center;
+    margin-top: 2px;
+
+    ion-icon {
+      font-size: 0.85rem;
+    }
   }
 }

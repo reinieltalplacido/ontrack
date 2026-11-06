@@ -1,15 +1,22 @@
 <ion-content [fullscreen]="true" class="login-content">
   <div class="login-container">
     
-    <!-- Top Back Navigation -->
+    <!-- Top Back Navigation & Demo Chips -->
     <div class="top-nav">
       <button class="back-btn" (click)="goBack()" aria-label="Go back">
         <ion-icon name="arrow-back-outline"></ion-icon>
       </button>
-      <button class="demo-chip-btn" (click)="fillDemoCredentials()">
-        <ion-icon name="sparkles-outline"></ion-icon>
-        <span>Demo Fill</span>
-      </button>
+      
+      <div class="demo-chips-group">
+        <button class="demo-chip-btn" (click)="fillDemoStudent()" aria-label="Student Demo Fill">
+          <ion-icon name="person-outline"></ion-icon>
+          <span>Student</span>
+        </button>
+        <button class="demo-chip-btn admin" (click)="fillDemoCoordinator()" aria-label="Coordinator Demo Fill">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <span>Coordinator</span>
+        </button>
+      </div>
     </div>
 
     <!-- Title & Greeting -->
@@ -18,7 +25,7 @@
         <img src="assets/icon/ontrack-logo.png" alt="OnTrack Logo" class="login-full-logo" />
       </div>
       <h1 class="page-title">Welcome Back</h1>
-      <p class="page-subtitle">Enter your student credentials to log your OJT hours and access your tasks.</p>
+      <p class="page-subtitle">Enter your student ID, faculty ID, or email to access your OnTrack portal.</p>
     </div>
 
     <!-- Error Banner -->
@@ -30,21 +37,21 @@
     <!-- Login Form -->
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-container">
       
-      <!-- Student Number / Email Field -->
+      <!-- Student Number / Faculty ID / Email Field -->
       <div class="input-group">
-        <label class="input-label" for="email">Student No. or Email</label>
+        <label class="input-label" for="email">Student No., Faculty ID, or Email</label>
         <div class="custom-input-box" [class.has-error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
           <ion-icon name="mail-outline" class="input-icon"></ion-icon>
           <input 
             id="email"
             type="text" 
             formControlName="email"
-            placeholder="e.g. 2026-0001 or student@neust.edu.ph"
+            placeholder="e.g. 2026-0001 or admin@neust.edu.ph"
             autocomplete="username"
           />
         </div>
         <p class="error-hint" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')">
-          Student number or email is required.
+          Identification or email is required.
         </p>
       </div>
 
@@ -102,6 +109,14 @@
     <div class="signup-footer">
       <p>Don't have an OnTrack account?</p>
       <button class="signup-btn" (click)="goToRegister()">Create Student Account</button>
+
+      <!-- Professor / Admin Portal Switch -->
+      <div class="admin-portal-switch">
+        <button class="admin-switch-btn" (click)="goToAdminLogin()">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <span>Dedicated Coordinator Portal</span>
+        </button>
+      </div>
     </div>
 
   </div>
@@ -118,11 +133,10 @@
   <ion-alert
     [isOpen]="showForgotAlert"
     header="Reset Password"
-    subHeader="Student Self-Service"
-    message="A password reset link will be sent to your registered academic email address."
+    subHeader="Account Recovery"
+    message="A password reset link will be sent to your registered institutional email address."
     [buttons]="['OK']"
     (didDismiss)="showForgotAlert = false">
   </ion-alert>
 
 </ion-content>
-
