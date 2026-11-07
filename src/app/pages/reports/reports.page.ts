@@ -260,6 +260,45 @@ export class ReportsPage implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  get completedTasksCount(): number {
+    return this.tasks.filter((t) => t.status === 'completed').length;
+  }
+
+  get pendingTasksCount(): number {
+    return this.tasks.filter((t) => t.status === 'pending' || t.status === 'in_progress').length;
+  }
+
+  get overdueTasksCount(): number {
+    const today = new Date().toISOString().split('T')[0];
+    return this.tasks.filter((t) => t.status !== 'completed' && t.deadline && t.deadline < today).length;
+  }
+
+  formatShiftTime(timeIn?: string | null, timeOut?: string | null): string {
+    if (!timeIn) return '--:--';
+    const inStr = this.formatTime(timeIn);
+    if (!timeOut) return `${inStr} - In Progress`;
+    const outStr = this.formatTime(timeOut);
+    return `${inStr} - ${outStr}`;
+  }
+
+  formatTime(timeStr?: string | null): string {
+    if (!timeStr) return '--:--';
+    try {
+      const parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        let hour = parseInt(parts[0], 10);
+        const minute = parts[1];
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12;
+        hour = hour ? hour : 12;
+        return `${hour}:${minute} ${ampm}`;
+      }
+      return timeStr;
+    } catch {
+      return timeStr;
+    }
+  }
+
   formatDate(dateStr?: string | null): string {
     if (!dateStr) return 'N/A';
     try {

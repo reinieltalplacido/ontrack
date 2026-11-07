@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $body = read_json_body();
 $studentId     = trim((string)($body['student_id'] ?? ($body['student_no'] ?? '')));
-$fullName      = trim((string)($body['full_name'] ?? ''));
+$fullName      = strtoupper(trim((string)($body['full_name'] ?? '')));
 $email         = trim((string)($body['email'] ?? ''));
 $password      = trim((string)($body['password'] ?? ''));
 $course        = trim((string)($body['course'] ?? 'BSIT'));
@@ -72,8 +72,8 @@ try {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO students (professor_id, student_no, full_name, email, password, course_section, school_campus, company_name, adviser_name, adviser_email, target_date, required_hours)
-         VALUES (:pid, :sid, :fn, :em, :pwd, :cs, :sc, :cn, :an, :ae, :td, :rh)'
+        'INSERT INTO students (professor_id, student_no, full_name, email, password, course, year_level, course_section, school_campus, company_name, adviser_name, adviser_email, target_date, required_hours)
+         VALUES (:pid, :sid, :fn, :em, :pwd, :crs, :yl, :cs, :sc, :cn, :an, :ae, :td, :rh)'
     );
     $stmt->execute([
         'pid' => $professorId,
@@ -81,6 +81,8 @@ try {
         'fn'  => $fullName,
         'em'  => $email !== '' ? $email : null,
         'pwd' => $hashedPassword,
+        'crs' => $course,
+        'yl'  => (int)$yearLevel,
         'cs'  => $courseSection,
         'sc'  => $schoolCampus,
         'cn'  => $companyName,

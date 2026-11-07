@@ -293,6 +293,114 @@
 
   &.select-shell select {
     cursor: pointer;
+    width: 100%;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+
+    optgroup {
+      font-weight: 700;
+      color: #2b5578;
+      background: #f8fafc;
+      padding: 4px;
+    }
+
+    option {
+      font-weight: 500;
+      color: #0f172a;
+      padding: 6px 8px;
+      background: #ffffff;
+    }
+  }
+
+  input#full_name,
+  input#section {
+    text-transform: uppercase;
+  }
+}
+
+.course-select-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 11px 40px 11px 14px;
+  min-height: 52px;
+  height: auto;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  .selected-course-display {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    pointer-events: none;
+
+    .course-title-text {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #0f172a;
+      line-height: 1.4;
+      white-space: normal;
+      word-break: break-word;
+    }
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 1.2rem;
+    pointer-events: none;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .overlay-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 5;
+    -webkit-appearance: menulist;
+
+    optgroup {
+      font-weight: 700;
+      color: #2b5578;
+      background: #f8fafc;
+      padding: 4px;
+    }
+
+    option {
+      font-weight: 500;
+      color: #0f172a;
+      padding: 6px 8px;
+      background: #ffffff;
+    }
+  }
+
+  &:hover {
+    border-color: #cbd5e1;
+  }
+
+  &:focus-within {
+    border-color: #2b5578;
+    box-shadow: 0 0 0 3px rgba(43, 85, 120, 0.12);
+
+    .select-arrow {
+      color: #2b5578;
+    }
+  }
+
+  &.error {
+    border-color: #ef4444;
+    background: #fffbfa;
   }
 }
 

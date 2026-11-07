@@ -89,7 +89,10 @@
               id="full_name"
               type="text" 
               formControlName="full_name" 
-              placeholder="First Name, M.I., Last Name" 
+              placeholder="FIRST NAME, M.I., LAST NAME" 
+              style="text-transform: uppercase;"
+              (input)="onFullNameInput($event)"
+              (blur)="onFullNameBlur()"
             />
           </div>
           <p class="field-hint" *ngIf="registerForm.get('full_name')?.touched && registerForm.get('full_name')?.invalid">
@@ -97,17 +100,28 @@
           </p>
         </div>
 
-        <!-- Course & Year Level Row -->
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label class="form-label" for="course">Course <span class="req">*</span></label>
-            <div class="input-shell select-shell">
-              <select id="course" formControlName="course">
-                <option *ngFor="let c of courses" [value]="c.code">{{ c.code }}</option>
-              </select>
+        <!-- Course / Degree Program Selection -->
+        <div class="form-group">
+          <label class="form-label" for="course">Course / Degree Program <span class="req">*</span></label>
+          <div class="course-select-box" [class.error]="registerForm.get('course')?.touched && registerForm.get('course')?.invalid">
+            <div class="selected-course-display">
+              <span class="course-title-text">{{ registerForm.get('course')?.value || 'Select course / program' }}</span>
             </div>
+            <ion-icon name="chevron-down-outline" class="select-arrow"></ion-icon>
+            <select id="course" formControlName="course" class="overlay-select" aria-label="Course / Degree Program">
+              <option value="" disabled>Select course / program</option>
+              <optgroup *ngFor="let col of collegeCourses" [label]="col.college">
+                <option *ngFor="let p of col.programs" [value]="p">{{ p }}</option>
+              </optgroup>
+            </select>
           </div>
+          <p class="field-hint" *ngIf="registerForm.get('course')?.touched && registerForm.get('course')?.invalid">
+            Course is required.
+          </p>
+        </div>
 
+        <!-- Year Level & Section Row -->
+        <div class="form-row">
           <div class="form-group flex-1">
             <label class="form-label" for="year_level">Year Level <span class="req">*</span></label>
             <div class="input-shell select-shell">
@@ -116,17 +130,24 @@
               </select>
             </div>
           </div>
-        </div>
 
-        <!-- Section Dropdown (Section A to K) -->
-        <div class="form-group">
-          <label class="form-label" for="section">Section <span class="req">*</span></label>
-          <div class="input-shell select-shell">
-            <select id="section" formControlName="section">
-              <option *ngFor="let s of sections" [value]="s.code">{{ s.label }}</option>
-            </select>
+          <div class="form-group flex-1">
+            <label class="form-label" for="section">Section <span class="req">*</span></label>
+            <div class="input-shell" [class.error]="registerForm.get('section')?.touched && registerForm.get('section')?.invalid">
+              <input 
+                id="section"
+                type="text" 
+                formControlName="section" 
+                placeholder="e.g. 4-A or Section A" 
+                style="text-transform: uppercase;"
+                (input)="onSectionInput($event)"
+              />
+            </div>
           </div>
         </div>
+        <p class="field-hint" *ngIf="registerForm.get('section')?.touched && registerForm.get('section')?.invalid">
+          Section is required.
+        </p>
 
         <!-- Auto-Fetched Coordinator Card -->
         <div class="assigned-coordinator-card" *ngIf="assignedCoordinator">

@@ -29,8 +29,14 @@ import {
   alertCircleOutline,
   calendarOutline,
   personCircleOutline,
+  chevronDownOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
+
+export interface CollegeProgramGroup {
+  college: string;
+  programs: string[];
+}
 
 @Component({
   selector: 'app-register',
@@ -67,32 +73,86 @@ export class RegisterPage {
   toastMessage = '';
   isCalendarOpen = false;
 
-  courses = [
-    { code: 'BSIT', name: 'BS in Information Technology' },
-    { code: 'BSCS', name: 'BS in Computer Science' },
-    { code: 'BSEMC', name: 'BS in Entertainment & Multimedia' },
-    { code: 'ACT', name: 'Associate in Computer Tech' },
+  collegeCourses: CollegeProgramGroup[] = [
+    {
+      college: 'College of Architecture',
+      programs: [
+        'Bachelor of Science in Architecture',
+        'Certificate in Drafting Technology',
+        'Certificate in Computer Aided Design and Drafting',
+        'Certificate in Building, Utilities and Technology',
+      ],
+    },
+    {
+      college: 'College of Education',
+      programs: [
+        'Bachelor of Elementary Education',
+        'Bachelor of Secondary Education Major in English',
+        'Bachelor of Secondary Education Major in Filipino',
+        'Bachelor of Secondary Education Major in Mathematics',
+        'Bachelor of Secondary Education Major in Science',
+        'Bachelor of Secondary Education Major in Social Studies',
+        'Bachelor of Secondary Education Major in Physics',
+        'Bachelor of Science in Industrial Education Major in Industrial Arts',
+        'Bachelor of Physical Education',
+        'Bachelor of Early Childhood Education',
+        'Bachelor of Technology and Livelihood Education Major in Home Economics',
+        'Bachelor of Special Needs Education – Generalist',
+        'Certificate in Professional Teacher Education',
+        'Post Baccalaureate Diploma in Alternative Learning System',
+      ],
+    },
+    {
+      college: 'College of Engineering',
+      programs: [
+        'Bachelor of Science in Civil Engineering',
+        'Bachelor of Science in Electrical Engineering',
+        'Bachelor of Science in Mechanical Engineering',
+      ],
+    },
+    {
+      college: 'College of Criminology',
+      programs: [
+        'Bachelor of Science in Criminology',
+      ],
+    },
+    {
+      college: 'College of Information and Communications Technology',
+      programs: [
+        'Bachelor of Science in Information Technology with Specialization in Database Systems Technology',
+        'Bachelor of Science in Information Technology with Specialization in Network Systems Technology',
+        'Bachelor of Science in Information Technology with Specialization in Web Systems Technology',
+        'Bachelor of Science in Data Science',
+      ],
+    },
+    {
+      college: 'College of Management and Business Technology',
+      programs: [
+        'Bachelor of Science in Business Administration Major in Business Economics',
+        'Bachelor of Science in Business Administration Major in Service Management for Business Process Outsourcing',
+        'Bachelor of Science in Business Administration Major in Financial Management',
+        'Bachelor of Science in Business Administration Major in Human Resource Management',
+        'Bachelor of Science in Business Administration Major in Marketing Management',
+        'Bachelor of Science in Entrepreneurship',
+        'Bachelor of Science in Hospitality Management',
+        'Bachelor of Science in Tourism Management',
+      ],
+    },
+    {
+      college: 'College of Public Administration and Disaster Management',
+      programs: [
+        'Bachelor of Public Administration',
+        'Bachelor of Public Administration with Major in Disaster Risk Management',
+      ],
+    },
   ];
 
   yearLevels = [
     { value: 1, label: '1st Year' },
     { value: 2, label: '2nd Year' },
     { value: 3, label: '3rd Year' },
-    { value: 4, label: '4th Year (Graduating / OJT)' },
-  ];
-
-  sections = [
-    { code: 'A', label: 'Section A (BSIT 4-A)' },
-    { code: 'B', label: 'Section B (BSIT 4-B)' },
-    { code: 'C', label: 'Section C (BSIT 4-C)' },
-    { code: 'D', label: 'Section D (BSIT 4-D)' },
-    { code: 'E', label: 'Section E (BSIT 4-E)' },
-    { code: 'F', label: 'Section F (BSIT 4-F)' },
-    { code: 'G', label: 'Section G (BSIT 4-G)' },
-    { code: 'H', label: 'Section H (BSIT 4-H)' },
-    { code: 'I', label: 'Section I (BSIT 4-I)' },
-    { code: 'J', label: 'Section J (BSIT 4-J)' },
-    { code: 'K', label: 'Section K (BSIT 4-K)' },
+    { value: 4, label: '4th Year' },
+    { value: 5, label: '5th Year' },
   ];
 
   assignedCoordinator: any = null;
@@ -115,15 +175,16 @@ export class RegisterPage {
       alertCircleOutline,
       calendarOutline,
       personCircleOutline,
+      chevronDownOutline,
     });
 
     this.registerForm = this.fb.group({
       // Step 1: Academic & Personal
       student_no: ['', [Validators.required, Validators.pattern(/^[0-9a-zA-Z\-_]+$/)]],
       full_name: ['', [Validators.required, Validators.minLength(3)]],
-      course: ['BSIT', [Validators.required]],
-      year_level: [4, [Validators.required, Validators.min(1), Validators.max(6)]],
-      section: ['A', [Validators.required]],
+      course: ['Bachelor of Science in Information Technology with Specialization in Web Systems Technology', [Validators.required]],
+      year_level: [4, [Validators.required, Validators.min(1), Validators.max(5)]],
+      section: ['4-A', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
 
       // Step 2: OJT & Company Details
@@ -138,23 +199,69 @@ export class RegisterPage {
       confirm_password: ['', [Validators.required]],
     });
 
+    // Auto-uppercase full_name whenever value changes
+    this.registerForm.get('full_name')?.valueChanges.subscribe((val) => {
+      if (typeof val === 'string') {
+        const upper = val.toUpperCase();
+        if (val !== upper) {
+          this.registerForm.get('full_name')?.setValue(upper, { emitEvent: false });
+        }
+      }
+    });
+
     // Auto-fetch coordinator whenever section, course, or year level changes
     this.registerForm.get('section')?.valueChanges.subscribe((sec) => {
       this.fetchAssignedCoordinator(sec);
     });
 
     this.registerForm.get('course')?.valueChanges.subscribe(() => {
-      this.fetchAssignedCoordinator(this.registerForm.get('section')?.value || 'A');
+      this.fetchAssignedCoordinator(this.registerForm.get('section')?.value || '4-A');
+    });
+
+    this.registerForm.get('year_level')?.valueChanges.subscribe(() => {
+      this.fetchAssignedCoordinator(this.registerForm.get('section')?.value || '4-A');
     });
 
     // Initial coordinator lookup
-    this.fetchAssignedCoordinator('A');
+    this.fetchAssignedCoordinator('4-A');
   }
 
-  fetchAssignedCoordinator(secCode: string) {
-    const course = this.registerForm.get('course')?.value || 'BSIT';
+  onFullNameInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const upper = (input.value || '').toUpperCase();
+    if (input.value !== upper) {
+      input.value = upper;
+    }
+    this.registerForm.get('full_name')?.setValue(upper, { emitModelToViewChange: false });
+  }
+
+  onFullNameBlur() {
+    const val = this.registerForm.get('full_name')?.value;
+    if (val && typeof val === 'string') {
+      this.registerForm.get('full_name')?.setValue(val.toUpperCase());
+    }
+  }
+
+  onSectionInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const upper = (input.value || '').toUpperCase();
+    if (input.value !== upper) {
+      input.value = upper;
+      this.registerForm.get('section')?.setValue(upper, { emitModelToViewChange: false });
+    }
+  }
+
+  fetchAssignedCoordinator(secInput: string) {
+    const trimmed = (secInput || '').trim();
+    if (!trimmed) return;
+
     const year = this.registerForm.get('year_level')?.value || 4;
-    const fullSection = `${course} ${year}-${secCode}`;
+    const upper = trimmed.toUpperCase();
+
+    // Extract letter/section code (e.g., "4-A" -> "A", "SECTION A" -> "A", "A" -> "A")
+    const match = upper.match(/[A-Z0-9]+$/i);
+    const secLetter = match ? match[0] : upper;
+    const fullSection = upper.includes('-') ? upper : `BSIT ${year}-${secLetter}`;
 
     this.isLoadingCoordinator = true;
     this.authService.getCoordinatorForSection(fullSection).subscribe({
@@ -197,7 +304,7 @@ export class RegisterPage {
     this.errorMessage = '';
     if (this.currentStep === 1) {
       if (!this.isStep1Valid()) {
-        this.markFieldsTouched(['student_no', 'full_name', 'course', 'year_level', 'email']);
+        this.markFieldsTouched(['student_no', 'full_name', 'course', 'year_level', 'section', 'email']);
         this.errorMessage = 'Please complete all academic fields accurately.';
         return;
       }
@@ -273,14 +380,14 @@ export class RegisterPage {
     const randomNum = Math.floor(100 + Math.random() * 900);
     this.registerForm.patchValue({
       student_no: `SUM2023-0${randomNum}`,
-      full_name: 'Alexandria Reyes',
-      course: 'BSIT',
+      full_name: 'REINIEL TALPLACIDO',
+      course: 'Bachelor of Science in Information Technology with Specialization in Web Systems Technology',
       year_level: 4,
-      section: 'B',
-      email: `alexandria.reyes${randomNum}@neust.edu.ph`,
+      section: '4-A',
+      email: `reiniel.talplacido${randomNum}@neust.edu.ph`,
       company_name: 'Innovatech Systems Hub',
-      adviser_name: 'Prof. Maria Santos',
-      adviser_email: 'maria.santos@neust.edu.ph',
+      adviser_name: 'Prof. Alexander Reyes',
+      adviser_email: 'admin@neust.edu.ph',
       required_hours: 486,
       target_date: '2026-12-15',
       password: 'Password123!',
