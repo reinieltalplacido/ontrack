@@ -61,7 +61,7 @@ import { AttendanceService } from '../core/services/attendance.service';
 import { NativeService } from '../core/services/native.service';
 import { User } from '../models/user.model';
 import { AttendanceLog, DashboardStats } from '../models/attendance.model';
-import { formatHours } from '../core/utils/format.util';
+import { formatHours, formatTime } from '../core/utils/format.util';
 
 @Component({
   selector: 'app-home',
@@ -573,17 +573,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   formatTime(timeStr?: string | null): string {
-    if (!timeStr) return '--:--';
-    const parts = timeStr.split(':');
-    if (parts.length >= 2) {
-      let hours = parseInt(parts[0], 10);
-      const minutes = parts[1];
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      return `${hours}:${minutes} ${ampm}`;
-    }
-    return timeStr;
+    return formatTime(timeStr);
   }
 
   showFeedback(msg: string, type: 'success' | 'error') {

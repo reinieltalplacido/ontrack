@@ -1,5 +1,5 @@
 /**
- * Utility functions for formatting durations and hours across the OnTrack application.
+ * Utility functions for formatting durations, hours, and times across the OnTrack application.
  */
 
 /**
@@ -24,3 +24,41 @@ export function formatHours(val: number | string | null | undefined): string {
   const formatted = num % 1 === 0 ? num.toString() : num.toFixed(2).replace(/\.?0+$/, '');
   return `${formatted} hr${num === 1 ? '' : 's'}`;
 }
+
+/**
+ * Formats a 24-hour military time string (e.g. "16:47:39", "23:00") into 12-hour AM/PM format (e.g. "4:47 PM", "11:00 PM").
+ */
+export function formatTime(timeStr?: string | null): string {
+  if (!timeStr) return '--:--';
+  const trimmed = timeStr.trim();
+  if (!trimmed || trimmed === '--:--' || trimmed === '--:--:--') return '--:--';
+
+  let timePart = trimmed;
+  if (trimmed.includes(' ') || trimmed.includes('T')) {
+    const split = trimmed.split(/[ T]/);
+    timePart = split[1] || split[0];
+  }
+
+  const parts = timePart.split(':');
+  if (parts.length >= 2) {
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1];
+    if (isNaN(hours)) return timeStr;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours}:${minutes} ${ampm}`;
+  }
+  return timeStr;
+}
+
+/**
+ * Formats a duty shift range into 12-hour AM/PM format.
+ */
+export function formatShiftTime(timeIn?: string | null, timeOut?: string | null): string {
+  const inStr = formatTime(timeIn);
+  if (!timeOut) return `${inStr} — In Progress`;
+  const outStr = formatTime(timeOut);
+  return `${inStr} — ${outStr}`;
+}
+

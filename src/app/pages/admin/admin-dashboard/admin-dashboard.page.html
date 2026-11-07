@@ -170,8 +170,8 @@
             <div class="activity-meta">
               <div class="meta-item">
                 <ion-icon name="time-outline"></ion-icon>
-                <span>In: {{ act.time_in }}</span>
-                <span *ngIf="act.time_out">| Out: {{ act.time_out }}</span>
+                <span>In: {{ formatTime(act.time_in) }}</span>
+                <span *ngIf="act.time_out">| Out: {{ formatTime(act.time_out) }}</span>
               </div>
               <div class="meta-item location" *ngIf="act.location_name">
                 <ion-icon name="location-outline"></ion-icon>
@@ -186,7 +186,7 @@
 
             <!-- Photo proof button -->
             <div class="activity-actions" *ngIf="act.photo_url">
-              <button class="photo-btn" (click)="openPhotoPreview(act.photo_url, act.student_name || 'Intern', act.log_date + ' • ' + act.time_in)">
+              <button class="photo-btn" (click)="openPhotoPreview(act.photo_url, act.student_name || 'Intern', act.log_date + ' • ' + formatTime(act.time_in))">
                 <ion-icon name="camera-outline"></ion-icon>
                 <span>View Verification Selfie</span>
               </button>
@@ -293,7 +293,7 @@
             <div class="footer-left-info">
               <span *ngIf="s.is_on_duty && s.current_shift" class="shift-info text-green">
                 <ion-icon name="time-outline"></ion-icon>
-                In: {{ s.current_shift.time_in }}
+                In: {{ formatTime(s.current_shift.time_in) }}
               </span>
               <span *ngIf="!s.is_on_duty" class="remaining-hours-text">
                 {{ formatHours(s.remaining_hours) }} remaining
@@ -456,8 +456,8 @@
 
               <div class="inspection-content" *ngIf="item.activeSelectedDay.hasDuty; else noDutyDay">
                 <div class="insp-times-row">
-                  <span>In: <strong>{{ item.activeSelectedDay.timeIn }}</strong></span>
-                  <span *ngIf="item.activeSelectedDay.timeOut">Out: <strong>{{ item.activeSelectedDay.timeOut }}</strong></span>
+                  <span>In: <strong>{{ formatTime(item.activeSelectedDay.timeIn) }}</strong></span>
+                  <span *ngIf="item.activeSelectedDay.timeOut">Out: <strong>{{ formatTime(item.activeSelectedDay.timeOut) }}</strong></span>
                   <span class="hrs-tag">{{ formatHours(item.activeSelectedDay.totalHours) }} rendered</span>
                 </div>
 
@@ -471,7 +471,7 @@
                 </div>
 
                 <div class="insp-actions" *ngIf="item.activeSelectedDay.photoUrl">
-                  <button class="insp-photo-btn" (click)="openPhotoPreview(item.activeSelectedDay.photoUrl, item.student.full_name, item.activeSelectedDay.dateStr + ' • ' + item.activeSelectedDay.timeIn)">
+                  <button class="insp-photo-btn" (click)="openPhotoPreview(item.activeSelectedDay.photoUrl, item.student.full_name, item.activeSelectedDay.dateStr + ' • ' + formatTime(item.activeSelectedDay.timeIn))">
                     <ion-icon name="camera-outline"></ion-icon>
                     <span>View Duty Proof Photo</span>
                   </button>
@@ -572,7 +572,7 @@
           <div class="log-times-row">
             <div class="time-block in">
               <span class="time-label">CLOCK IN</span>
-              <span class="time-val">{{ log.time_in }}</span>
+              <span class="time-val">{{ formatTime(log.time_in) }}</span>
               <span class="date-val">{{ log.log_date }}</span>
             </div>
             
@@ -582,7 +582,7 @@
 
             <div class="time-block out">
               <span class="time-label">CLOCK OUT</span>
-              <span class="time-val">{{ log.time_out || '--:--:--' }}</span>
+              <span class="time-val">{{ formatTime(log.time_out) }}</span>
               <span class="date-val">{{ log.status === 'ongoing' ? 'In progress' : log.log_date }}</span>
             </div>
           </div>
@@ -609,7 +609,7 @@
 
           <!-- Photo Verification Proof Thumbnail -->
           <div class="log-proof-row" *ngIf="log.photo_url">
-            <button class="proof-preview-btn" (click)="openPhotoPreview(log.photo_url, log.student_name || 'Intern', log.log_date + ' • ' + log.time_in)">
+            <button class="proof-preview-btn" (click)="openPhotoPreview(log.photo_url, log.student_name || 'Intern', log.log_date + ' • ' + formatTime(log.time_in))">
               <div class="thumb-container">
                 <img [src]="getPhotoUrl(log.photo_url)" alt="Proof Selfie" />
               </div>
@@ -1094,8 +1094,8 @@
                           </div>
                           
                           <div class="log-item-times">
-                            <span>In: <strong>{{ l.time_in }}</strong></span>
-                            <span *ngIf="l.time_out">Out: <strong>{{ l.time_out }}</strong></span>
+                            <span>In: <strong>{{ formatTime(l.time_in) }}</strong></span>
+                            <span *ngIf="l.time_out">Out: <strong>{{ formatTime(l.time_out) }}</strong></span>
                           </div>
 
                           <div class="log-item-loc" *ngIf="l.location_name">
@@ -1109,7 +1109,7 @@
                           </div>
 
                           <div class="log-item-photo" *ngIf="l.photo_url">
-                            <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + l.time_in)">
+                            <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + formatTime(l.time_in))">
                               <ion-icon name="camera-outline"></ion-icon>
                               <span>View Selfie Proof</span>
                             </button>
@@ -1189,8 +1189,8 @@
                         </div>
                         
                         <div class="log-item-times">
-                          <span>In: <strong>{{ l.time_in }}</strong></span>
-                          <span *ngIf="l.time_out">Out: <strong>{{ l.time_out }}</strong></span>
+                          <span>In: <strong>{{ formatTime(l.time_in) }}</strong></span>
+                          <span *ngIf="l.time_out">Out: <strong>{{ formatTime(l.time_out) }}</strong></span>
                         </div>
 
                         <div class="log-item-loc" *ngIf="l.location_name">
@@ -1203,7 +1203,7 @@
                         </div>
 
                         <div class="log-item-photo" *ngIf="l.photo_url">
-                          <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + l.time_in)">
+                          <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + formatTime(l.time_in))">
                             <ion-icon name="camera-outline"></ion-icon>
                             <span>View Selfie Proof</span>
                           </button>
@@ -1229,8 +1229,8 @@
                   </div>
                   
                   <div class="log-item-times">
-                    <span>In: <strong>{{ l.time_in }}</strong></span>
-                    <span *ngIf="l.time_out">Out: <strong>{{ l.time_out }}</strong></span>
+                    <span>In: <strong>{{ formatTime(l.time_in) }}</strong></span>
+                    <span *ngIf="l.time_out">Out: <strong>{{ formatTime(l.time_out) }}</strong></span>
                   </div>
 
                   <div class="log-item-loc" *ngIf="l.location_name">
@@ -1243,7 +1243,7 @@
                   </div>
 
                   <div class="log-item-photo" *ngIf="l.photo_url">
-                    <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + l.time_in)">
+                    <button class="thumb-chip" (click)="openPhotoPreview(l.photo_url, selectedStudent.full_name, l.log_date + ' • ' + formatTime(l.time_in))">
                       <ion-icon name="camera-outline"></ion-icon>
                       <span>View Selfie Proof</span>
                     </button>

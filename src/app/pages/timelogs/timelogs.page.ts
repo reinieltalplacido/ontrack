@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -40,7 +40,7 @@ import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceLog } from '../../models/attendance.model';
 import { User } from '../../models/user.model';
-import { formatHours } from '../../core/utils/format.util';
+import { formatHours, formatTime } from '../../core/utils/format.util';
 
 @Component({
   selector: 'app-timelogs',
@@ -65,6 +65,7 @@ export class TimeLogsPage implements OnInit {
   private attendanceService = inject(AttendanceService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   currentUser: User | null = null;
   logs: AttendanceLog[] = [];
@@ -112,6 +113,7 @@ export class TimeLogsPage implements OnInit {
     this.activeMenu = 'timelogs';
     this.isSideMenuOpen = false;
     this.currentUser = this.authService.currentUserValue || this.currentUser;
+    this.loadCachedLogs();
     this.loadLogs();
   }
 
@@ -127,7 +129,26 @@ export class TimeLogsPage implements OnInit {
         required_hours: 500,
       };
     }
-    this.loadLogs();
+    this.loadCachedLogs();
+  }
+
+  private loadCachedLogs() {
+    try {
+      const cached = localStorage.getItem('ontrack_cached_timelogs');
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (data && Array.isArray(data.logs) && data.logs.length > 0) {
+          this.logs = data.logs;
+          this.totalRenderedHours = data.total_hours || 0;
+          this.totalLogsCount = this.logs.length;
+          this.applyFilters();
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      }
+    } catch {
+      // Ignore cache parse error
+    }
   }
 
   loadLogs(event?: any) {
@@ -136,7 +157,12 @@ export class TimeLogsPage implements OnInit {
       return;
     }
 
-    this.isLoading = true;
+    // Only show full loading spinner if no logs exist yet
+    if (this.logs.length === 0) {
+      this.isLoading = true;
+      this.cdr.detectChanges();
+    }
+
     this.attendanceService.getAttendanceHistory(this.currentUser.id).subscribe({
       next: (res) => {
         if (res && res.logs) {
@@ -144,13 +170,24 @@ export class TimeLogsPage implements OnInit {
           this.totalRenderedHours = res.total_hours || 0;
           this.totalLogsCount = this.logs.length;
           this.applyFilters();
+
+          try {
+            localStorage.setItem('ontrack_cached_timelogs', JSON.stringify({
+              logs: this.logs,
+              total_hours: this.totalRenderedHours,
+            }));
+          } catch {
+            // Storage quota safe
+          }
         }
         this.isLoading = false;
         if (event) event.target.complete();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         if (event) event.target.complete();
+        this.cdr.detectChanges();
       },
     });
   }
@@ -263,17 +300,7 @@ export class TimeLogsPage implements OnInit {
   }
 
   formatTime(timeStr?: string | null): string {
-    if (!timeStr) return '--:--';
-    const parts = timeStr.split(':');
-    if (parts.length >= 2) {
-      let hours = parseInt(parts[0], 10);
-      const minutes = parts[1];
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      return `${hours}:${minutes} ${ampm}`;
-    }
-    return timeStr;
+    return formatTime(timeStr);
   }
 }
 

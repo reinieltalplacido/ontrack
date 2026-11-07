@@ -363,8 +363,8 @@
                   @for (log of logs; track log.log_date) {
                     <tr>
                       <td>{{ formatDate(log.log_date) }}</td>
-                      <td>{{ log.time_in }}</td>
-                      <td>{{ log.time_out || '--:--' }}</td>
+                      <td>{{ formatTime(log.time_in) }}</td>
+                      <td>{{ formatTime(log.time_out) }}</td>
                       <td><strong>{{ formatHours(log.total_hours) }}</strong></td>
                       <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
                     </tr>

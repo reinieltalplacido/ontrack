@@ -70,7 +70,7 @@ import { AdminService, AdminStats, MonitoredStudent } from '../../../core/servic
 import { NativeService } from '../../../core/services/native.service';
 import { Professor } from '../../../models/user.model';
 import { environment } from '../../../../environments/environment';
-import { formatHours } from '../../../core/utils/format.util';
+import { formatHours, formatTime, formatShiftTime } from '../../../core/utils/format.util';
 
 export interface AdminAttendanceLog {
   id: number;
@@ -180,6 +180,8 @@ export class AdminDashboardPage implements OnInit {
   private nativeService = inject(NativeService);
   private router = inject(Router);
   formatHours = formatHours;
+  formatTime = formatTime;
+  formatShiftTime = formatShiftTime;
   private cdr = inject(ChangeDetectorRef);
 
   currentProfessor: Professor | null = null;

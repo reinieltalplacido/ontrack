@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -42,7 +42,7 @@ import { NativeService } from '../../core/services/native.service';
 import { User } from '../../models/user.model';
 import { AttendanceLog, DashboardStats } from '../../models/attendance.model';
 import { TaskItem } from '../../models/task.model';
-import { formatHours } from '../../core/utils/format.util';
+import { formatHours, formatTime, formatShiftTime } from '../../core/utils/format.util';
 
 export interface GeneratedReport {
   id: string;
@@ -76,6 +76,7 @@ export class ReportsPage implements OnInit {
   private taskService = inject(TaskService);
   private nativeService = inject(NativeService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   currentUser: User | null = null;
   stats: DashboardStats | null = null;
@@ -162,19 +163,26 @@ export class ReportsPage implements OnInit {
 
     // Load stats
     this.attendanceService.getDashboardStats(uid).subscribe({
-      next: (s) => (this.stats = s),
+      next: (s) => {
+        this.stats = s;
+        this.cdr.detectChanges();
+      },
     });
 
     // Load logs
     this.attendanceService.getAttendanceHistory(uid).subscribe({
       next: (res) => {
         if (res && res.logs) this.logs = this.consolidateLogsByDate(res.logs);
+        this.cdr.detectChanges();
       },
     });
 
     // Load tasks
     this.taskService.getTasks(uid).subscribe({
-      next: (t) => (this.tasks = t),
+      next: (t) => {
+        this.tasks = t;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -317,29 +325,11 @@ export class ReportsPage implements OnInit {
   }
 
   formatShiftTime(timeIn?: string | null, timeOut?: string | null): string {
-    if (!timeIn) return '--:--';
-    const inStr = this.formatTime(timeIn);
-    if (!timeOut) return `${inStr} - In Progress`;
-    const outStr = this.formatTime(timeOut);
-    return `${inStr} - ${outStr}`;
+    return formatShiftTime(timeIn, timeOut);
   }
 
   formatTime(timeStr?: string | null): string {
-    if (!timeStr) return '--:--';
-    try {
-      const parts = timeStr.split(':');
-      if (parts.length >= 2) {
-        let hour = parseInt(parts[0], 10);
-        const minute = parts[1];
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        hour = hour % 12;
-        hour = hour ? hour : 12;
-        return `${hour}:${minute} ${ampm}`;
-      }
-      return timeStr;
-    } catch {
-      return timeStr;
-    }
+    return formatTime(timeStr);
   }
 
   formatDate(dateStr?: string | null): string {
