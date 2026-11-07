@@ -241,6 +241,12 @@ export class HomePage implements OnInit, OnDestroy {
     this.loadDashboardData();
   }
 
+  ionViewWillEnter() {
+    this.activeMenu = 'dashboard';
+    this.isSideMenuOpen = false;
+    this.currentUser = this.authService.currentUserValue || this.currentUser;
+  }
+
   ngOnDestroy() {
     if (this.clockInterval) {
       clearInterval(this.clockInterval);
@@ -532,7 +538,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   selectMenuItem(item: string) {
-    this.activeMenu = item;
     this.closeSideMenu();
     if (item === 'profile') this.goToProfile();
     else if (item === 'tasks') this.goToTasks();

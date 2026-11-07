@@ -187,11 +187,11 @@
     <!-- 4. Recent Attendance Log List Card -->
     <ion-card class="neat-card recent-logs-card">
       <ion-card-header class="card-top-header">
-        <div>
+        <div class="card-header-left">
           <ion-card-subtitle class="card-category-label">History</ion-card-subtitle>
           <ion-card-title class="card-main-title">Recent Attendance</ion-card-title>
         </div>
-        <button class="view-all-link" (click)="goToTimeLogs()">
+        <button class="view-all-link" (click)="goToTimeLogs()" aria-label="View all attendance records">
           <span>View All</span>
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </button>
