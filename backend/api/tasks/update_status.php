@@ -31,9 +31,31 @@ try {
     $deadline    = isset($input['deadline']) ? (!empty($input['deadline']) ? $input['deadline'] : null) : $existing['deadline'];
     $priority    = in_array($input['priority'] ?? '', ['low', 'medium', 'high']) ? $input['priority'] : $existing['priority'];
     $newStatus   = in_array($status, ['pending', 'in_progress', 'completed']) ? $status : $existing['status'];
+    $proofUrl    = isset($input['proof_url']) ? trim((string)$input['proof_url']) : ($existing['proof_url'] ?? null);
+
+    if (!empty($input['proof_image'])) {
+        $rawImage = $input['proof_image'];
+        if (str_starts_with($rawImage, 'data:image')) {
+            $uploadsDir = dirname(__DIR__, 2) . '/uploads/tasks';
+            if (!is_dir($uploadsDir)) {
+                @mkdir($uploadsDir, 0777, true);
+            }
+            $parts = explode(',', $rawImage, 2);
+            $imgData = base64_decode($parts[1] ?? '');
+            if ($imgData !== false) {
+                $fileName = 'task_proof_' . $taskId . '_' . time() . '.jpg';
+                file_put_contents($uploadsDir . '/' . $fileName, $imgData);
+                $proofUrl = 'uploads/tasks/' . $fileName;
+            } else {
+                $proofUrl = $rawImage;
+            }
+        } else {
+            $proofUrl = $rawImage;
+        }
+    }
 
     $stmt = $pdo->prepare(
-        'UPDATE tasks SET title = :title, description = :desc, deadline = :deadline, priority = :priority, status = :status WHERE id = :id'
+        'UPDATE tasks SET title = :title, description = :desc, deadline = :deadline, priority = :priority, status = :status, proof_url = :proof WHERE id = :id'
     );
     $stmt->execute([
         'title'    => $title,
@@ -41,6 +63,7 @@ try {
         'deadline' => $deadline,
         'priority' => $priority,
         'status'   => $newStatus,
+        'proof'    => $proofUrl,
         'id'       => $taskId,
     ]);
 

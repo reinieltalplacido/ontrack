@@ -721,30 +721,6 @@
     margin-bottom: 14px;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
 
-    .clock-live-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(52, 211, 153, 0.3);
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-
-      .pulse-beacon {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #10b981;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35);
-        animation: pulseBeacon 2s infinite ease-in-out;
-      }
-    }
-
     .clock-time-val {
       font-size: 2.1rem;
       font-weight: 800;

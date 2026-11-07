@@ -208,7 +208,7 @@
         </div>
         } @else {
         <div class="logs-list">
-          @for (log of recentLogs; track log.id) {
+          @for (log of recentLogs; track log.log_date) {
           <div class="log-row">
             <div class="log-calendar-col">
               <span class="calendar-day">{{ log.log_date.split('-')[2] || '01' }}</span>
@@ -256,12 +256,13 @@
       <ion-content class="ion-padding modal-content">
         <!-- REALTIME CLOCK DISPLAY -->
         <div class="realtime-clock-display">
-          <div class="clock-live-pill">
-            <span class="pulse-beacon"></span>
-            <span>LIVE SYSTEM CLOCK</span>
-          </div>
-          <div class="clock-time-val">{{ currentTimeString }}</div>
-          <div class="clock-date-val">{{ currentDateString }}</div>
+          @if (liveClock$ | async; as clock) {
+            <div class="clock-time-val">{{ clock.time }}</div>
+            <div class="clock-date-val">{{ clock.date }}</div>
+          } @else {
+            <div class="clock-time-val">{{ currentTimeString }}</div>
+            <div class="clock-date-val">{{ currentDateString }}</div>
+          }
         </div>
 
         <div class="modal-card-block">
@@ -272,29 +273,12 @@
               <strong class="item-val">{{ locationName }}</strong>
             </div>
             @if (isGettingLocation) {
-            <ion-spinner name="dots"></ion-spinner>
-            } @else if (currentCoords) {
-            <span class="verified-pill">GPS Verified</span>
+              <ion-spinner name="dots"></ion-spinner>
+            } @else {
+              <button class="small-action-btn" (click)="refreshLocation()" title="Refresh workplace location">
+                Refresh
+              </button>
             }
-          </div>
-
-          <div class="modal-row-item">
-            <ion-icon name="radioButtonOnOutline" class="modal-item-icon emerald"></ion-icon>
-            <div class="modal-item-text">
-              <span class="item-label">GPS Coordinates</span>
-              <span class="item-desc" *ngIf="currentCoords">
-                {{ currentCoords.latitude.toFixed(6) }}, {{ currentCoords.longitude.toFixed(6) }}
-              </span>
-              <span class="item-desc" *ngIf="!currentCoords && isGettingLocation">
-                Acquiring precise satellite fix...
-              </span>
-              <span class="item-desc" *ngIf="!currentCoords && !isGettingLocation">
-                Location acquired from device sensors
-              </span>
-            </div>
-            <button class="small-action-btn" (click)="refreshLocation()">
-              Refresh
-            </button>
           </div>
         </div>
       </ion-content>
@@ -329,6 +313,17 @@
       </ion-header>
 
       <ion-content class="ion-padding modal-content">
+        <!-- REALTIME CLOCK DISPLAY -->
+        <div class="realtime-clock-display">
+          @if (liveClock$ | async; as clock) {
+            <div class="clock-time-val">{{ clock.time }}</div>
+            <div class="clock-date-val">{{ clock.date }}</div>
+          } @else {
+            <div class="clock-time-val">{{ currentTimeString }}</div>
+            <div class="clock-date-val">{{ currentDateString }}</div>
+          }
+        </div>
+
         <div class="clockout-meta-card">
           <div class="meta-row">
             <span class="meta-label">Time Started</span>

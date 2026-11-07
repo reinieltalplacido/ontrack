@@ -158,8 +158,8 @@
         <div class="tasks-items-wrap">
           @for (task of filteredTasks; track task.id) {
             <ion-card class="task-card" [class.is-completed]="task.status === 'completed'" [class.is-overdue]="isOverdue(task)">
-              <div class="task-card-inner">
-                <div class="task-check-col" (click)="toggleTaskStatus(task)">
+              <div class="task-card-inner" (click)="viewTask(task)">
+                <div class="task-check-col" (click)="$event.stopPropagation(); toggleTaskStatus(task)">
                   <button class="checkbox-btn" [class.checked]="task.status === 'completed'" aria-label="Toggle complete">
                     <ion-icon [name]="task.status === 'completed' ? 'checkmark-circle-outline' : 'square-outline'"></ion-icon>
                   </button>
@@ -170,13 +170,29 @@
                     <h3 class="task-title" [class.strikethrough]="task.status === 'completed'">
                       {{ task.title }}
                     </h3>
-                    <button class="task-del-btn" (click)="deleteTask(task, $event)" aria-label="Delete task">
-                      <ion-icon name="trash-outline"></ion-icon>
-                    </button>
+                    <div class="card-action-icons">
+                      <button class="task-view-btn" (click)="$event.stopPropagation(); viewTask(task)" aria-label="View task details" title="View details">
+                        <ion-icon name="eye-outline"></ion-icon>
+                      </button>
+                      <button class="task-del-btn" (click)="deleteTask(task, $event)" aria-label="Delete task">
+                        <ion-icon name="trash-outline"></ion-icon>
+                      </button>
+                    </div>
                   </div>
 
                   @if (task.description) {
                     <p class="task-desc">{{ task.description }}</p>
+                  }
+
+                  <!-- Documentation Thumbnail if attached -->
+                  @if (task.proof_url) {
+                    <div class="card-proof-badge" (click)="$event.stopPropagation(); viewFullImage(getProofImageUrl(task.proof_url))">
+                      <img [src]="getProofImageUrl(task.proof_url)" alt="Documentation preview" class="mini-thumb" />
+                      <span class="proof-label">
+                        <ion-icon name="camera-outline"></ion-icon>
+                        Photo Attached
+                      </span>
+                    </div>
                   }
 
                   <div class="task-tags-row">
@@ -195,6 +211,32 @@
                     <ion-badge class="tag-chip status-tag" [class]="'status-' + task.status">
                       {{ task.status === 'in_progress' ? 'In Progress' : (task.status | titlecase) }}
                     </ion-badge>
+                  </div>
+
+                  <!-- Quick Card Action Button Row -->
+                  <div class="card-quick-actions" (click)="$event.stopPropagation()">
+                    @if (task.status === 'pending') {
+                      <button class="btn-quick-start" (click)="startTask(task, $event)">
+                        <ion-icon name="play-outline"></ion-icon>
+                        <span>Start Task</span>
+                      </button>
+                    } @else if (task.status === 'in_progress') {
+                      <div class="in-progress-actions">
+                        <button class="btn-quick-camera" (click)="openCameraForDocumentation(task)">
+                          <ion-icon name="camera-outline"></ion-icon>
+                          <span>{{ task.proof_url ? 'Retake Photo' : 'Attach Photo' }}</span>
+                        </button>
+                        <button class="btn-quick-complete" (click)="completeTask(task, $event)">
+                          <ion-icon name="checkmark-done-outline"></ion-icon>
+                          <span>Complete</span>
+                        </button>
+                      </div>
+                    } @else {
+                      <div class="completed-chip">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        <span>Completed</span>
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
@@ -277,6 +319,180 @@
             </button>
           </div>
         </form>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ================= Task Detail View & Documentation Modal ================= -->
+  <ion-modal [isOpen]="showTaskDetailModal" (didDismiss)="closeTaskDetailModal()" class="task-detail-modal">
+    <ng-template>
+      <div class="detail-sheet-wrapper" *ngIf="selectedTask">
+        <!-- Header -->
+        <div class="detail-sheet-header">
+          <div class="detail-header-left">
+            <span class="detail-kicker">Task Overview</span>
+            <div class="detail-badge-pills">
+              <ion-badge class="tag-chip priority-tag" [class]="'priority-' + selectedTask.priority">
+                {{ selectedTask.priority | titlecase }} Priority
+              </ion-badge>
+              <ion-badge class="tag-chip status-tag" [class]="'status-' + selectedTask.status">
+                {{ selectedTask.status === 'in_progress' ? 'In Progress' : (selectedTask.status | titlecase) }}
+              </ion-badge>
+            </div>
+          </div>
+          <button type="button" class="close-sheet-btn" (click)="closeTaskDetailModal()" aria-label="Close details">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="detail-sheet-body">
+          <!-- Title -->
+          <h2 class="detail-title">{{ selectedTask.title }}</h2>
+
+          <!-- Description -->
+          <div class="detail-section">
+            <span class="section-label">Description / Instructions</span>
+            <p class="section-text" *ngIf="selectedTask.description">{{ selectedTask.description }}</p>
+            <p class="section-text text-muted" *ngIf="!selectedTask.description">No specific description provided.</p>
+          </div>
+
+          <!-- Metadata Grid -->
+          <div class="detail-meta-row">
+            <div class="meta-card">
+              <span class="meta-label">Target Deadline</span>
+              <div class="meta-val" [class.is-overdue]="isOverdue(selectedTask)">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>{{ formatDate(selectedTask.deadline) }}</span>
+              </div>
+            </div>
+
+            <div class="meta-card">
+              <span class="meta-label">Current State</span>
+              <div class="meta-val">
+                <span class="state-dot" [class]="'dot-' + selectedTask.status"></span>
+                <span>{{ selectedTask.status === 'pending' ? 'Not Started' : (selectedTask.status === 'in_progress' ? 'In Progress' : 'Completed') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documentation & Proof of Work Section -->
+          <div class="detail-section documentation-box">
+            <div class="doc-box-header">
+              <div class="doc-box-title">
+                <ion-icon name="camera-outline"></ion-icon>
+                <span>Photo Documentation / Proof</span>
+              </div>
+              <span class="doc-count-pill" [class.has-file]="!!selectedTask.proof_url">
+                {{ selectedTask.proof_url ? '1 Photo Attached' : 'No Photo' }}
+              </span>
+            </div>
+
+            <!-- If proof photo exists -->
+            <div class="doc-preview-card" *ngIf="selectedTask.proof_url">
+              <div class="preview-img-shell" (click)="viewFullImage(getProofImageUrl(selectedTask.proof_url))">
+                <img [src]="getProofImageUrl(selectedTask.proof_url)" alt="Attached Documentation" class="doc-img" />
+                <div class="expand-badge">
+                  <ion-icon name="expand-outline"></ion-icon>
+                  <span>Tap to expand</span>
+                </div>
+              </div>
+
+              <div class="doc-actions-toolbar">
+                <button type="button" class="btn-retake-camera" (click)="openCameraForDocumentation(selectedTask)">
+                  <ion-icon name="camera-outline"></ion-icon>
+                  <span>Retake Photo</span>
+                </button>
+                <button type="button" class="btn-replace-gallery" (click)="fileInputDetail.click()">
+                  <ion-icon name="image-outline"></ion-icon>
+                  <span>Choose File</span>
+                </button>
+                <button type="button" class="btn-delete-doc" (click)="removeDocumentation(selectedTask, $event)" title="Delete proof">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- If no proof photo yet -->
+            <div class="empty-doc-upload-box" *ngIf="!selectedTask.proof_url">
+              <div class="upload-icon-circle">
+                <ion-icon name="camera-outline"></ion-icon>
+              </div>
+              <p class="upload-title">Capture or Attach Proof of Work</p>
+              <p class="upload-sub">Take a photo using your camera or choose an image file for task accomplishment documentation.</p>
+
+              <div class="upload-buttons-group">
+                <button type="button" class="btn-open-camera" (click)="openCameraForDocumentation(selectedTask)">
+                  <ion-icon name="camera-outline"></ion-icon>
+                  <span>Open Camera</span>
+                </button>
+                <button type="button" class="btn-choose-file" (click)="fileInputDetail.click()">
+                  <ion-icon name="attach-outline"></ion-icon>
+                  <span>Attach from Files</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Hidden file input for web fallback -->
+            <input 
+              type="file" 
+              #fileInputDetail 
+              accept="image/*" 
+              style="display: none;" 
+              (change)="onFileSelected($event, selectedTask)" 
+            />
+          </div>
+
+          <!-- Action Workflow Footer -->
+          <div class="detail-action-footer">
+            <!-- PENDING: Start Task Button -->
+            <button 
+              type="button" 
+              class="btn-workflow-start" 
+              *ngIf="selectedTask.status === 'pending'" 
+              (click)="startTask(selectedTask); closeTaskDetailModal()">
+              <ion-icon name="play-outline"></ion-icon>
+              <span>Start Task Now</span>
+            </button>
+
+            <!-- IN PROGRESS: Complete Task Button -->
+            <div class="in-progress-button-group" *ngIf="selectedTask.status === 'in_progress'">
+              <button 
+                type="button" 
+                class="btn-workflow-complete" 
+                (click)="completeTask(selectedTask); closeTaskDetailModal()">
+                <ion-icon name="checkmark-done-outline"></ion-icon>
+                <span>Mark as Completed</span>
+              </button>
+            </div>
+
+            <!-- COMPLETED: Reopen Button -->
+            <div class="completed-state-group" *ngIf="selectedTask.status === 'completed'">
+              <div class="completed-msg">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>Task is completed</span>
+              </div>
+              <button 
+                type="button" 
+                class="btn-workflow-reopen" 
+                (click)="reopenTask(selectedTask)">
+                <ion-icon name="refresh-outline"></ion-icon>
+                <span>Reopen</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ================= Full Image Preview Lightbox ================= -->
+  <ion-modal [isOpen]="isImageModalOpen" (didDismiss)="closeImageModal()" class="image-viewer-modal">
+    <ng-template>
+      <div class="image-lightbox-wrapper">
+        <button type="button" class="close-lightbox-btn" (click)="closeImageModal()">&times;</button>
+        <div class="lightbox-img-center">
+          <img [src]="previewImageUrl" alt="Task Proof Full View" class="lightbox-img" />
+        </div>
       </div>
     </ng-template>
   </ion-modal>

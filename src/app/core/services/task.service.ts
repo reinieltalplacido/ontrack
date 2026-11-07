@@ -33,11 +33,26 @@ export class TaskService {
 
   updateTaskStatus(
     taskId: number,
-    status: 'pending' | 'in_progress' | 'completed'
+    status: 'pending' | 'in_progress' | 'completed',
+    proofImage?: string | null
+  ): Observable<{ success: boolean; message: string; task?: TaskItem }> {
+    const payload: any = { task_id: taskId, status };
+    if (proofImage) {
+      payload.proof_image = proofImage;
+    }
+    return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
+      `${this.apiUrl}/tasks/update.php`,
+      payload
+    );
+  }
+
+  attachTaskProof(
+    taskId: number,
+    proofImage: string
   ): Observable<{ success: boolean; message: string; task?: TaskItem }> {
     return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
       `${this.apiUrl}/tasks/update.php`,
-      { task_id: taskId, status }
+      { task_id: taskId, proof_image: proofImage }
     );
   }
 

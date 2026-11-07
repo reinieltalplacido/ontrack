@@ -82,7 +82,7 @@
         </div>
       } @else {
         <div class="logs-items-wrap">
-          @for (log of filteredLogs; track log.id) {
+          @for (log of filteredLogs; track log.log_date) {
             <ion-card class="log-card">
               <div class="log-card-inner">
                 <div class="log-header-row">

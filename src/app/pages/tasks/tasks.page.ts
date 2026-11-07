@@ -16,6 +16,12 @@ import {
   IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
+import { TaskService } from '../../core/services/task.service';
+import { AuthService } from '../../core/services/auth.service';
+import { NativeService } from '../../core/services/native.service';
+import { TaskItem, TaskPriority, TaskStatus } from '../../models/task.model';
+import { User } from '../../models/user.model';
+import { environment } from '../../../environments/environment';
 import {
   addOutline,
   searchOutline,
@@ -38,12 +44,16 @@ import {
   flagOutline,
   swapVerticalOutline,
   arrowBackOutline,
+  cameraOutline,
+  imageOutline,
+  playOutline,
+  eyeOutline,
+  attachOutline,
+  documentTextOutline,
+  checkmarkDoneOutline,
+  chevronForwardOutline,
+  expandOutline,
 } from 'ionicons/icons';
-import { TaskService } from '../../core/services/task.service';
-import { AuthService } from '../../core/services/auth.service';
-import { NativeService } from '../../core/services/native.service';
-import { TaskItem, TaskPriority, TaskStatus } from '../../models/task.model';
-import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-tasks',
@@ -91,6 +101,15 @@ export class TasksPage implements OnInit {
   newTaskDeadline = '';
   newTaskPriority: TaskPriority = 'medium';
 
+  // Task Details Modal State
+  showTaskDetailModal = false;
+  selectedTask: TaskItem | null = null;
+  isSavingProof = false;
+
+  // Full Image Modal
+  isImageModalOpen = false;
+  previewImageUrl = '';
+
   // Side Drawer state
   isSideMenuOpen = false;
   activeMenu = 'tasks';
@@ -122,6 +141,15 @@ export class TasksPage implements OnInit {
       flagOutline,
       swapVerticalOutline,
       arrowBackOutline,
+      cameraOutline,
+      imageOutline,
+      playOutline,
+      eyeOutline,
+      attachOutline,
+      documentTextOutline,
+      checkmarkDoneOutline,
+      chevronForwardOutline,
+      expandOutline,
     });
   }
 
@@ -245,6 +273,9 @@ export class TasksPage implements OnInit {
       next: (res) => {
         if (res.success) {
           task.status = newStatus;
+          if (this.selectedTask && this.selectedTask.id === task.id) {
+            this.selectedTask.status = newStatus;
+          }
           this.applyFilters();
           this.nativeService.triggerHapticFeedback('medium');
           this.showFeedback(
@@ -257,6 +288,176 @@ export class TasksPage implements OnInit {
         this.showFeedback('Unable to update task status.', 'error');
       },
     });
+  }
+
+  // Start Task workflow (pending -> in_progress)
+  startTask(task: TaskItem, event?: Event) {
+    if (event) event.stopPropagation();
+    this.taskService.updateTaskStatus(task.id, 'in_progress').subscribe({
+      next: (res) => {
+        if (res.success) {
+          task.status = 'in_progress';
+          if (this.selectedTask && this.selectedTask.id === task.id) {
+            this.selectedTask.status = 'in_progress';
+          }
+          this.applyFilters();
+          this.nativeService.triggerHapticFeedback('success');
+          this.showFeedback(`"${task.title}" started! Now In Progress.`, 'success');
+        }
+      },
+      error: () => {
+        this.showFeedback('Unable to start task.', 'error');
+      },
+    });
+  }
+
+  // Complete Task workflow
+  completeTask(task: TaskItem, event?: Event) {
+    if (event) event.stopPropagation();
+    this.taskService.updateTaskStatus(task.id, 'completed').subscribe({
+      next: (res) => {
+        if (res.success) {
+          task.status = 'completed';
+          if (this.selectedTask && this.selectedTask.id === task.id) {
+            this.selectedTask.status = 'completed';
+          }
+          this.applyFilters();
+          this.nativeService.triggerHapticFeedback('success');
+          this.showFeedback(`"${task.title}" marked as completed!`, 'success');
+        }
+      },
+      error: () => {
+        this.showFeedback('Unable to complete task.', 'error');
+      },
+    });
+  }
+
+  // Reopen Task
+  reopenTask(task: TaskItem, event?: Event) {
+    if (event) event.stopPropagation();
+    this.taskService.updateTaskStatus(task.id, 'in_progress').subscribe({
+      next: (res) => {
+        if (res.success) {
+          task.status = 'in_progress';
+          if (this.selectedTask && this.selectedTask.id === task.id) {
+            this.selectedTask.status = 'in_progress';
+          }
+          this.applyFilters();
+          this.showFeedback('Task reopened to In Progress.', 'success');
+        }
+      },
+      error: () => {
+        this.showFeedback('Unable to reopen task.', 'error');
+      },
+    });
+  }
+
+  // View Task Details Modal
+  viewTask(task: TaskItem, event?: Event) {
+    if (event) event.stopPropagation();
+    this.selectedTask = task;
+    this.showTaskDetailModal = true;
+  }
+
+  closeTaskDetailModal() {
+    this.showTaskDetailModal = false;
+    this.selectedTask = null;
+  }
+
+  // Camera & Documentation Attachment
+  async openCameraForDocumentation(task: TaskItem) {
+    try {
+      const photo = await this.nativeService.openCameraForTask();
+      if (photo) {
+        this.saveTaskDocumentation(task, photo);
+      }
+    } catch {
+      this.showFeedback('Camera could not be opened. You can attach from files instead.', 'error');
+    }
+  }
+
+  async attachDocumentation(task: TaskItem) {
+    try {
+      const photo = await this.nativeService.captureTaskProof();
+      if (photo) {
+        this.saveTaskDocumentation(task, photo);
+      }
+    } catch {
+      // Fallback handled via file input
+    }
+  }
+
+  onFileSelected(event: any, task: TaskItem) {
+    const file = event.target?.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        this.saveTaskDocumentation(task, base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveTaskDocumentation(task: TaskItem, photoData: string) {
+    this.isSavingProof = true;
+    this.taskService.attachTaskProof(task.id, photoData).subscribe({
+      next: (res) => {
+        this.isSavingProof = false;
+        const savedUrl = res?.task?.proof_url || photoData;
+        task.proof_url = savedUrl;
+        if (this.selectedTask && this.selectedTask.id === task.id) {
+          this.selectedTask.proof_url = savedUrl;
+        }
+        this.nativeService.triggerHapticFeedback('success');
+        this.showFeedback('Documentation photo attached successfully!', 'success');
+      },
+      error: () => {
+        this.isSavingProof = false;
+        task.proof_url = photoData;
+        if (this.selectedTask && this.selectedTask.id === task.id) {
+          this.selectedTask.proof_url = photoData;
+        }
+        this.showFeedback('Documentation photo saved locally.', 'success');
+      },
+    });
+  }
+
+  removeDocumentation(task: TaskItem, event?: Event) {
+    if (event) event.stopPropagation();
+    task.proof_url = null;
+    if (this.selectedTask && this.selectedTask.id === task.id) {
+      this.selectedTask.proof_url = null;
+    }
+    this.taskService.updateTaskStatus(task.id, task.status, '').subscribe({
+      next: () => {
+        this.showFeedback('Documentation photo removed.', 'success');
+      },
+      error: () => {
+        this.showFeedback('Documentation photo removed.', 'success');
+      },
+    });
+  }
+
+  getProofImageUrl(proofUrl?: string | null): string {
+    if (!proofUrl) return '';
+    if (proofUrl.startsWith('data:image') || proofUrl.startsWith('http://') || proofUrl.startsWith('https://')) {
+      return proofUrl;
+    }
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}/${proofUrl}`;
+  }
+
+  viewFullImage(url: string, event?: Event) {
+    if (event) event.stopPropagation();
+    if (!url) return;
+    this.previewImageUrl = url;
+    this.isImageModalOpen = true;
+  }
+
+  closeImageModal() {
+    this.isImageModalOpen = false;
+    this.previewImageUrl = '';
   }
 
   // Delete task

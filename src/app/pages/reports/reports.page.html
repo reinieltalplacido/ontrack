@@ -272,7 +272,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @for (log of logs; track log.id) {
+                      @for (log of logs; track log.log_date) {
                         <tr>
                           <td>{{ formatDate(log.log_date) }}</td>
                           <td>{{ formatShiftTime(log.time_in, log.time_out) }}</td>
@@ -360,7 +360,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (log of logs; track log.id) {
+                  @for (log of logs; track log.log_date) {
                     <tr>
                       <td>{{ formatDate(log.log_date) }}</td>
                       <td>{{ log.time_in }}</td>

@@ -157,7 +157,7 @@ export class ReportsPage implements OnInit {
     // Load logs
     this.attendanceService.getAttendanceHistory(uid).subscribe({
       next: (res) => {
-        if (res && res.logs) this.logs = res.logs;
+        if (res && res.logs) this.logs = this.consolidateLogsByDate(res.logs);
       },
     });
 
@@ -165,6 +165,37 @@ export class ReportsPage implements OnInit {
     this.taskService.getTasks(uid).subscribe({
       next: (t) => (this.tasks = t),
     });
+  }
+
+  consolidateLogsByDate(logs: AttendanceLog[]): AttendanceLog[] {
+    const map = new Map<string, AttendanceLog>();
+    for (const log of logs) {
+      const d = log.log_date;
+      if (!map.has(d)) {
+        map.set(d, { ...log, total_hours: Number(log.total_hours) || 0 });
+      } else {
+        const existing = map.get(d)!;
+        existing.total_hours = Math.round(((Number(existing.total_hours) || 0) + (Number(log.total_hours) || 0)) * 100) / 100;
+        if (log.time_in && (!existing.time_in || log.time_in < existing.time_in)) {
+          existing.time_in = log.time_in;
+        }
+        if (log.status === 'ongoing' || existing.status === 'ongoing') {
+          existing.status = 'ongoing';
+          existing.time_out = null as any;
+        } else if (log.time_out && (!existing.time_out || log.time_out > existing.time_out)) {
+          existing.time_out = log.time_out;
+        }
+        const notes = log.activity_notes?.trim();
+        if (notes && notes !== 'Duty shift completed') {
+          if (!existing.activity_notes || existing.activity_notes === 'Duty shift completed') {
+            existing.activity_notes = notes;
+          } else if (!existing.activity_notes.includes(notes)) {
+            existing.activity_notes += ' | ' + notes;
+          }
+        }
+      }
+    }
+    return Array.from(map.values());
   }
 
   generateReport(type: 'Time Log' | 'Summary') {

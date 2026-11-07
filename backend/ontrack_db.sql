@@ -103,7 +103,7 @@ CREATE TABLE `tasks` (
   `priority` enum('low','medium','high') DEFAULT 'medium',
   `status` enum('pending','in_progress','completed') DEFAULT 'pending',
   `proof_file` varchar(255) DEFAULT NULL,
-  `proof_url` varchar(255) DEFAULT NULL,
+  `proof_url` longtext DEFAULT NULL,
   `verified_at` datetime DEFAULT NULL,
   `verified_by` varchar(150) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),

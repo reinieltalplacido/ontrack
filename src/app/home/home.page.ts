@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { timer, Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
 import {
   IonHeader,
   IonToolbar,
@@ -97,7 +99,28 @@ export class HomePage implements OnInit, OnDestroy {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
-  // Realtime Clock State
+  // Realtime Clock State & Observable
+  readonly liveClock$: Observable<{ time: string; date: string }> = timer(0, 1000).pipe(
+    map(() => {
+      const now = new Date();
+      return {
+        time: now.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true,
+        }),
+        date: now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+      };
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
   currentTimeString = '';
   currentDateString = '';
   private clockInterval?: any;
@@ -267,11 +290,42 @@ export class HomePage implements OnInit, OnDestroy {
     this.attendanceService.getAttendanceHistory(userId).subscribe({
       next: (res) => {
         if (res && res.logs) {
-          this.recentLogs = res.logs.slice(0, 5);
+          this.recentLogs = this.consolidateLogsByDate(res.logs).slice(0, 5);
         }
       },
       error: () => {},
     });
+  }
+
+  consolidateLogsByDate(logs: AttendanceLog[]): AttendanceLog[] {
+    const map = new Map<string, AttendanceLog>();
+    for (const log of logs) {
+      const d = log.log_date;
+      if (!map.has(d)) {
+        map.set(d, { ...log, total_hours: Number(log.total_hours) || 0 });
+      } else {
+        const existing = map.get(d)!;
+        existing.total_hours = Math.round(((Number(existing.total_hours) || 0) + (Number(log.total_hours) || 0)) * 100) / 100;
+        if (log.time_in && (!existing.time_in || log.time_in < existing.time_in)) {
+          existing.time_in = log.time_in;
+        }
+        if (log.status === 'ongoing' || existing.status === 'ongoing') {
+          existing.status = 'ongoing';
+          existing.time_out = null as any;
+        } else if (log.time_out && (!existing.time_out || log.time_out > existing.time_out)) {
+          existing.time_out = log.time_out;
+        }
+        const notes = log.activity_notes?.trim();
+        if (notes && notes !== 'Duty shift completed') {
+          if (!existing.activity_notes || existing.activity_notes === 'Duty shift completed') {
+            existing.activity_notes = notes;
+          } else if (!existing.activity_notes.includes(notes)) {
+            existing.activity_notes += ' | ' + notes;
+          }
+        }
+      }
+    }
+    return Array.from(map.values());
   }
 
   handleRefresh(event: any) {
@@ -377,6 +431,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   openClockOutModal() {
     this.activityNotes = '';
+    this.updateRealtimeClock();
     this.showClockOutModal = true;
   }
 
