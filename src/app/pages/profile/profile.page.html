@@ -33,12 +33,12 @@
           <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
         </div>
         <div class="camera-badge">
-          <ion-icon name="camera-outline"></ion-icon>
+          <ion-icon name="person-outline"></ion-icon>
         </div>
       </div>
 
-      <h1 class="student-name">{{ currentUser?.full_name }}</h1>
-      <ion-badge color="primary" class="student-id-pill">{{ currentUser?.student_id }}</ion-badge>
+      <h1 class="student-name">{{ currentUser?.full_name || 'Student Intern' }}</h1>
+      <ion-badge color="primary" class="student-id-pill">{{ currentUser?.student_id || 'ID N/A' }}</ion-badge>
 
       <div class="hero-meta-row">
         <span class="meta-item">
@@ -48,8 +48,16 @@
         <span class="meta-dot">•</span>
         <span class="meta-item">
           <ion-icon name="business-outline"></ion-icon>
-          {{ currentUser?.company_name || 'Project SOLO' }}
+          {{ currentUser?.company_name || 'Assigned Agency' }}
         </span>
+      </div>
+
+      <!-- Top Edit Mode Toggle Button -->
+      <div class="hero-actions-row">
+        <button class="hero-edit-toggle-btn" [class.active]="isEditMode" (click)="toggleEditMode()">
+          <ion-icon [name]="isEditMode ? 'close-outline' : 'create-outline'"></ion-icon>
+          <span>{{ isEditMode ? 'Cancel Editing' : 'Edit Profile' }}</span>
+        </button>
       </div>
     </ion-card>
 
@@ -71,131 +79,285 @@
         </div>
         <div class="snapshot-col">
           <span class="snapshot-label">Required</span>
-          <strong class="snapshot-val">{{ currentUser?.required_hours || 500 }} hrs</strong>
+          <strong class="snapshot-val">{{ currentUser?.required_hours || 0 }} hrs</strong>
         </div>
         <div class="snapshot-col">
           <span class="snapshot-label">Remaining</span>
-          <strong class="snapshot-val">{{ stats?.remaining_hours || 500 }} hrs</strong>
+          <strong class="snapshot-val">{{ stats?.remaining_hours || 0 }} hrs</strong>
         </div>
       </div>
     </ion-card>
 
-    <!-- Edit Profile Form -->
-    <form (ngSubmit)="saveProfile()" class="profile-edit-form">
-      <!-- Card 1: Academic & Personal Details -->
-      <ion-card class="form-section-card">
-        <div class="section-title-group">
-          <ion-icon name="person-outline" class="section-icon"></ion-icon>
-          <h2 class="section-title">Personal & Academic Info</h2>
-        </div>
-
-        <div class="form-field">
-          <label class="field-label">Full Name</label>
-          <div class="custom-input-box">
-            <input type="text" [(ngModel)]="fullName" name="fullName" placeholder="Your Full Name" required />
+    <!-- ================= DISPLAY MODE ================= -->
+    @if (!isEditMode) {
+      <div class="profile-display-view">
+        <!-- 1. Personal & Academic Information Card -->
+        <ion-card class="display-section-card">
+          <div class="section-card-header">
+            <div class="section-title-wrap">
+              <ion-icon name="person-outline" class="sec-icon"></ion-icon>
+              <h2 class="sec-title">Personal & Academic Info</h2>
+            </div>
+            <button class="quick-edit-pill" (click)="toggleEditMode()" aria-label="Edit personal details">
+              <ion-icon name="create-outline"></ion-icon>
+              <span>Edit</span>
+            </button>
           </div>
-        </div>
 
-        <div class="form-field">
-          <label class="field-label">Student ID (Read-Only)</label>
-          <div class="custom-input-box readonly">
-            <input type="text" [value]="currentUser?.student_id" readonly />
+          <div class="detail-rows-list">
+            <div class="detail-item">
+              <span class="detail-label">Full Name</span>
+              <span class="detail-val highlight">{{ currentUser?.full_name || 'Not provided' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Student ID</span>
+              <span class="detail-val mono">{{ currentUser?.student_id || 'Not provided' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Institutional Email</span>
+              <span class="detail-val email">{{ currentUser?.email || 'Not provided' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Course & Section</span>
+              <span class="detail-val">{{ currentUser?.course_section || 'Not provided' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Campus / University</span>
+              <span class="detail-val">{{ currentUser?.school_campus || 'NEUST - Sumacab Campus' }}</span>
+            </div>
           </div>
-        </div>
+        </ion-card>
 
-        <div class="form-field">
-          <label class="field-label">Email Address (Read-Only)</label>
-          <div class="custom-input-box readonly">
-            <input type="email" [value]="currentUser?.email" readonly />
+        <!-- 2. OJT Placement & Targets Card -->
+        <ion-card class="display-section-card">
+          <div class="section-card-header">
+            <div class="section-title-wrap">
+              <ion-icon name="business-outline" class="sec-icon"></ion-icon>
+              <h2 class="sec-title">OJT Placement & Targets</h2>
+            </div>
+            <button class="quick-edit-pill" (click)="toggleEditMode()" aria-label="Edit placement details">
+              <ion-icon name="create-outline"></ion-icon>
+              <span>Edit</span>
+            </button>
           </div>
-        </div>
 
-        <div class="form-field">
-          <label class="field-label">Course & Section</label>
-          <div class="custom-input-box">
-            <input type="text" [(ngModel)]="courseSection" name="courseSection" placeholder="e.g. BSIT 4-A" />
+          <div class="detail-rows-list">
+            <div class="detail-item">
+              <span class="detail-label">Assigned Company / Agency</span>
+              <span class="detail-val highlight">{{ currentUser?.company_name || 'Not provided' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Company Address</span>
+              <span class="detail-val">{{ currentUser?.company_address || 'Not specified' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Trainer Name</span>
+              <span class="detail-val">{{ currentUser?.trainer_name || 'Not specified' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">OJT Adviser / Coordinator</span>
+              <span class="detail-val">{{ currentUser?.adviser_name || 'Not specified' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Adviser Email</span>
+              <span class="detail-val email">{{ currentUser?.adviser_email || 'adviser@neust.edu.ph' }}</span>
+            </div>
+
+            <div class="detail-item-grid-2">
+              <div class="detail-item">
+                <span class="detail-label">Start Date of OJT</span>
+                <span class="detail-val">{{ formatDate(currentUser?.start_date) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Target End Date</span>
+                <span class="detail-val">{{ formatDate(currentUser?.target_date) }}</span>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Required Total Hours</span>
+              <span class="detail-val hours-pill">{{ currentUser?.required_hours || 0 }} hrs</span>
+            </div>
           </div>
-        </div>
+        </ion-card>
 
-        <div class="form-field">
-          <label class="field-label">Campus / University</label>
-          <div class="custom-input-box">
-            <input type="text" [(ngModel)]="schoolCampus" name="schoolCampus" placeholder="e.g. NEUST Sumacab Campus" />
+        <!-- Edit Profile Primary Button -->
+        <div class="view-actions-wrap">
+          <button type="button" class="primary-edit-btn" (click)="toggleEditMode()">
+            <ion-icon name="create-outline"></ion-icon>
+            <span>Edit Profile Details</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ================= EDIT MODE ================= -->
+    @if (isEditMode) {
+      <div class="edit-mode-notice-banner">
+        <ion-icon name="create-outline"></ion-icon>
+        <div class="notice-text">
+          <strong>Editing Profile Details</strong>
+          <p>You can update all fields below. Click "Save Profile Changes" when done.</p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="saveProfile()" class="profile-edit-form">
+        <!-- Edit Card 1: Academic & Personal Details -->
+        <ion-card class="form-section-card">
+          <div class="section-title-group">
+            <ion-icon name="person-outline" class="section-icon"></ion-icon>
+            <h2 class="section-title">Personal & Academic Info</h2>
           </div>
-        </div>
-      </ion-card>
 
-      <!-- Card 2: OJT Placement & Targets -->
-      <ion-card class="form-section-card">
-        <div class="section-title-group">
-          <ion-icon name="business-outline" class="section-icon"></ion-icon>
-          <h2 class="section-title">OJT Placement & Targets</h2>
-        </div>
-
-        <div class="form-field">
-          <label class="field-label">Assigned Company / Agency</label>
-          <div class="custom-input-box">
-            <input type="text" [(ngModel)]="companyName" name="companyName" placeholder="e.g. Project SOLO" />
+          <div class="form-field">
+            <label class="field-label">Full Name <span class="req">*</span></label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="fullName" name="fullName" placeholder="Your Full Name" required />
+            </div>
           </div>
-        </div>
 
-        <div class="form-field">
-          <label class="field-label">OJT Adviser / Coordinator</label>
-          <div class="custom-input-box">
-            <input type="text" [(ngModel)]="adviserName" name="adviserName" placeholder="e.g. Prof. Gel Cunanan" />
+          <div class="form-field">
+            <label class="field-label">Student ID <span class="req">*</span></label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="studentId" name="studentId" placeholder="e.g. 2026-0001" required />
+            </div>
           </div>
-        </div>
 
-        <div class="form-row-2">
+          <div class="form-field">
+            <label class="field-label">Email Address <span class="req">*</span></label>
+            <div class="custom-input-box">
+              <input type="email" [(ngModel)]="email" name="email" placeholder="e.g. student@neust.edu.ph" required />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Course & Section</label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="courseSection" name="courseSection" placeholder="e.g. BSIT 4-A" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Campus / University</label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="schoolCampus" name="schoolCampus" placeholder="e.g. NEUST Sumacab Campus" />
+            </div>
+          </div>
+        </ion-card>
+
+        <!-- Edit Card 2: OJT Placement & Targets -->
+        <ion-card class="form-section-card">
+          <div class="section-title-group">
+            <ion-icon name="business-outline" class="section-icon"></ion-icon>
+            <h2 class="section-title">OJT Placement & Targets</h2>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Assigned Company / Agency</label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="companyName" name="companyName" placeholder="e.g. Innovate Tech Solutions" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Company Address</label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="companyAddress" name="companyAddress" placeholder="e.g. Maharlika Highway, Cabanatuan City" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Trainer Name</label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="trainerName" name="trainerName" placeholder="e.g. Engr. Michael Santos" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">OJT Adviser / Coordinator</label>
+            <div class="custom-input-box">
+              <input type="text" [(ngModel)]="adviserName" name="adviserName" placeholder="e.g. Prof. Alexander Reyes" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Adviser Email</label>
+            <div class="custom-input-box">
+              <input type="email" [(ngModel)]="adviserEmail" name="adviserEmail" placeholder="e.g. admin@neust.edu.ph" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="field-label">Start Date of OJT</label>
+              <div class="custom-input-box">
+                <input type="date" [(ngModel)]="startDate" name="startDate" />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Target End Date</label>
+              <div class="custom-input-box">
+                <input type="date" [(ngModel)]="targetDate" name="targetDate" />
+              </div>
+            </div>
+          </div>
+
           <div class="form-field">
             <label class="field-label">Required Total Hours</label>
             <div class="custom-input-box">
-              <input type="number" [(ngModel)]="requiredHours" name="requiredHours" placeholder="500" />
+              <input type="number" [(ngModel)]="requiredHours" name="requiredHours" placeholder="500" min="0" />
             </div>
+          </div>
+        </ion-card>
+
+        <!-- Edit Card 3: Security & Password -->
+        <ion-card class="form-section-card">
+          <div class="section-title-group">
+            <ion-icon name="lock-closed-outline" class="section-icon"></ion-icon>
+            <h2 class="section-title">Account Security</h2>
           </div>
 
           <div class="form-field">
-            <label class="field-label">Target End Date</label>
+            <label class="field-label">Change Password (leave empty to keep current)</label>
             <div class="custom-input-box">
-              <input type="date" [(ngModel)]="targetDate" name="targetDate" />
+              <input
+                type="password"
+                [(ngModel)]="newPassword"
+                name="newPassword"
+                placeholder="Enter new password"
+                autocomplete="new-password"
+              />
             </div>
           </div>
-        </div>
-      </ion-card>
+        </ion-card>
 
-      <!-- Card 3: Security & Password -->
-      <ion-card class="form-section-card">
-        <div class="section-title-group">
-          <ion-icon name="lock-closed-outline" class="section-icon"></ion-icon>
-          <h2 class="section-title">Account Security</h2>
-        </div>
+        <!-- Action Buttons in Edit Mode -->
+        <div class="form-actions-wrap">
+          <button type="submit" class="save-profile-btn" [disabled]="isSaving">
+            @if (isSaving) {
+              <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+              <ion-icon name="save-outline"></ion-icon>
+              <span>Save Profile Changes</span>
+            }
+          </button>
 
-        <div class="form-field">
-          <label class="field-label">Change Password (leave empty to keep current)</label>
-          <div class="custom-input-box">
-            <input
-              type="password"
-              [(ngModel)]="newPassword"
-              name="newPassword"
-              placeholder="Enter new password"
-              autocomplete="new-password"
-            />
-          </div>
+          <button type="button" class="cancel-edit-btn" (click)="cancelEdit()">
+            <ion-icon name="close-outline"></ion-icon>
+            <span>Cancel</span>
+          </button>
         </div>
-      </ion-card>
-
-      <!-- Save Button -->
-      <div class="form-actions-wrap">
-        <button type="submit" class="save-profile-btn" [disabled]="isSaving">
-          @if (isSaving) {
-            <ion-spinner name="crescent"></ion-spinner>
-          } @else {
-            <ion-icon name="save-outline"></ion-icon>
-            <span>Save Profile Changes</span>
-          }
-        </button>
-      </div>
-    </form>
+      </form>
+    }
 
     <!-- Sign Out Button -->
     <div class="logout-section">
@@ -213,11 +375,11 @@
   <div class="drawer-header">
     <div class="student-mini-profile">
       <div class="mini-avatar">
-        <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
+        <span>{{ (currentUser?.full_name || 'J').charAt(0) }}</span>
       </div>
       <div class="mini-details">
-        <h4>{{ currentUser?.full_name || 'Reiniel Talplacido' }}</h4>
-        <p>{{ currentUser?.student_id || 'SUM2023-00980' }}</p>
+        <h4>{{ currentUser?.full_name || 'Juan Dela Cruz' }}</h4>
+        <p>{{ currentUser?.student_id || '2026-0001' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser?.course_section }}</span></p>
       </div>
     </div>
     <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">
@@ -248,6 +410,10 @@
       <ion-icon name="person-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Profile</span>
     </button>
+    <button class="nav-item admin-nav-item" (click)="selectMenuItem('admin')">
+      <ion-icon name="shield-checkmark-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Coordinator Portal</span>
+    </button>
   </nav>
 
   <div class="drawer-footer">
@@ -258,4 +424,3 @@
     <span class="app-version-tag">OnTrack v1.0 • OJT Attendance</span>
   </div>
 </aside>
-

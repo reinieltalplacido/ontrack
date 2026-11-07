@@ -32,6 +32,10 @@ import {
   timeOutline,
   checkboxOutline,
   copyOutline,
+  shieldCheckmarkOutline,
+  createOutline,
+  locationOutline,
+  callOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceService } from '../../core/services/attendance.service';
@@ -66,15 +70,22 @@ export class ProfilePage implements OnInit {
   stats: DashboardStats | null = null;
   isLoading = false;
   isSaving = false;
+  isEditMode = false;
 
   // Form Fields
   fullName = '';
+  studentId = '';
+  email = '';
   courseSection = '';
   schoolCampus = '';
   companyName = '';
+  companyAddress = '';
+  trainerName = '';
   adviserName = '';
-  requiredHours = 500;
+  adviserEmail = '';
+  startDate = '';
   targetDate = '';
+  requiredHours = 0;
   newPassword = '';
 
   // Side Drawer
@@ -106,7 +117,19 @@ export class ProfilePage implements OnInit {
       timeOutline,
       checkboxOutline,
       copyOutline,
+      shieldCheckmarkOutline,
+      createOutline,
+      locationOutline,
+      callOutline,
     });
+  }
+
+  ionViewWillEnter() {
+    this.activeMenu = 'profile';
+    this.isSideMenuOpen = false;
+    this.currentUser = this.authService.currentUserValue || this.currentUser;
+    this.populateForm();
+    this.loadStats();
   }
 
   ngOnInit() {
@@ -119,10 +142,14 @@ export class ProfilePage implements OnInit {
         email: 'reiniel@student.neust.edu.ph',
         course_section: 'BSIT 4-A',
         school_campus: 'NEUST - Sumacab Campus',
-        company_name: 'Project SOLO',
-        adviser_name: 'Prof. Gel Cunanan',
-        required_hours: 500,
+        company_name: 'Innovate Tech Solutions Inc.',
+        company_address: 'Maharlika Highway, Cabanatuan City',
+        trainer_name: 'Engr. Michael Santos',
+        adviser_name: 'Prof. Alexander Reyes',
+        adviser_email: 'admin@neust.edu.ph',
+        start_date: '2026-08-15',
         target_date: '2026-12-15',
+        required_hours: 500,
       };
     }
 
@@ -133,12 +160,31 @@ export class ProfilePage implements OnInit {
   populateForm() {
     if (!this.currentUser) return;
     this.fullName = this.currentUser.full_name || '';
+    this.studentId = this.currentUser.student_id || '';
+    this.email = this.currentUser.email || '';
     this.courseSection = this.currentUser.course_section || 'BSIT 4-A';
     this.schoolCampus = this.currentUser.school_campus || 'NEUST - Sumacab Campus';
-    this.companyName = this.currentUser.company_name || 'Project SOLO';
-    this.adviserName = this.currentUser.adviser_name || 'Prof. Gel Cunanan';
-    this.requiredHours = this.currentUser.required_hours || 500;
+    this.companyName = this.currentUser.company_name || 'Innovate Tech Solutions Inc.';
+    this.companyAddress = this.currentUser.company_address || '';
+    this.trainerName = this.currentUser.trainer_name || '';
+    this.adviserName = this.currentUser.adviser_name || 'Prof. Alexander Reyes';
+    this.adviserEmail = this.currentUser.adviser_email || 'admin@neust.edu.ph';
+    this.startDate = this.currentUser.start_date || '2026-08-15';
     this.targetDate = this.currentUser.target_date || '2026-12-15';
+    this.requiredHours = Number(this.currentUser.required_hours) || 0;
+    this.newPassword = '';
+  }
+
+  toggleEditMode() {
+    this.isEditMode = !this.isEditMode;
+    if (!this.isEditMode) {
+      this.populateForm();
+    }
+  }
+
+  cancelEdit() {
+    this.populateForm();
+    this.isEditMode = false;
   }
 
   loadStats() {
@@ -163,12 +209,18 @@ export class ProfilePage implements OnInit {
     const payload: any = {
       user_id: this.currentUser.id,
       full_name: this.fullName.trim(),
+      student_id: this.studentId.trim(),
+      email: this.email.trim(),
       course_section: this.courseSection.trim(),
       school_campus: this.schoolCampus.trim(),
       company_name: this.companyName.trim(),
+      company_address: this.companyAddress.trim(),
+      trainer_name: this.trainerName.trim(),
       adviser_name: this.adviserName.trim(),
-      required_hours: Number(this.requiredHours) || 500,
+      adviser_email: this.adviserEmail.trim(),
+      start_date: this.startDate,
       target_date: this.targetDate,
+      required_hours: Number(this.requiredHours) || 0,
     };
 
     if (this.newPassword.trim()) {
@@ -180,9 +232,10 @@ export class ProfilePage implements OnInit {
         this.isSaving = false;
         if (res.success && res.user) {
           this.currentUser = res.user;
-          this.newPassword = '';
-          this.nativeService.triggerHapticFeedback('success');
+          this.populateForm();
+          this.isEditMode = false;
           this.showFeedback('Profile updated successfully!', 'success');
+          this.loadStats();
         } else {
           this.showFeedback(res.message || 'Could not update profile.', 'error');
         }
@@ -208,7 +261,6 @@ export class ProfilePage implements OnInit {
   }
 
   selectMenuItem(item: string) {
-    this.activeMenu = item;
     this.closeSideMenu();
 
     if (item === 'dashboard') {
@@ -219,6 +271,8 @@ export class ProfilePage implements OnInit {
       this.router.navigate(['/timelogs']);
     } else if (item === 'reports') {
       this.router.navigate(['/reports']);
+    } else if (item === 'admin') {
+      this.router.navigate(['/admin/dashboard']);
     }
   }
 
@@ -229,7 +283,7 @@ export class ProfilePage implements OnInit {
   }
 
   formatDate(dateStr?: string | null): string {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return 'Not set';
     try {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
@@ -253,4 +307,3 @@ export class ProfilePage implements OnInit {
     }, 3500);
   }
 }
-

@@ -59,7 +59,7 @@ $bg-canvas: #f1f5f9;
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-bottom: 16px;
   font-size: 0.88rem;
   font-weight: 600;
@@ -73,37 +73,37 @@ $bg-canvas: #f1f5f9;
   --background: #{$card-bg};
   background: $card-bg;
   border: 1px solid $border-color;
-  border-radius: 14px;
-  padding: 24px 18px;
+  border-radius: 18px;
+  padding: 22px 18px 18px;
   text-align: center;
   margin: 0 0 16px 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.05);
 
   .avatar-wrapper {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: 82px;
+    height: 82px;
     margin: 0 auto 12px;
 
     .large-avatar-circle {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: $primary;
+      background: linear-gradient(135deg, $primary 0%, #1e3a5f 100%);
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 2.2rem;
       font-weight: 800;
-      box-shadow: 0 4px 12px rgba(84, 119, 146, 0.3);
+      box-shadow: 0 4px 14px rgba(43, 85, 120, 0.25);
     }
 
     .camera-badge {
       position: absolute;
       bottom: 0;
       right: 0;
-      background: #1e293b;
+      background: #0f172a;
       color: #ffffff;
       width: 26px;
       height: 26px;
@@ -130,9 +130,10 @@ $bg-canvas: #f1f5f9;
     color: $primary;
     font-size: 0.82rem;
     font-weight: 700;
-    padding: 3px 12px;
+    padding: 4px 14px;
     border-radius: 999px;
     margin-bottom: 10px;
+    border: 1px solid rgba(43, 85, 120, 0.12);
   }
 
   .hero-meta-row {
@@ -142,6 +143,7 @@ $bg-canvas: #f1f5f9;
     gap: 8px;
     font-size: 0.82rem;
     color: #64748b;
+    margin-bottom: 14px;
 
     .meta-item {
       display: flex;
@@ -151,6 +153,39 @@ $bg-canvas: #f1f5f9;
     }
     .meta-dot { color: #cbd5e1; }
   }
+
+  .hero-actions-row {
+    display: flex;
+    justify-content: center;
+
+    .hero-edit-toggle-btn {
+      background: #f0f4f8;
+      border: 1px solid rgba(43, 85, 120, 0.18);
+      color: $primary;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      ion-icon { font-size: 0.95rem; }
+
+      &:active {
+        background: #e2e8f0;
+        transform: scale(0.97);
+      }
+
+      &.active {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+    }
+  }
 }
 
 // Progress Snapshot Card
@@ -158,7 +193,7 @@ $bg-canvas: #f1f5f9;
   --background: #{$card-bg};
   background: $card-bg;
   border: 1px solid $border-color;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   margin: 0 0 16px 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
@@ -183,7 +218,7 @@ $bg-canvas: #f1f5f9;
 
     .progress-bar-fill {
       height: 100%;
-      background: $primary;
+      background: linear-gradient(90deg, $primary 0%, #059669 100%);
       border-radius: 999px;
       transition: width 0.4s ease;
       min-width: 4px;
@@ -202,7 +237,172 @@ $bg-canvas: #f1f5f9;
   }
 }
 
-// Form Sections
+// ================= DISPLAY MODE CARDS =================
+.profile-display-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.display-section-card, ion-card.display-section-card {
+  --background: #{$card-bg};
+  background: $card-bg;
+  border: 1px solid $border-color;
+  border-radius: 16px;
+  padding: 16px 18px 18px;
+  margin: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  .section-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .sec-icon { font-size: 1.2rem; color: $primary; }
+      .sec-title { font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0; }
+    }
+
+    .quick-edit-pill {
+      background: #f0f4f8;
+      border: 1px solid rgba(43, 85, 120, 0.15);
+      color: $primary;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      ion-icon { font-size: 0.85rem; }
+      &:active { background: #e2e8f0; }
+    }
+  }
+
+  .detail-rows-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .detail-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #64748b;
+      }
+
+      .detail-val {
+        font-size: 0.94rem;
+        font-weight: 600;
+        color: #1e293b;
+        word-break: break-word;
+
+        &.highlight {
+          color: #0f172a;
+          font-weight: 700;
+        }
+
+        &.mono {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          color: $primary;
+          font-weight: 700;
+        }
+
+        &.email {
+          color: #2563eb;
+        }
+
+        &.hours-pill {
+          display: inline-block;
+          background: #ecfdf5;
+          color: #047857;
+          font-weight: 800;
+          padding: 2px 10px;
+          border-radius: 6px;
+          width: fit-content;
+        }
+      }
+    }
+
+    .detail-item-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+  }
+}
+
+.view-actions-wrap {
+  margin-top: 4px;
+
+  .primary-edit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, $primary 0%, #1e3a5f 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.96rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(43, 85, 120, 0.25);
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    ion-icon { font-size: 1.15rem; }
+  }
+}
+
+// ================= EDIT MODE NOTICES & FORM =================
+.edit-mode-notice-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 1.25rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .notice-text {
+    font-size: 0.84rem;
+    line-height: 1.35;
+    strong { display: block; margin-bottom: 2px; }
+    p { margin: 0; color: #1e3a8a; }
+  }
+}
+
 .profile-edit-form {
   display: flex;
   flex-direction: column;
@@ -214,8 +414,8 @@ $bg-canvas: #f1f5f9;
   --background: #{$card-bg};
   background: $card-bg;
   border: 1px solid $border-color;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 16px 18px 18px;
   margin: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 
@@ -224,7 +424,7 @@ $bg-canvas: #f1f5f9;
     align-items: center;
     gap: 8px;
     margin-bottom: 14px;
-    padding-bottom: 8px;
+    padding-bottom: 10px;
     border-bottom: 1px solid #f1f5f9;
 
     .section-icon { font-size: 1.15rem; color: $primary; }
@@ -238,10 +438,12 @@ $bg-canvas: #f1f5f9;
 
     .field-label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      color: #475569;
+      color: #334155;
       margin-bottom: 4px;
+
+      .req { color: #dc2626; }
     }
 
     .custom-input-box {
@@ -249,10 +451,12 @@ $bg-canvas: #f1f5f9;
       border-radius: 8px;
       background: #f8fafc;
       padding: 0 12px;
+      transition: border-color 0.2s ease;
 
-      &.readonly {
-        background: #f1f5f9;
-        input { color: #64748b; cursor: not-allowed; }
+      &:focus-within {
+        border-color: $primary;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(43, 85, 120, 0.1);
       }
 
       input {
@@ -261,7 +465,7 @@ $bg-canvas: #f1f5f9;
         background: transparent;
         padding: 9px 0;
         font-size: 0.9rem;
-        color: #1e293b;
+        color: #0f172a;
         outline: none;
       }
     }
@@ -275,34 +479,59 @@ $bg-canvas: #f1f5f9;
 }
 
 .form-actions-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
   .save-profile-btn {
     width: 100%;
-    background: $primary;
+    background: linear-gradient(135deg, $primary 0%, #1e3a5f 100%);
     color: #ffffff;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 14px;
-    font-size: 1rem;
+    font-size: 0.96rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(84, 119, 146, 0.25);
+    box-shadow: 0 4px 14px rgba(43, 85, 120, 0.25);
 
     &:active { background: $primary-hover; }
     ion-icon { font-size: 1.2rem; }
   }
+
+  .cancel-edit-btn {
+    width: 100%;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+
+    &:active { background: #e2e8f0; }
+    ion-icon { font-size: 1.1rem; }
+  }
 }
 
 .logout-section {
+  margin-top: 10px;
+
   .sign-out-btn {
     width: 100%;
     background: #fef2f2;
     color: #b91c1c;
     border: 1px solid #fecaca;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 12px;
     font-size: 0.92rem;
     font-weight: 700;
@@ -311,6 +540,9 @@ $bg-canvas: #f1f5f9;
     justify-content: center;
     gap: 8px;
     cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:active { background: #fee2e2; }
   }
 }
 
@@ -394,20 +626,22 @@ $bg-canvas: #f1f5f9;
     flex: 1;
 
     .nav-item {
+      width: 100%;
+      height: 44px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      background: none;
+      gap: 12px;
+      padding: 0 14px;
+      border-radius: 10px;
       border: none;
-      font-size: 0.95rem;
-      font-weight: 600;
+      background: none;
       color: #334155;
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
-      text-align: left;
+      margin-bottom: 4px;
 
-      .nav-icon { font-size: 1.35rem; color: $primary; }
+      .nav-icon { font-size: 1.25rem; color: #64748b; }
       &:active { background: #f1f5f9; }
 
       &.active {
@@ -425,20 +659,21 @@ $bg-canvas: #f1f5f9;
 
     .drawer-signout-btn {
       width: 100%;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid #fee2e2;
+      background: #fef2f2;
+      color: #dc2626;
+      font-size: 0.88rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      padding: 13px 16px;
-      background: #dbeafe;
-      color: #1e40af;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 700;
+      gap: 8px;
       cursor: pointer;
+      margin-bottom: 8px;
 
-      ion-icon { font-size: 1.25rem; }
+      ion-icon { font-size: 1.1rem; }
     }
 
     .app-version-tag {
@@ -451,4 +686,3 @@ $bg-canvas: #f1f5f9;
     }
   }
 }
-

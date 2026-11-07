@@ -414,11 +414,11 @@
   <div class="drawer-header">
     <div class="student-mini-profile">
       <div class="mini-avatar">
-        <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
+        <span>{{ (currentUser?.full_name || 'J').charAt(0) }}</span>
       </div>
       <div class="mini-details">
-        <h4>{{ currentUser?.full_name || 'Reiniel Talplacido' }}</h4>
-        <p>{{ currentUser?.student_id || 'SUM2023-00980' }}</p>
+        <h4>{{ currentUser?.full_name || 'Juan Dela Cruz' }}</h4>
+        <p>{{ currentUser?.student_id || '2026-0001' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser?.course_section }}</span></p>
       </div>
     </div>
     <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">
@@ -448,6 +448,10 @@
     <button class="nav-item" [class.active]="activeMenu === 'profile'" (click)="selectMenuItem('profile')">
       <ion-icon name="person-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Profile</span>
+    </button>
+    <button class="nav-item admin-nav-item" (click)="selectMenuItem('admin')">
+      <ion-icon name="shield-checkmark-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Coordinator Portal</span>
     </button>
   </nav>
 

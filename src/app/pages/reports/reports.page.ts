@@ -33,6 +33,7 @@ import {
   shareOutline,
   eyeOutline,
   arrowBackOutline,
+  shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceService } from '../../core/services/attendance.service';
@@ -122,7 +123,15 @@ export class ReportsPage implements OnInit {
       shareOutline,
       eyeOutline,
       arrowBackOutline,
+      shieldCheckmarkOutline,
     });
+  }
+
+  ionViewWillEnter() {
+    this.activeMenu = 'reports';
+    this.isSideMenuOpen = false;
+    this.currentUser = this.authService.currentUserValue || this.currentUser;
+    this.loadData();
   }
 
   ngOnInit() {
@@ -271,7 +280,6 @@ export class ReportsPage implements OnInit {
   }
 
   selectMenuItem(item: string) {
-    this.activeMenu = item;
     this.closeSideMenu();
 
     if (item === 'dashboard') {
@@ -282,6 +290,8 @@ export class ReportsPage implements OnInit {
       this.router.navigate(['/timelogs']);
     } else if (item === 'profile') {
       this.router.navigate(['/profile']);
+    } else if (item === 'admin') {
+      this.router.navigate(['/admin/dashboard']);
     }
   }
 

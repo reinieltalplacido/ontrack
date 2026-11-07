@@ -34,6 +34,7 @@ import {
   chevronForwardOutline,
   arrowDownOutline,
   arrowBackOutline,
+  shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -101,7 +102,15 @@ export class TimeLogsPage implements OnInit {
       chevronForwardOutline,
       arrowDownOutline,
       arrowBackOutline,
+      shieldCheckmarkOutline,
     });
+  }
+
+  ionViewWillEnter() {
+    this.activeMenu = 'timelogs';
+    this.isSideMenuOpen = false;
+    this.currentUser = this.authService.currentUserValue || this.currentUser;
+    this.loadLogs();
   }
 
   ngOnInit() {
@@ -213,7 +222,6 @@ export class TimeLogsPage implements OnInit {
   }
 
   selectMenuItem(item: string) {
-    this.activeMenu = item;
     this.closeSideMenu();
 
     if (item === 'dashboard') {
@@ -224,6 +232,8 @@ export class TimeLogsPage implements OnInit {
       this.router.navigate(['/profile']);
     } else if (item === 'reports') {
       this.router.navigate(['/reports']);
+    } else if (item === 'admin') {
+      this.router.navigate(['/admin/dashboard']);
     }
   }
 

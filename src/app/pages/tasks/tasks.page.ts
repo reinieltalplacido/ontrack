@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -53,6 +53,8 @@ import {
   checkmarkDoneOutline,
   chevronForwardOutline,
   expandOutline,
+  shieldCheckmarkOutline,
+  arrowUndoOutline,
 } from 'ionicons/icons';
 
 @Component({
@@ -81,6 +83,7 @@ export class TasksPage implements OnInit {
   private authService = inject(AuthService);
   private nativeService = inject(NativeService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   currentUser: User | null = null;
   tasks: TaskItem[] = [];
@@ -150,7 +153,16 @@ export class TasksPage implements OnInit {
       checkmarkDoneOutline,
       chevronForwardOutline,
       expandOutline,
+      shieldCheckmarkOutline,
+      arrowUndoOutline,
     });
+  }
+
+  ionViewWillEnter() {
+    this.activeMenu = 'tasks';
+    this.isSideMenuOpen = false;
+    this.currentUser = this.authService.currentUserValue || this.currentUser;
+    this.loadTasks();
   }
 
   ngOnInit() {
@@ -175,15 +187,19 @@ export class TasksPage implements OnInit {
     }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
+
     this.taskService.getTasks(this.currentUser.id).subscribe({
       next: (tasks) => {
         this.tasks = tasks;
         this.applyFilters();
         this.isLoading = false;
+        this.cdr.detectChanges();
         if (event) event.target.complete();
       },
       error: () => {
         this.isLoading = false;
+        this.cdr.detectChanges();
         if (event) event.target.complete();
       },
     });
@@ -301,12 +317,35 @@ export class TasksPage implements OnInit {
             this.selectedTask.status = 'in_progress';
           }
           this.applyFilters();
+          this.cdr.detectChanges();
           this.nativeService.triggerHapticFeedback('success');
           this.showFeedback(`"${task.title}" started! Now In Progress.`, 'success');
         }
       },
       error: () => {
         this.showFeedback('Unable to start task.', 'error');
+      },
+    });
+  }
+
+  // Undo Start Task (in_progress -> pending)
+  undoStartTask(task: TaskItem, event?: Event) {
+    if (event) event.stopPropagation();
+    this.taskService.updateTaskStatus(task.id, 'pending').subscribe({
+      next: (res) => {
+        if (res.success) {
+          task.status = 'pending';
+          if (this.selectedTask && this.selectedTask.id === task.id) {
+            this.selectedTask.status = 'pending';
+          }
+          this.applyFilters();
+          this.cdr.detectChanges();
+          this.nativeService.triggerHapticFeedback('medium');
+          this.showFeedback(`"${task.title}" reverted back to Pending.`, 'success');
+        }
+      },
+      error: () => {
+        this.showFeedback('Unable to undo task status.', 'error');
       },
     });
   }
@@ -322,6 +361,7 @@ export class TasksPage implements OnInit {
             this.selectedTask.status = 'completed';
           }
           this.applyFilters();
+          this.cdr.detectChanges();
           this.nativeService.triggerHapticFeedback('success');
           this.showFeedback(`"${task.title}" marked as completed!`, 'success');
         }
@@ -343,6 +383,7 @@ export class TasksPage implements OnInit {
             this.selectedTask.status = 'in_progress';
           }
           this.applyFilters();
+          this.cdr.detectChanges();
           this.showFeedback('Task reopened to In Progress.', 'success');
         }
       },
@@ -540,7 +581,6 @@ export class TasksPage implements OnInit {
   }
 
   selectMenuItem(item: string) {
-    this.activeMenu = item;
     this.closeSideMenu();
 
     if (item === 'dashboard') {
@@ -551,6 +591,8 @@ export class TasksPage implements OnInit {
       this.router.navigate(['/profile']);
     } else if (item === 'reports') {
       this.router.navigate(['/reports']);
+    } else if (item === 'admin') {
+      this.router.navigate(['/admin/dashboard']);
     }
   }
 
