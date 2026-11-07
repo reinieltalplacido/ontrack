@@ -20,6 +20,7 @@ import {
   alertCircleOutline,
 } from 'ionicons/icons';
 import { AdminService } from '../../../core/services/admin.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -37,6 +38,7 @@ import { AdminService } from '../../../core/services/admin.service';
 export class AdminLoginPage {
   private adminService = inject(AdminService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   identifier = '';
   password = '';
@@ -66,11 +68,13 @@ export class AdminLoginPage {
     this.identifier = 'admin@neust.edu.ph';
     this.password = 'AdminPassword123!';
     this.errorMessage = '';
+    this.toastService.showInfo('Admin / Coordinator credentials loaded!');
   }
 
   submitLogin() {
     if (!this.identifier.trim() || !this.password.trim()) {
       this.errorMessage = 'Please enter your faculty email/ID and password.';
+      this.toastService.showError(this.errorMessage);
       return;
     }
 
@@ -81,14 +85,17 @@ export class AdminLoginPage {
       next: (res) => {
         this.isLoading = false;
         if (res.success) {
+          this.toastService.showSuccess('Welcome back, Coordinator!');
           this.router.navigate(['/admin/dashboard']);
         } else {
           this.errorMessage = res.message || 'Invalid professor credentials.';
+          this.toastService.showError(this.errorMessage);
         }
       },
       error: (err) => {
         this.isLoading = false;
         this.errorMessage = err?.error?.message || 'Server error. Please verify backend is running.';
+        this.toastService.showError(this.errorMessage);
       },
     });
   }

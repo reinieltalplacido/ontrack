@@ -352,80 +352,102 @@ $bg-canvas: #f1f5f9;
 
 // Report Modal & Printable Doc
 .report-modal {
-  --width: 92%;
-  --max-width: 520px;
-  --height: 90vh;
-  --border-radius: 16px;
+  --width: 96vw;
+  --max-width: 1200px;
+  --height: 94vh;
+  --max-height: 96vh;
+  --border-radius: 18px;
+  --box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
 
   .preview-modal-container {
     background: #ffffff;
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 18px;
+    padding: 18px 22px;
+    border-radius: 18px;
 
     .preview-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
       border-bottom: 1px solid #e2e8f0;
 
       .header-left {
         display: flex;
         align-items: center;
-        gap: 8px;
-        .modal-icon { font-size: 1.35rem; color: $primary; }
-        h3 { font-size: 1.15rem; font-weight: 800; margin: 0; color: #0f172a; }
+        gap: 10px;
+
+        .modal-icon { font-size: 1.45rem; color: $primary; }
+        h3 { font-size: 1.2rem; font-weight: 800; margin: 0; color: #0f172a; }
       }
 
       .modal-close-btn {
-        background: none;
+        background: #f1f5f9;
         border: none;
-        font-size: 1.4rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
         color: #64748b;
         cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover, &:active {
+          background: #e2e8f0;
+          color: #0f172a;
+        }
       }
     }
 
     .printable-document {
       flex: 1;
       overflow-y: auto;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
       padding: 24px;
       background: #ffffff;
-      font-size: 0.85rem;
+      font-size: 0.86rem;
 
       &.summary-layout {
         background: #ffffff;
-        padding: 28px 32px;
+        padding: 24px;
       }
 
-      /* Exact Match to OJT Summary Report Spec */
+      /* Exact Match to OJT Summary Report Spec (Landscape Layout) */
       .summary-report-sheet {
+        background: #ffffff;
+        width: 100%;
+        min-width: 900px;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 36px;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
         color: #0f172a;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
         .report-main-heading {
-          font-size: 1.6rem;
+          font-size: 1.85rem;
           font-weight: 800;
           color: #0f172a;
-          margin: 0 0 18px 0;
-          letter-spacing: -0.3px;
+          margin: 0 0 22px 0;
+          letter-spacing: -0.4px;
         }
 
         .summary-meta-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 6px 20px;
-          margin-bottom: 24px;
-
-          @media (max-width: 600px) {
-            grid-template-columns: 1fr;
-            gap: 6px;
-          }
+          grid-template-columns: repeat(3, 1fr) !important;
+          gap: 8px 32px;
+          margin-bottom: 28px;
 
           .meta-col {
             display: flex;
@@ -434,14 +456,14 @@ $bg-canvas: #f1f5f9;
           }
 
           .meta-item {
-            font-size: 0.82rem;
-            line-height: 1.35;
+            font-size: 0.88rem;
+            line-height: 1.4;
             color: #1e293b;
 
             .meta-label {
               font-weight: 600;
               color: #0f172a;
-              margin-right: 4px;
+              margin-right: 5px;
             }
 
             .meta-val {
@@ -451,13 +473,13 @@ $bg-canvas: #f1f5f9;
         }
 
         .report-section-block {
-          margin-bottom: 24px;
+          margin-bottom: 28px;
 
           .section-title {
-            font-size: 1.15rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: #0f172a;
-            margin: 0 0 10px 0;
+            margin: 0 0 12px 0;
             letter-spacing: -0.2px;
           }
 
@@ -465,20 +487,20 @@ $bg-canvas: #f1f5f9;
             width: 100%;
             overflow-x: auto;
             border: 1px solid #cbd5e1;
-            border-radius: 4px;
+            border-radius: 6px;
             background: #ffffff;
 
             .report-table {
               width: 100%;
               border-collapse: collapse;
-              font-size: 0.82rem;
+              font-size: 0.85rem;
 
               thead tr th {
                 background: #2563eb;
                 color: #ffffff;
                 font-weight: 700;
                 text-align: left;
-                padding: 10px 14px;
+                padding: 11px 16px;
                 border: 1px solid #2563eb;
                 letter-spacing: 0.2px;
               }
@@ -489,7 +511,7 @@ $bg-canvas: #f1f5f9;
                 }
 
                 td {
-                  padding: 10px 14px;
+                  padding: 11px 16px;
                   border: 1px solid #e2e8f0;
                   color: #1e293b;
                   vertical-align: middle;
@@ -502,9 +524,9 @@ $bg-canvas: #f1f5f9;
 
               .status-cell-pill {
                 display: inline-block;
-                padding: 2px 8px;
-                border-radius: 4px;
-                font-size: 0.74rem;
+                padding: 3px 10px;
+                border-radius: 6px;
+                font-size: 0.76rem;
                 font-weight: 600;
 
                 &.completed {
@@ -512,7 +534,7 @@ $bg-canvas: #f1f5f9;
                   background: #ecfdf5;
                   border: 1px solid #a7f3d0;
                 }
-                &.in_progress {
+                &.in_progress, &.ongoing {
                   color: #2563eb;
                   background: #eff6ff;
                   border: 1px solid #bfdbfe;
@@ -528,7 +550,7 @@ $bg-canvas: #f1f5f9;
                 text-align: center;
                 color: #64748b;
                 font-style: italic;
-                padding: 18px;
+                padding: 22px;
               }
             }
           }
@@ -536,13 +558,27 @@ $bg-canvas: #f1f5f9;
 
         .report-doc-footer {
           text-align: center;
-          margin-top: 48px;
+          margin-top: 50px;
           padding-top: 24px;
-          font-size: 0.8rem;
+          border-top: 1px solid #f1f5f9;
+          font-size: 0.82rem;
           font-weight: 600;
           color: #475569;
           letter-spacing: 0.3px;
         }
+      }
+
+      /* Also make DTR report landscape-wide */
+      .doc-sheet-wrapper {
+        background: #ffffff;
+        width: 100%;
+        min-width: 900px;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 36px;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
       }
 
       .doc-header {
@@ -651,6 +687,17 @@ $bg-canvas: #f1f5f9;
 }
 
 @media print {
+  @page {
+    size: landscape;
+    margin: 8mm 10mm;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    background: #ffffff !important;
+  }
+
   ion-header,
   .mobile-top-bar,
   .reports-container,
@@ -672,6 +719,10 @@ $bg-canvas: #f1f5f9;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
   }
 
   .printable-document {
@@ -679,10 +730,20 @@ $bg-canvas: #f1f5f9;
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
+    background: #ffffff !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 
-    .summary-report-sheet {
+    .summary-report-sheet,
+    .doc-sheet-wrapper {
+      min-width: 100% !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+
       .report-table-wrap {
         border: 1px solid #000000 !important;
         

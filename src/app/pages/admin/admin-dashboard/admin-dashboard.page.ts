@@ -11,7 +11,6 @@ import {
   IonRefresherContent,
   IonModal,
   IonSpinner,
-  IonToast,
   IonCard,
   IonBadge,
 } from '@ionic/angular';
@@ -68,6 +67,7 @@ import {
 } from 'ionicons/icons';
 import { AdminService, AdminStats, MonitoredStudent } from '../../../core/services/admin.service';
 import { NativeService } from '../../../core/services/native.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Professor } from '../../../models/user.model';
 import { environment } from '../../../../environments/environment';
 import { formatHours, formatTime, formatShiftTime } from '../../../core/utils/format.util';
@@ -170,7 +170,6 @@ export interface AdminTaskItem {
     IonRefresherContent,
     IonModal,
     IonSpinner,
-    IonToast,
     IonCard,
     IonBadge,
   ],
@@ -178,6 +177,7 @@ export interface AdminTaskItem {
 export class AdminDashboardPage implements OnInit {
   private adminService = inject(AdminService);
   private nativeService = inject(NativeService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   formatHours = formatHours;
   formatTime = formatTime;
@@ -204,6 +204,7 @@ export class AdminDashboardPage implements OnInit {
   onSectionChange(newSection: string) {
     this.currentSection = newSection;
     this.newTask.section = newSection;
+    this.toastService.showInfo(`Viewing Section ${newSection}`);
     this.loadAllData();
   }
 
@@ -517,6 +518,7 @@ export class AdminDashboardPage implements OnInit {
     if (event) {
       setTimeout(() => {
         event.target.complete();
+        this.toastService.showSuccess('Duty data and intern logs updated.');
       }, 600);
     }
   }
@@ -925,17 +927,17 @@ export class AdminDashboardPage implements OnInit {
           task.status = 'completed';
           task.verified_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
           task.verified_by = profName;
-          this.presentToast('Task verified and marked completed.');
+          this.presentToast('Task verified and marked completed.', 'success');
           this.nativeService.triggerHapticFeedback('success');
           this.loadDashboardStats();
         } else {
-          this.presentToast(res.message || 'Could not verify task.');
+          this.presentToast(res.message || 'Could not verify task.', 'error');
         }
         this.cdr.detectChanges();
       },
       error: () => {
         this.isVerifyingTask = false;
-        this.presentToast('Error connecting to verification service.');
+        this.presentToast('Error connecting to verification service.', 'error');
         this.cdr.detectChanges();
       }
     });
@@ -976,12 +978,12 @@ export class AdminDashboardPage implements OnInit {
 
   submitAssignTask() {
     if (!this.newTask.title.trim()) {
-      this.presentToast('Please provide a task title.');
+      this.presentToast('Please provide a task title.', 'warning');
       return;
     }
 
     if (this.newTask.target_type === 'student' && !this.newTask.user_id) {
-      this.presentToast('Please select a student.');
+      this.presentToast('Please select a student.', 'warning');
       return;
     }
 
@@ -1002,18 +1004,18 @@ export class AdminDashboardPage implements OnInit {
           this.isSubmittingTask = false;
           if (res.success) {
             this.nativeService.triggerHapticFeedback('success');
-            this.presentToast(res.message || 'Task successfully assigned!');
+            this.presentToast(res.message || 'Task successfully assigned!', 'success');
             this.closeAssignTaskModal();
             this.loadDashboardStats();
             this.loadStudents();
           } else {
-            this.presentToast(res.message || 'Failed to assign task.');
+            this.presentToast(res.message || 'Failed to assign task.', 'error');
           }
           this.cdr.detectChanges();
         },
         error: () => {
           this.isSubmittingTask = false;
-          this.presentToast('Server error while assigning task.');
+          this.presentToast('Server error while assigning task.', 'error');
           this.cdr.detectChanges();
         },
       });
@@ -1043,14 +1045,16 @@ export class AdminDashboardPage implements OnInit {
     return `${baseUrl}/${path.replace(/^\/+/, '')}`;
   }
 
-  presentToast(message: string) {
+  presentToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {
     this.toastMessage = message;
     this.showToast = true;
+    this.toastService.show(message, type);
   }
 
   logout() {
     this.closeSideMenu();
     this.adminService.logout();
+    this.toastService.showInfo('Signed out of Coordinator Portal.');
     this.router.navigate(['/login']);
   }
 

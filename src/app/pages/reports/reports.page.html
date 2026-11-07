@@ -259,16 +259,18 @@
                 </div>
               </div>
 
-              <!-- 1. TIME LOGS (DATE TIME HOURS) - FIRST -->
+              <!-- 1. TIME LOGS (DATE, TIME, HOURS, ACTIVITIES, STATUS) -->
               <div class="report-section-block">
                 <h3 class="section-title">Time Logs</h3>
                 <div class="report-table-wrap">
                   <table class="report-table">
                     <thead>
                       <tr>
-                        <th style="width: 28%;">Date</th>
-                        <th style="width: 44%;">Time</th>
-                        <th style="width: 28%;">Hours</th>
+                        <th style="width: 14%;">Date</th>
+                        <th style="width: 22%;">Time</th>
+                        <th style="width: 12%;">Hours</th>
+                        <th style="width: 38%;">Activities</th>
+                        <th style="width: 14%;">Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -276,12 +278,18 @@
                         <tr>
                           <td>{{ formatDate(log.log_date) }}</td>
                           <td>{{ formatShiftTime(log.time_in, log.time_out) }}</td>
-                          <td>{{ formatHours(log.total_hours) }}</td>
+                          <td><strong>{{ formatHours(log.total_hours) }}</strong></td>
+                          <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
+                          <td>
+                            <span class="status-cell-pill" [class]="log.status || 'completed'">
+                              {{ log.status === 'ongoing' ? 'Ongoing' : 'Completed' }}
+                            </span>
+                          </td>
                         </tr>
                       }
                       @if (logs.length === 0) {
                         <tr>
-                          <td colspan="3" class="table-empty-cell">No time logs recorded yet.</td>
+                          <td colspan="5" class="table-empty-cell">No time logs recorded yet.</td>
                         </tr>
                       }
                     </tbody>
@@ -332,63 +340,65 @@
             </div>
           } @else {
             <!-- TIME LOG REPORT (DTR) -->
-            <div class="doc-header">
-              <h4>NUEVA ECIJA UNIVERSITY OF SCIENCE AND TECHNOLOGY</h4>
-              <p>Sumacab Campus, Cabanatuan City</p>
-              <strong class="doc-title">DAILY TIME RECORD (DTR) REPORT</strong>
-            </div>
-
-            <!-- Student & Agency Meta -->
-            <div class="doc-student-meta">
-              <div><strong>Trainee:</strong> {{ currentUser?.full_name }}</div>
-              <div><strong>Student ID:</strong> {{ currentUser?.student_id }}</div>
-              <div><strong>Program:</strong> {{ currentUser?.course_section || 'BSIT' }}</div>
-              <div><strong>Assigned Agency:</strong> {{ currentUser?.company_name }}</div>
-              <div><strong>Adviser:</strong> {{ currentUser?.adviser_name }}</div>
-              <div><strong>Target Hours:</strong> {{ currentUser?.required_hours || 500 }} hrs</div>
-            </div>
-
-            <div class="doc-table-wrap">
-              <table class="doc-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Time In</th>
-                    <th>Time Out</th>
-                    <th>Rendered</th>
-                    <th>Accomplishment Summary</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (log of logs; track log.log_date) {
-                    <tr>
-                      <td>{{ formatDate(log.log_date) }}</td>
-                      <td>{{ formatTime(log.time_in) }}</td>
-                      <td>{{ formatTime(log.time_out) }}</td>
-                      <td><strong>{{ formatHours(log.total_hours) }}</strong></td>
-                      <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
-                    </tr>
-                  }
-                  @if (logs.length === 0) {
-                    <tr>
-                      <td colspan="5" style="text-align:center; padding: 12px; color: #64748b;">
-                        No past duty records logged yet.
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Signatures -->
-            <div class="doc-signatures">
-              <div class="sig-col">
-                <div class="sig-line"></div>
-                <span>Student Trainee Signature</span>
+            <div class="doc-sheet-wrapper">
+              <div class="doc-header">
+                <h4>NUEVA ECIJA UNIVERSITY OF SCIENCE AND TECHNOLOGY</h4>
+                <p>Sumacab Campus, Cabanatuan City</p>
+                <strong class="doc-title">DAILY TIME RECORD (DTR) REPORT</strong>
               </div>
-              <div class="sig-col">
-                <div class="sig-line"></div>
-                <span>Industry Supervisor Signature</span>
+
+              <!-- Student & Agency Meta -->
+              <div class="doc-student-meta">
+                <div><strong>Trainee:</strong> {{ currentUser?.full_name }}</div>
+                <div><strong>Student ID:</strong> {{ currentUser?.student_id }}</div>
+                <div><strong>Program:</strong> {{ currentUser?.course_section || 'BSIT' }}</div>
+                <div><strong>Assigned Agency:</strong> {{ currentUser?.company_name }}</div>
+                <div><strong>Adviser:</strong> {{ currentUser?.adviser_name }}</div>
+                <div><strong>Target Hours:</strong> {{ currentUser?.required_hours || 500 }} hrs</div>
+              </div>
+
+              <div class="doc-table-wrap">
+                <table class="doc-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Time In</th>
+                      <th>Time Out</th>
+                      <th>Rendered</th>
+                      <th>Accomplishment Summary</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (log of logs; track log.log_date) {
+                      <tr>
+                        <td>{{ formatDate(log.log_date) }}</td>
+                        <td>{{ formatTime(log.time_in) }}</td>
+                        <td>{{ formatTime(log.time_out) }}</td>
+                        <td><strong>{{ formatHours(log.total_hours) }}</strong></td>
+                        <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
+                      </tr>
+                    }
+                    @if (logs.length === 0) {
+                      <tr>
+                        <td colspan="5" style="text-align:center; padding: 12px; color: #64748b;">
+                          No past duty records logged yet.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Signatures -->
+              <div class="doc-signatures">
+                <div class="sig-col">
+                  <div class="sig-line"></div>
+                  <span>Student Trainee Signature</span>
+                </div>
+                <div class="sig-col">
+                  <div class="sig-line"></div>
+                  <span>Industry Supervisor Signature</span>
+                </div>
               </div>
             </div>
           }

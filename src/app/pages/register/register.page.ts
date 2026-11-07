@@ -7,7 +7,6 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
-  IonToast,
   IonModal,
   IonDatetime,
   IonBadge,
@@ -32,6 +31,7 @@ import {
   chevronDownOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 export interface CollegeProgramGroup {
   college: string;
@@ -50,7 +50,6 @@ export interface CollegeProgramGroup {
     IonButton,
     IonIcon,
     IonSpinner,
-    IonToast,
     IonModal,
     IonDatetime,
     IonBadge,
@@ -61,6 +60,7 @@ export class RegisterPage {
   private authService = inject(AuthService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   registerForm: FormGroup;
   currentStep = 1;
@@ -403,6 +403,7 @@ export class RegisterPage {
     });
     this.toastMessage = 'Sample student & OJT details filled!';
     this.showToast = true;
+    this.toastService.showInfo('Sample student & OJT details filled!');
   }
 
   onSubmit() {
@@ -413,6 +414,7 @@ export class RegisterPage {
       } else {
         this.errorMessage = 'Password must be at least 6 characters.';
       }
+      this.toastService.showError(this.errorMessage);
       return;
     }
 
@@ -427,6 +429,7 @@ export class RegisterPage {
         if (res.success) {
           this.toastMessage = 'Account created successfully!';
           this.showToast = true;
+          this.toastService.showSuccess('Account registered successfully! Welcome to OnTrack.');
           setTimeout(() => {
             this.router.navigate(['/home']);
           }, 800);
@@ -434,6 +437,7 @@ export class RegisterPage {
           this.errorMessage = res.message || 'Registration failed. Please check your information.';
           this.toastMessage = this.errorMessage;
           this.showToast = true;
+          this.toastService.showError(this.errorMessage);
         }
         this.cdr.detectChanges();
       },
@@ -442,6 +446,7 @@ export class RegisterPage {
         this.errorMessage = err?.error?.message || 'Unable to register account. Please check your connection.';
         this.toastMessage = this.errorMessage;
         this.showToast = true;
+        this.toastService.showError(this.errorMessage);
         this.cdr.detectChanges();
       },
     });

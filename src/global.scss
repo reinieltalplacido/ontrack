@@ -89,3 +89,274 @@ body {
     }
   }
 }
+
+/* =======================================================
+   ONTRACK GLOBAL TOP TOAST NOTIFICATIONS
+   ======================================================= */
+ion-toast.ontrack-top-toast {
+  --border-radius: 14px;
+  --box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.22), 0 4px 10px -2px rgba(15, 23, 42, 0.12);
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: -0.2px;
+  margin-top: calc(env(safe-area-inset-top, 12px) + 8px);
+  padding: 0 12px;
+
+  &::part(container) {
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+  }
+
+  &::part(message) {
+    font-weight: 600;
+    line-height: 1.35;
+    padding-right: 8px;
+  }
+
+  &::part(button) {
+    opacity: 0.85;
+    font-size: 1.15rem;
+  }
+
+  /* Success Variant */
+  &.ontrack-toast-success {
+    --background: #0f172a;
+    --color: #ffffff;
+    --border-color: #22c55e;
+    --border-width: 1.5px;
+    --button-color: #94a3b8;
+
+    ion-icon {
+      color: #22c55e;
+      font-size: 1.35rem;
+    }
+  }
+
+  /* Error Variant */
+  &.ontrack-toast-error {
+    --background: #7f1d1d;
+    --color: #ffffff;
+    --border-color: #ef4444;
+    --border-width: 1.5px;
+    --button-color: #fca5a5;
+
+    ion-icon {
+      color: #fca5a5;
+      font-size: 1.35rem;
+    }
+  }
+
+  /* Info Variant */
+  &.ontrack-toast-info {
+    --background: #1e3a5f;
+    --color: #ffffff;
+    --border-color: #38bdf8;
+    --border-width: 1.5px;
+    --button-color: #bae6fd;
+
+    ion-icon {
+      color: #38bdf8;
+      font-size: 1.35rem;
+    }
+  }
+
+  /* Warning Variant */
+  &.ontrack-toast-warning {
+    --background: #78350f;
+    --color: #ffffff;
+    --border-color: #f59e0b;
+    --border-width: 1.5px;
+    --button-color: #fde68a;
+
+    ion-icon {
+      color: #f59e0b;
+      font-size: 1.35rem;
+    }
+  }
+}
+
+/* =======================================================
+   GLOBAL PRINT STYLES - FULL PAGE PURE WHITE LANDSCAPE
+   ======================================================= */
+@media print {
+  @page {
+    size: landscape;
+    margin: 8mm 10mm;
+  }
+
+  *, *::before, *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html,
+  body,
+  app-root,
+  ion-app,
+  ion-router-outlet,
+  ion-page,
+  ion-content,
+  .ion-page {
+    background: #ffffff !important;
+    --background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  body,
+  body.backdrop-no-scroll {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: #ffffff !important;
+  }
+
+  ion-content::part(scroll) {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    contain: none !important;
+    background: #ffffff !important;
+  }
+
+  /* Completely hide all non-report elements (Never hide .backdrop-no-scroll since that is on <body>!) */
+  ion-header,
+  ion-footer,
+  ion-toolbar,
+  .mobile-top-bar,
+  .reports-container,
+  .preview-header,
+  .preview-actions,
+  .side-drawer,
+  .side-drawer-backdrop,
+  ion-backdrop,
+  .modal-shadow {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Ionic Modal Print Reset - Fill Entire Paper Pure White */
+  ion-modal,
+  ion-modal.report-modal {
+    --background: #ffffff !important;
+    --border-radius: 0 !important;
+    --box-shadow: none !important;
+    --width: 100% !important;
+    --height: auto !important;
+    --max-width: 100% !important;
+    --max-height: none !important;
+    position: static !important;
+    display: block !important;
+    contain: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+
+    &::part(backdrop) {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+
+    &::part(content) {
+      position: static !important;
+      display: block !important;
+      width: 100% !important;
+      height: auto !important;
+      max-width: 100% !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+  }
+
+  /* Document Content - Clean Edge to Edge White */
+  .preview-modal-container {
+    background: #ffffff !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: block !important;
+  }
+
+  .printable-document {
+    background: #ffffff !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+
+    .summary-report-sheet,
+    .doc-sheet-wrapper {
+      background: #ffffff !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+
+      .report-table-wrap {
+        border: 1px solid #000000 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        width: 100% !important;
+
+        .report-table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+
+          thead tr th {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            border: 1px solid #2563eb !important;
+          }
+
+          tbody tr td {
+            border: 1px solid #cbd5e1 !important;
+          }
+        }
+      }
+    }
+
+    /* DTR Table borders in print */
+    .doc-table-wrap .doc-table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      th, td {
+        border: 1px solid #000000 !important;
+      }
+    }
+  }
+}

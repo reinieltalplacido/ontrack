@@ -214,7 +214,7 @@ export class NativeService {
   /**
    * Haptic feedback (disabled / removed)
    */
-  async triggerHapticFeedback(_type?: 'success' | 'warning' | 'medium'): Promise<void> {
+  async triggerHapticFeedback(_type?: 'success' | 'warning' | 'medium' | 'heavy' | 'light'): Promise<void> {
     // Intentionally disabled / removed
   }
 }

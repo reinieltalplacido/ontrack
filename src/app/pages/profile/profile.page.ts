@@ -40,6 +40,7 @@ import {
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { NativeService } from '../../core/services/native.service';
+import { ToastService } from '../../core/services/toast.service';
 import { User } from '../../models/user.model';
 import { DashboardStats } from '../../models/attendance.model';
 import { formatHours } from '../../core/utils/format.util';
@@ -66,6 +67,7 @@ export class ProfilePage implements OnInit {
   private attendanceService = inject(AttendanceService);
   private nativeService = inject(NativeService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   currentUser: User | null = null;
   stats: DashboardStats | null = null;
@@ -281,6 +283,7 @@ export class ProfilePage implements OnInit {
   logout() {
     this.closeSideMenu();
     this.authService.logout();
+    this.toastService.showInfo('Signed out of student account.');
     this.router.navigate(['/login']);
   }
 
@@ -304,6 +307,7 @@ export class ProfilePage implements OnInit {
   showFeedback(msg: string, type: 'success' | 'error') {
     this.feedbackMessage = msg;
     this.feedbackType = type;
+    this.toastService.show(msg, type);
     setTimeout(() => {
       this.feedbackMessage = '';
     }, 3500);

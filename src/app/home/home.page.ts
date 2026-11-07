@@ -59,6 +59,7 @@ import {
 import { AuthService } from '../core/services/auth.service';
 import { AttendanceService } from '../core/services/attendance.service';
 import { NativeService } from '../core/services/native.service';
+import { ToastService } from '../core/services/toast.service';
 import { User } from '../models/user.model';
 import { AttendanceLog, DashboardStats } from '../models/attendance.model';
 import { formatHours, formatTime } from '../core/utils/format.util';
@@ -99,6 +100,7 @@ export class HomePage implements OnInit, OnDestroy {
   private nativeService = inject(NativeService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   // Realtime Clock State & Observable
   formatHours = formatHours;
@@ -579,8 +581,11 @@ export class HomePage implements OnInit, OnDestroy {
   showFeedback(msg: string, type: 'success' | 'error') {
     this.feedbackMessage = msg;
     this.feedbackType = type;
+    this.toastService.show(msg, type);
+    this.cdr.detectChanges();
     setTimeout(() => {
       this.feedbackMessage = '';
+      this.cdr.detectChanges();
     }, 4000);
   }
 }

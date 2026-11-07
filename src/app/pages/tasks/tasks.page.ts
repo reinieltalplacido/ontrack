@@ -19,6 +19,7 @@ import { addIcons } from 'ionicons';
 import { TaskService } from '../../core/services/task.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NativeService } from '../../core/services/native.service';
+import { ToastService } from '../../core/services/toast.service';
 import { TaskItem, TaskPriority, TaskStatus } from '../../models/task.model';
 import { User } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
@@ -86,6 +87,7 @@ export class TasksPage implements OnInit {
   private nativeService = inject(NativeService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   currentUser: User | null = null;
   tasks: TaskItem[] = [];
@@ -682,8 +684,11 @@ export class TasksPage implements OnInit {
   showFeedback(msg: string, type: 'success' | 'error') {
     this.feedbackMessage = msg;
     this.feedbackType = type;
+    this.toastService.show(msg, type);
+    this.cdr.detectChanges();
     setTimeout(() => {
       this.feedbackMessage = '';
+      this.cdr.detectChanges();
     }, 3500);
   }
 }

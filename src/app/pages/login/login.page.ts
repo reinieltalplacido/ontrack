@@ -7,7 +7,6 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
-  IonToast,
   IonAlert,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -24,6 +23,7 @@ import {
   personOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -37,7 +37,6 @@ import { AuthService } from '../../core/services/auth.service';
     IonButton,
     IonIcon,
     IonSpinner,
-    IonToast,
     IonAlert,
   ],
 })
@@ -46,6 +45,7 @@ export class LoginPage {
   private authService = inject(AuthService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   loginForm: FormGroup;
   showPassword = false;
@@ -96,6 +96,7 @@ export class LoginPage {
     this.errorMessage = '';
     this.toastMessage = 'Student demo credentials loaded!';
     this.showToast = true;
+    this.toastService.showInfo('Student demo credentials loaded!');
     this.cdr.detectChanges();
   }
 
@@ -107,6 +108,7 @@ export class LoginPage {
     this.errorMessage = '';
     this.toastMessage = 'Coordinator demo credentials loaded!';
     this.showToast = true;
+    this.toastService.showInfo('Coordinator demo credentials loaded!');
     this.cdr.detectChanges();
   }
 
@@ -117,6 +119,7 @@ export class LoginPage {
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
+      this.toastService.showError('Please enter your Student ID / Email and password.');
       return;
     }
 
@@ -130,6 +133,9 @@ export class LoginPage {
       next: (res) => {
         this.isLoading = false;
         if (res.success) {
+          this.toastService.showSuccess(
+            res.role === 'professor' || res.professor ? 'Welcome back, Coordinator!' : 'Signed in successfully!'
+          );
           if (res.role === 'professor' || res.professor) {
             this.router.navigate(['/admin/dashboard']);
           } else {
@@ -137,12 +143,14 @@ export class LoginPage {
           }
         } else {
           this.errorMessage = res.message || 'Invalid email or password.';
+          this.toastService.showError(this.errorMessage);
         }
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.isLoading = false;
         this.errorMessage = err?.error?.message || 'Unable to connect to server. Please try again.';
+        this.toastService.showError(this.errorMessage);
         this.cdr.detectChanges();
       },
     });

@@ -1,0 +1,61 @@
+@if (toast(); as item) {
+  <div 
+    class="ontrack-toast-wrapper" 
+    [class.toast-visible]="isVisible()"
+    [class.toast-hidden]="!isVisible()">
+    
+    <div 
+      class="ontrack-toast-card" 
+      [class]="'type-' + item.type"
+      [style.transform]="touchTranslateY ? 'translateY(' + touchTranslateY + 'px)' : null"
+      (click)="onToastClick($event)"
+      (touchstart)="onTouchStart($event)"
+      (touchmove)="onTouchMove($event)"
+      (touchend)="onTouchEnd()">
+      
+      <!-- Icon Badge -->
+      <div class="toast-icon-badge">
+        <ion-icon [name]="getIconName(item)"></ion-icon>
+      </div>
+
+      <!-- Text / Content -->
+      <div class="toast-body">
+        <div class="toast-header-row">
+          <span class="toast-type-pill">{{ item.title }}</span>
+          <span class="toast-brand-hint">OnTrack</span>
+        </div>
+        <div class="toast-message-text">{{ item.message }}</div>
+      </div>
+
+      <!-- Optional Inline Action Button -->
+      @if (item.actionText) {
+        <button 
+          type="button" 
+          class="toast-action-btn" 
+          (click)="onActionClick($event, item)">
+          {{ item.actionText }}
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </button>
+      }
+
+      <!-- Dismiss Close Icon Button -->
+      <button 
+        type="button" 
+        class="toast-dismiss-btn" 
+        (click)="dismiss($event)" 
+        aria-label="Dismiss notification">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <!-- Auto-dismiss Progress Bar -->
+      @if (item.duration > 0) {
+        <div class="toast-progress-track">
+          <div 
+            class="toast-progress-bar" 
+            [style.animation-duration]="item.duration + 'ms'">
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

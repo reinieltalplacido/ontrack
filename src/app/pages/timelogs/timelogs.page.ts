@@ -38,6 +38,7 @@ import {
 } from 'ionicons/icons';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { AttendanceLog } from '../../models/attendance.model';
 import { User } from '../../models/user.model';
 import { formatHours, formatTime } from '../../core/utils/format.util';
@@ -64,6 +65,7 @@ import { formatHours, formatTime } from '../../core/utils/format.util';
 export class TimeLogsPage implements OnInit {
   private attendanceService = inject(AttendanceService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -181,12 +183,18 @@ export class TimeLogsPage implements OnInit {
           }
         }
         this.isLoading = false;
-        if (event) event.target.complete();
+        if (event) {
+          event.target.complete();
+          this.toastService.showSuccess('Attendance history updated.');
+        }
         this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
-        if (event) event.target.complete();
+        if (event) {
+          event.target.complete();
+          this.toastService.showError('Could not refresh attendance history.');
+        }
         this.cdr.detectChanges();
       },
     });
@@ -279,6 +287,7 @@ export class TimeLogsPage implements OnInit {
   logout() {
     this.closeSideMenu();
     this.authService.logout();
+    this.toastService.showInfo('Signed out of student session.');
     this.router.navigate(['/login']);
   }
 

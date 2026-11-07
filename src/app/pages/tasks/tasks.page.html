@@ -256,7 +256,11 @@
     <ng-template>
       <div class="modal-card-container">
         <div class="modal-header">
-          <h2 class="modal-title">Add New Task</h2>
+          <div class="modal-title-group">
+            <span class="modal-kicker">New Deliverable</span>
+            <h2 class="modal-title">Add New Task</h2>
+            <p class="modal-subtitle">Define task details, deadline, and priority level</p>
+          </div>
           <button class="modal-close-btn" (click)="closeNewTaskModal()" aria-label="Close modal">
             <ion-icon name="close-outline"></ion-icon>
           </button>
@@ -265,10 +269,14 @@
         <form (ngSubmit)="submitNewTask()" class="modal-form">
           <!-- Title Input -->
           <div class="form-group">
+            <label class="form-label" for="task-title">
+              <span class="label-text">Task Title <span class="required">*</span></span>
+            </label>
             <input
+              id="task-title"
               type="text"
-              class="form-input"
-              placeholder="Title"
+              class="form-input clean-input"
+              placeholder="e.g. Design ER Diagram, Submit Weekly Report"
               [(ngModel)]="newTaskTitle"
               name="title"
               required
@@ -277,41 +285,143 @@
 
           <!-- Description Textarea -->
           <div class="form-group">
+            <label class="form-label" for="task-desc">
+              <span class="label-text">Description <span class="optional">(Optional)</span></span>
+            </label>
             <textarea
-              class="form-textarea"
-              placeholder="Description"
+              id="task-desc"
+              class="form-textarea clean-textarea"
+              placeholder="Brief overview, requirements, or steps to accomplish..."
               [(ngModel)]="newTaskDescription"
               name="description"
               rows="3"
             ></textarea>
           </div>
 
-          <!-- Date Picker -->
+          <!-- Due Date Picker -->
           <div class="form-group">
-            <div class="date-input-wrap">
+            <label class="form-label" for="task-deadline">
+              <span class="label-text">Due Date <span class="required">*</span></span>
+            </label>
+            <div class="custom-date-field" (click)="openDatePicker(datePickerInput)">
               <input
+                #datePickerInput
+                id="task-deadline"
                 type="date"
                 class="form-input date-input"
                 [(ngModel)]="newTaskDeadline"
                 name="deadline"
+                required
               />
+              <button
+                type="button"
+                class="calendar-action-btn"
+                (click)="openDatePicker(datePickerInput); $event.stopPropagation()"
+                aria-label="Open Calendar"
+              >
+                <ion-icon name="calendar-outline"></ion-icon>
+              </button>
             </div>
           </div>
 
-          <!-- Priority Select -->
+          <!-- Priority Level Custom Dropdown -->
           <div class="form-group">
-            <div class="select-wrapper">
-              <select [(ngModel)]="newTaskPriority" name="priority" class="custom-select form-input">
-                <option value="low">Low Priority</option>
-                <option value="medium">Medium Priority</option>
-                <option value="high">High Priority</option>
-              </select>
+            <label class="form-label">
+              <span class="label-text">Priority Level</span>
+            </label>
+            <div class="custom-dropdown-container">
+              @if (isPriorityDropdownOpen) {
+                <div class="dropdown-backdrop" (click)="isPriorityDropdownOpen = false"></div>
+              }
+
+              <button
+                type="button"
+                class="custom-dropdown-trigger"
+                [class.is-open]="isPriorityDropdownOpen"
+                (click)="togglePriorityDropdown()"
+                aria-haspopup="listbox"
+                [attr.aria-expanded]="isPriorityDropdownOpen"
+              >
+                <div class="trigger-selected">
+                  <span class="priority-bullet" [class]="'bullet-' + newTaskPriority"></span>
+                  <span class="priority-label-text">{{ getPriorityLabel(newTaskPriority) }}</span>
+                </div>
+                <ion-icon
+                  [name]="isPriorityDropdownOpen ? 'chevron-up-outline' : 'chevron-down-outline'"
+                  class="trigger-arrow"
+                ></ion-icon>
+              </button>
+
+              @if (isPriorityDropdownOpen) {
+                <div class="custom-dropdown-menu" role="listbox">
+                  <div
+                    class="dropdown-item"
+                    [class.active]="newTaskPriority === 'low'"
+                    (click)="selectPriority('low')"
+                    role="option"
+                    [attr.aria-selected]="newTaskPriority === 'low'"
+                  >
+                    <div class="item-info">
+                      <span class="priority-bullet bullet-low"></span>
+                      <span class="item-name">Low Priority</span>
+                    </div>
+                    <div class="item-meta">
+                      <span class="item-tag tag-low">Flexible</span>
+                      @if (newTaskPriority === 'low') {
+                        <ion-icon name="checkmark-outline" class="item-check"></ion-icon>
+                      }
+                    </div>
+                  </div>
+
+                  <div
+                    class="dropdown-item"
+                    [class.active]="newTaskPriority === 'medium'"
+                    (click)="selectPriority('medium')"
+                    role="option"
+                    [attr.aria-selected]="newTaskPriority === 'medium'"
+                  >
+                    <div class="item-info">
+                      <span class="priority-bullet bullet-medium"></span>
+                      <span class="item-name">Medium Priority</span>
+                    </div>
+                    <div class="item-meta">
+                      <span class="item-tag tag-medium">Standard</span>
+                      @if (newTaskPriority === 'medium') {
+                        <ion-icon name="checkmark-outline" class="item-check"></ion-icon>
+                      }
+                    </div>
+                  </div>
+
+                  <div
+                    class="dropdown-item"
+                    [class.active]="newTaskPriority === 'high'"
+                    (click)="selectPriority('high')"
+                    role="option"
+                    [attr.aria-selected]="newTaskPriority === 'high'"
+                  >
+                    <div class="item-info">
+                      <span class="priority-bullet bullet-high"></span>
+                      <span class="item-name">High Priority</span>
+                    </div>
+                    <div class="item-meta">
+                      <span class="item-tag tag-high">Urgent</span>
+                      @if (newTaskPriority === 'high') {
+                        <ion-icon name="checkmark-outline" class="item-check"></ion-icon>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div class="modal-actions-col">
-            <button type="submit" class="primary-submit-btn" [disabled]="isSubmitting">
+            <button
+              type="submit"
+              class="primary-submit-btn"
+              [disabled]="isSubmitting || !newTaskTitle.trim() || !newTaskDeadline"
+            >
               @if (isSubmitting) {
                 <ion-spinner name="crescent"></ion-spinner>
               } @else {

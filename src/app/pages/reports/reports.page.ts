@@ -39,6 +39,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { TaskService } from '../../core/services/task.service';
 import { NativeService } from '../../core/services/native.service';
+import { ToastService } from '../../core/services/toast.service';
 import { User } from '../../models/user.model';
 import { AttendanceLog, DashboardStats } from '../../models/attendance.model';
 import { TaskItem } from '../../models/task.model';
@@ -77,6 +78,7 @@ export class ReportsPage implements OnInit {
   private nativeService = inject(NativeService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   currentUser: User | null = null;
   stats: DashboardStats | null = null;
@@ -352,8 +354,11 @@ export class ReportsPage implements OnInit {
   showFeedback(msg: string, type: 'success' | 'error') {
     this.feedbackMessage = msg;
     this.feedbackType = type;
+    this.toastService.show(msg, type);
+    this.cdr.detectChanges();
     setTimeout(() => {
       this.feedbackMessage = '';
+      this.cdr.detectChanges();
     }, 3500);
   }
 }
