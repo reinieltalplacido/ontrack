@@ -533,9 +533,9 @@ $bg-canvas: #f1f5f9;
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #fff1f2;
-            color: #e11d48;
-            border: 1px solid #fecdd3;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
             padding: 5px 10px;
             font-size: 0.76rem;
@@ -544,12 +544,14 @@ $bg-canvas: #f1f5f9;
             transition: all 0.15s ease;
 
             &:active {
-              background: #ffe4e6;
+              background: #e2e8f0;
+              color: #1e293b;
               transform: scale(0.97);
             }
 
             ion-icon {
-              font-size: 0.9rem;
+              font-size: 0.95rem;
+              color: #64748b;
             }
           }
 
@@ -1205,9 +1207,9 @@ $bg-canvas: #f1f5f9;
         .btn-workflow-undo {
           flex: 1;
           height: 48px;
-          background: #fff1f2;
-          color: #e11d48;
-          border: 1.5px solid #fecdd3;
+          background: #ffffff;
+          color: #334155;
+          border: 1.5px solid #cbd5e1;
           border-radius: 12px;
           font-size: 0.88rem;
           font-weight: 700;
@@ -1216,10 +1218,19 @@ $bg-canvas: #f1f5f9;
           justify-content: center;
           gap: 6px;
           cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
           transition: all 0.15s ease;
 
+          ion-icon {
+            font-size: 1.15rem;
+            color: #64748b;
+          }
+
           &:active {
-            background: #ffe4e6;
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #0f172a;
             transform: scale(0.98);
           }
         }
