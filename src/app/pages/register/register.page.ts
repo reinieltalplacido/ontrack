@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import {
   IonToast,
   IonModal,
   IonDatetime,
+  IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -27,6 +28,7 @@ import {
   sparklesOutline,
   alertCircleOutline,
   calendarOutline,
+  personCircleOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -45,12 +47,14 @@ import { AuthService } from '../../core/services/auth.service';
     IonToast,
     IonModal,
     IonDatetime,
+    IonBadge,
   ],
 })
 export class RegisterPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   registerForm: FormGroup;
   currentStep = 1;
@@ -77,6 +81,23 @@ export class RegisterPage {
     { value: 4, label: '4th Year (Graduating / OJT)' },
   ];
 
+  sections = [
+    { code: 'A', label: 'Section A (BSIT 4-A)' },
+    { code: 'B', label: 'Section B (BSIT 4-B)' },
+    { code: 'C', label: 'Section C (BSIT 4-C)' },
+    { code: 'D', label: 'Section D (BSIT 4-D)' },
+    { code: 'E', label: 'Section E (BSIT 4-E)' },
+    { code: 'F', label: 'Section F (BSIT 4-F)' },
+    { code: 'G', label: 'Section G (BSIT 4-G)' },
+    { code: 'H', label: 'Section H (BSIT 4-H)' },
+    { code: 'I', label: 'Section I (BSIT 4-I)' },
+    { code: 'J', label: 'Section J (BSIT 4-J)' },
+    { code: 'K', label: 'Section K (BSIT 4-K)' },
+  ];
+
+  assignedCoordinator: any = null;
+  isLoadingCoordinator = false;
+
   constructor() {
     addIcons({
       arrowBackOutline,
@@ -93,6 +114,7 @@ export class RegisterPage {
       sparklesOutline,
       alertCircleOutline,
       calendarOutline,
+      personCircleOutline,
     });
 
     this.registerForm = this.fb.group({
@@ -101,12 +123,13 @@ export class RegisterPage {
       full_name: ['', [Validators.required, Validators.minLength(3)]],
       course: ['BSIT', [Validators.required]],
       year_level: [4, [Validators.required, Validators.min(1), Validators.max(6)]],
+      section: ['A', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
 
       // Step 2: OJT & Company Details
       company_name: ['', [Validators.required]],
-      adviser_name: ['Prof. Maria Santos', [Validators.required]],
-      adviser_email: ['adviser@neust.edu.ph', [Validators.email]],
+      adviser_name: ['', [Validators.required]],
+      adviser_email: ['', [Validators.email]],
       required_hours: [486, [Validators.required, Validators.min(50), Validators.max(1000)]],
       target_date: ['2026-12-15', [Validators.required]],
 
@@ -114,10 +137,47 @@ export class RegisterPage {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirm_password: ['', [Validators.required]],
     });
+
+    // Auto-fetch coordinator whenever section, course, or year level changes
+    this.registerForm.get('section')?.valueChanges.subscribe((sec) => {
+      this.fetchAssignedCoordinator(sec);
+    });
+
+    this.registerForm.get('course')?.valueChanges.subscribe(() => {
+      this.fetchAssignedCoordinator(this.registerForm.get('section')?.value || 'A');
+    });
+
+    // Initial coordinator lookup
+    this.fetchAssignedCoordinator('A');
+  }
+
+  fetchAssignedCoordinator(secCode: string) {
+    const course = this.registerForm.get('course')?.value || 'BSIT';
+    const year = this.registerForm.get('year_level')?.value || 4;
+    const fullSection = `${course} ${year}-${secCode}`;
+
+    this.isLoadingCoordinator = true;
+    this.authService.getCoordinatorForSection(fullSection).subscribe({
+      next: (res) => {
+        this.isLoadingCoordinator = false;
+        if (res.success && res.coordinator) {
+          this.assignedCoordinator = res.coordinator;
+          this.registerForm.patchValue({
+            adviser_name: res.coordinator.full_name,
+            adviser_email: res.coordinator.email,
+          });
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoadingCoordinator = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   isStep1Valid(): boolean {
-    const s1 = ['student_no', 'full_name', 'course', 'year_level', 'email'];
+    const s1 = ['student_no', 'full_name', 'course', 'year_level', 'section', 'email'];
     return s1.every((field) => this.registerForm.get(field)?.valid);
   }
 
@@ -216,6 +276,7 @@ export class RegisterPage {
       full_name: 'Alexandria Reyes',
       course: 'BSIT',
       year_level: 4,
+      section: 'B',
       email: `alexandria.reyes${randomNum}@neust.edu.ph`,
       company_name: 'Innovatech Systems Hub',
       adviser_name: 'Prof. Maria Santos',
@@ -256,11 +317,17 @@ export class RegisterPage {
           }, 800);
         } else {
           this.errorMessage = res.message || 'Registration failed. Please check your information.';
+          this.toastMessage = this.errorMessage;
+          this.showToast = true;
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isLoading = false;
         this.errorMessage = err?.error?.message || 'Unable to register account. Please check your connection.';
+        this.toastMessage = this.errorMessage;
+        this.showToast = true;
+        this.cdr.detectChanges();
       },
     });
   }

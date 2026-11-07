@@ -176,14 +176,25 @@
   }
 }
 
-.neat-card {
+.neat-card, ion-card.neat-card {
+  --background: #ffffff;
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: 18px;
   box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
-  padding: 16px;
-  margin-bottom: 14px;
+  padding: 0;
+  margin: 0 0 14px 0;
   box-sizing: border-box;
+
+  ion-card-header.card-top-header {
+    padding: 16px 16px 0 16px;
+  }
+
+  ion-card-content.card-inner-body {
+    padding: 12px 16px 16px 16px;
+    font-size: inherit;
+    color: inherit;
+  }
 
   .card-top-header {
     display: flex;

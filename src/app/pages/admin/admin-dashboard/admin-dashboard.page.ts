@@ -12,6 +12,8 @@ import {
   IonModal,
   IonSpinner,
   IonToast,
+  IonCard,
+  IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -52,6 +54,17 @@ import {
   calendarClearOutline,
   checkmarkOutline,
   todayOutline,
+  reorderThreeOutline,
+  clipboardOutline,
+  listOutline,
+  closeCircleOutline,
+  fingerPrintOutline,
+  downloadOutline,
+  checkmarkDoneCircleOutline,
+  checkmark,
+  time,
+  checkmarkCircle,
+  documentText,
 } from 'ionicons/icons';
 import { AdminService, AdminStats, MonitoredStudent } from '../../../core/services/admin.service';
 import { NativeService } from '../../../core/services/native.service';
@@ -157,6 +170,8 @@ export interface AdminTaskItem {
     IonModal,
     IonSpinner,
     IonToast,
+    IonCard,
+    IonBadge,
   ],
 })
 export class AdminDashboardPage implements OnInit {
@@ -167,7 +182,26 @@ export class AdminDashboardPage implements OnInit {
 
   currentProfessor: Professor | null = null;
   currentSection = 'BSIT 4-A';
+  availableSections = [
+    'BSIT 4-A',
+    'BSIT 4-B',
+    'BSIT 4-C',
+    'BSIT 4-D',
+    'BSIT 4-E',
+    'BSIT 4-F',
+    'BSIT 4-G',
+    'BSIT 4-H',
+    'BSIT 4-I',
+    'BSIT 4-J',
+    'BSIT 4-K',
+  ];
   isSideMenuOpen = false;
+
+  onSectionChange(newSection: string) {
+    this.currentSection = newSection;
+    this.newTask.section = newSection;
+    this.loadAllData();
+  }
 
   // Active Segment
   selectedSegment: 'overview' | 'students' | 'attendance' | 'tasks' = 'overview';
@@ -261,45 +295,7 @@ export class AdminDashboardPage implements OnInit {
   toastMessage = '';
 
   constructor() {
-    addIcons({
-      gridOutline,
-      peopleOutline,
-      timeOutline,
-      calendarOutline,
-      checkboxOutline,
-      checkmarkCircleOutline,
-      hourglassOutline,
-      searchOutline,
-      filterOutline,
-      addOutline,
-      closeOutline,
-      refreshOutline,
-      logOutOutline,
-      locationOutline,
-      cameraOutline,
-      businessOutline,
-      mailOutline,
-      schoolOutline,
-      personOutline,
-      shieldCheckmarkOutline,
-      documentTextOutline,
-      alertCircleOutline,
-      chevronForwardOutline,
-      eyeOutline,
-      sparklesOutline,
-      arrowBackOutline,
-      flagOutline,
-      speedometerOutline,
-      imageOutline,
-      sendOutline,
-      menuOutline,
-      chevronBackOutline,
-      chevronDownOutline,
-      chevronUpOutline,
-      calendarClearOutline,
-      checkmarkOutline,
-      todayOutline,
-    });
+    addIcons({menuOutline,shieldCheckmarkOutline,calendarOutline,addOutline,peopleOutline,timeOutline,checkboxOutline,chevronForwardOutline,locationOutline,cameraOutline,hourglassOutline,searchOutline,closeOutline,chevronBackOutline,todayOutline,documentTextOutline,eyeOutline,flagOutline,reorderThreeOutline,clipboardOutline,schoolOutline,businessOutline,mailOutline,listOutline,checkmarkCircleOutline,checkmark,time,closeCircleOutline,calendarClearOutline,fingerPrintOutline,checkmarkCircle,personOutline,sendOutline,documentText,downloadOutline,checkmarkDoneCircleOutline,gridOutline,refreshOutline,logOutOutline,filterOutline,alertCircleOutline,sparklesOutline,arrowBackOutline,speedometerOutline,imageOutline,chevronDownOutline,chevronUpOutline,checkmarkOutline,});
   }
 
   ngOnInit() {
@@ -687,13 +683,21 @@ export class AdminDashboardPage implements OnInit {
     const groupsMap = new Map<string, any[]>();
 
     for (const log of this.studentDossierLogs) {
-      const parts = log.log_date.split('-');
-      const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-      const day = d.getDay();
+      if (!log || !log.log_date) continue;
+      const parts = String(log.log_date).split('-');
+      if (parts.length < 3) continue;
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      const dateObj = new Date(y, m, d);
+      const day = dateObj.getDay();
       const diff = day === 0 ? -6 : 1 - day;
-      const monday = new Date(d);
-      monday.setDate(d.getDate() + diff);
-      const mStr = monday.toISOString().split('T')[0];
+      const monday = new Date(y, m, d + diff);
+
+      const monYear = monday.getFullYear();
+      const monMonth = String(monday.getMonth() + 1).padStart(2, '0');
+      const monDate = String(monday.getDate()).padStart(2, '0');
+      const mStr = `${monYear}-${monMonth}-${monDate}`;
 
       if (!groupsMap.has(mStr)) {
         groupsMap.set(mStr, []);
@@ -707,18 +711,19 @@ export class AdminDashboardPage implements OnInit {
 
     this.dossierWeekGroups = sortedWeekKeys.map((mStr, index) => {
       const parts = mStr.split('-');
-      const monday = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      const monday = new Date(y, m, d);
+      const sunday = new Date(y, m, d + 6);
 
-      const sParts = sunday.toISOString().split('T')[0].split('-');
-      const sMonth = months[parseInt(parts[1], 10) - 1];
-      const eMonth = months[parseInt(sParts[1], 10) - 1];
-      const year = parts[0];
+      const sMonth = months[monday.getMonth()] || 'Jan';
+      const eMonth = months[sunday.getMonth()] || 'Jan';
+      const year = String(monday.getFullYear());
 
       const weekLabel = sMonth === eMonth
-        ? `${sMonth} ${parseInt(parts[2], 10)} - ${parseInt(sParts[2], 10)}, ${year}`
-        : `${sMonth} ${parseInt(parts[2], 10)} - ${eMonth} ${parseInt(sParts[2], 10)}, ${year}`;
+        ? `${sMonth} ${monday.getDate()} - ${sunday.getDate()}, ${year}`
+        : `${sMonth} ${monday.getDate()} - ${eMonth} ${sunday.getDate()}, ${year}`;
 
       const logsInWeek = groupsMap.get(mStr) || [];
       let totalHrs = 0;
@@ -726,9 +731,11 @@ export class AdminDashboardPage implements OnInit {
 
       const days = [];
       for (let i = 0; i < 7; i++) {
-        const curDate = new Date(monday);
-        curDate.setDate(monday.getDate() + i);
-        const curStr = curDate.toISOString().split('T')[0];
+        const curDate = new Date(y, m, d + i);
+        const cYear = curDate.getFullYear();
+        const cMonth = String(curDate.getMonth() + 1).padStart(2, '0');
+        const cDay = String(curDate.getDate()).padStart(2, '0');
+        const curStr = `${cYear}-${cMonth}-${cDay}`;
         const logForDay = logsInWeek.find((l: any) => l.log_date === curStr);
 
         if (logForDay) {
@@ -820,6 +827,7 @@ export class AdminDashboardPage implements OnInit {
   }
 
   openStudentDossier(student: MonitoredStudent) {
+    if (!student) return;
     this.selectedStudent = student;
     this.isStudentModalOpen = true;
     this.isLoadingStudentDossier = true;
@@ -828,18 +836,24 @@ export class AdminDashboardPage implements OnInit {
     this.studentDossierTab = 'logs';
     this.studentDossierViewMode = 'weekly';
 
-    this.adminService.getStudentDetail(student.id).subscribe({
+    const sId = Number(student.id);
+    this.adminService.getStudentDetail(sId).subscribe({
       next: (res) => {
         this.isLoadingStudentDossier = false;
-        if (res.success) {
+        if (res && res.success) {
           this.selectedStudent = { ...student, ...res.student };
           this.studentDossierLogs = res.logs || [];
           this.studentDossierTasks = res.tasks || [];
-          this.groupDossierLogsByWeek();
+          try {
+            this.groupDossierLogsByWeek();
+          } catch (err) {
+            console.error('Error grouping dossier logs by week:', err);
+          }
         }
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error fetching student detail:', err);
         this.isLoadingStudentDossier = false;
         this.cdr.detectChanges();
       },

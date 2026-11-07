@@ -118,6 +118,31 @@
           </div>
         </div>
 
+        <!-- Section Dropdown (Section A to K) -->
+        <div class="form-group">
+          <label class="form-label" for="section">Section <span class="req">*</span></label>
+          <div class="input-shell select-shell">
+            <select id="section" formControlName="section">
+              <option *ngFor="let s of sections" [value]="s.code">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Auto-Fetched Coordinator Card -->
+        <div class="assigned-coordinator-card" *ngIf="assignedCoordinator">
+          <div class="coord-avatar">
+            <ion-icon name="person-circle-outline"></ion-icon>
+          </div>
+          <div class="coord-details">
+            <div class="coord-tag-row">
+              <span class="coord-kicker">Assigned Coordinator</span>
+              <ion-badge class="auto-link-badge">Auto-Assigned</ion-badge>
+            </div>
+            <h5 class="coord-name">{{ assignedCoordinator.full_name }}</h5>
+            <p class="coord-meta">{{ assignedCoordinator.email }} • Section {{ registerForm.get('section')?.value }}</p>
+          </div>
+        </div>
+
         <!-- Academic Email -->
         <div class="form-group">
           <label class="form-label" for="email">Student Email <span class="req">*</span></label>
@@ -169,6 +194,9 @@
               placeholder="e.g. Prof. Maria Santos" 
             />
           </div>
+          <p class="field-hint text-green" *ngIf="assignedCoordinator">
+            Auto-assigned: {{ assignedCoordinator.full_name }} (Section {{ registerForm.get('section')?.value }})
+          </p>
         </div>
 
         <!-- Required Hours & Target Completion Date -->
@@ -245,7 +273,11 @@
           </div>
           <div class="summary-line">
             <span class="s-label">Program:</span>
-            <span class="s-val">{{ registerForm.get('course')?.value }} • Year {{ registerForm.get('year_level')?.value }}</span>
+            <span class="s-val">{{ registerForm.get('course')?.value }} 4-{{ registerForm.get('section')?.value }}</span>
+          </div>
+          <div class="summary-line">
+            <span class="s-label">Coordinator:</span>
+            <span class="s-val">{{ registerForm.get('adviser_name')?.value || '—' }}</span>
           </div>
           <div class="summary-line">
             <span class="s-label">Company:</span>
@@ -259,6 +291,12 @@
             <ion-icon name="shield-checkmark-outline"></ion-icon>
             <span>Official OJT Student Record</span>
           </div>
+        </div>
+
+        <!-- Inline Error Banner in Step 3 -->
+        <div class="error-banner" *ngIf="errorMessage">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <span>{{ errorMessage }}</span>
         </div>
 
       </div>

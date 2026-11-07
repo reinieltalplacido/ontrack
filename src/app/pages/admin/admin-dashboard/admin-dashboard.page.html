@@ -8,7 +8,16 @@
       </div>
       
       <div class="brand-right">
-        <span class="section-tag">{{ currentSection }}</span>
+        <div class="section-picker-wrap">
+          <select 
+            class="section-select-pill" 
+            [(ngModel)]="currentSection" 
+            (change)="onSectionChange(currentSection)"
+            aria-label="Monitored Section">
+            <option *ngFor="let s of availableSections" [value]="s">{{ s }}</option>
+          </select>
+          <ion-icon name="chevron-down-outline" class="pill-chevron"></ion-icon>
+        </div>
         <button class="header-menu-btn" (click)="openSideMenu()" aria-label="Open navigation menu">
           <ion-icon name="menu-outline"></ion-icon>
         </button>
@@ -72,7 +81,7 @@
       <div class="metrics-grid">
         
         <!-- Total Students -->
-        <div class="metric-card" (click)="switchSegment('students')">
+        <ion-card class="metric-card" (click)="switchSegment('students')">
           <div class="metric-header">
             <div class="metric-icon-box blue">
               <ion-icon name="people-outline"></ion-icon>
@@ -82,10 +91,10 @@
           <div class="metric-value">{{ stats.total_students }}</div>
           <div class="metric-label">Enrolled Interns</div>
           <div class="metric-footer">Class of {{ currentSection }}</div>
-        </div>
+        </ion-card>
 
         <!-- Active On Duty -->
-        <div class="metric-card" (click)="switchSegment('attendance')">
+        <ion-card class="metric-card" (click)="switchSegment('attendance')">
           <div class="metric-header">
             <div class="metric-icon-box green">
               <ion-icon name="time-outline"></ion-icon>
@@ -98,12 +107,12 @@
           <div class="metric-value text-green">{{ stats.active_on_duty }}</div>
           <div class="metric-label">On Duty Right Now</div>
           <div class="metric-footer">{{ stats.completed_duty_today }} shifts completed today</div>
-        </div>
+        </ion-card>
 
 
 
         <!-- Tasks Tracked -->
-        <div class="metric-card full-width" (click)="switchSegment('tasks')">
+        <ion-card class="metric-card full-width" (click)="switchSegment('tasks')">
           <div class="metric-header">
             <div class="metric-icon-box purple">
               <ion-icon name="checkbox-outline"></ion-icon>
@@ -126,7 +135,7 @@
               <span class="split-txt">Completed</span>
             </div>
           </div>
-        </div>
+        </ion-card>
 
       </div>
 
@@ -142,7 +151,7 @@
 
         <!-- Activity Cards -->
         <div class="recent-list" *ngIf="recentActivities.length > 0; else noRecent">
-          <div class="activity-card" *ngFor="let act of recentActivities">
+          <ion-card class="activity-card" *ngFor="let act of recentActivities">
             <div class="activity-top">
               <div class="activity-student">
                 <div class="student-avatar-circle">
@@ -186,7 +195,7 @@
                 <span>View Verification Selfie</span>
               </button>
             </div>
-          </div>
+          </ion-card>
         </div>
 
         <ng-template #noRecent>
@@ -247,7 +256,7 @@
 
       <!-- Students List -->
       <div class="students-list" *ngIf="filteredStudents.length > 0; else noStudents">
-        <div class="student-card" *ngFor="let s of filteredStudents" (click)="openStudentDossier(s)">
+        <ion-card class="student-card" *ngFor="let s of filteredStudents" (click)="openStudentDossier(s)">
           
           <div class="card-main-row">
             <div class="student-avatar">
@@ -257,10 +266,10 @@
             <div class="student-details">
               <div class="student-title-line">
                 <h4 class="student-name">{{ s.full_name }}</h4>
-                <span class="status-pill" [class.on-duty]="s.is_on_duty" [class.off-duty]="!s.is_on_duty">
+                <ion-badge class="status-pill" [class.on-duty]="s.is_on_duty" [class.off-duty]="!s.is_on_duty">
                   <span class="status-dot"></span>
                   {{ s.is_on_duty ? 'On Duty' : 'Off Duty' }}
-                </span>
+                </ion-badge>
               </div>
               <p class="student-sub">
                 <span class="sno">{{ s.student_no }}</span>
@@ -300,14 +309,14 @@
                 <ion-icon name="add-outline"></ion-icon>
                 <span>Task</span>
               </button>
-              <button class="action-btn-sm primary" (click)="openStudentDossier(s)" aria-label="View Profile">
-                <span>Dossier</span>
+              <button class="action-btn-sm primary" (click)="openStudentDossier(s); $event.stopPropagation()" aria-label="View Profile">
+                <span>View</span>
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </button>
             </div>
           </div>
 
-        </div>
+        </ion-card>
       </div>
 
       <ng-template #noStudents>
@@ -732,21 +741,13 @@
                   </div>
                 </div>
 
-                <!-- Col 2: Task Info & Badges -->
+                <!-- Col 2: Task Title & Status -->
                 <div class="col-task-wrap">
                   <span class="task-title-text">{{ t.title }}</span>
                   <div class="task-meta-pills">
-                    <span class="status-badge" [class.badge-completed]="t.status === 'completed'" [class.badge-progress]="t.status === 'in_progress'" [class.badge-pending]="t.status === 'pending'">
+                    <ion-badge class="status-badge" [class.badge-completed]="t.status === 'completed'" [class.badge-progress]="t.status === 'in_progress'" [class.badge-pending]="t.status === 'pending'">
                       {{ t.status === 'in_progress' ? 'In Progress' : (t.status | titlecase) }}
-                    </span>
-                    <span class="proof-badge" *ngIf="t.proof_file">
-                      <ion-icon [name]="isProofDocument(t.proof_file) ? 'document-text-outline' : 'image-outline'"></ion-icon>
-                      <span>{{ t.proof_file }}</span>
-                    </span>
-                    <span class="due-badge" *ngIf="t.deadline">
-                      <ion-icon name="calendar-outline"></ion-icon>
-                      <span>{{ formatFriendlyDate(t.deadline) }}</span>
-                    </span>
+                    </ion-badge>
                   </div>
                 </div>
 
@@ -778,7 +779,7 @@
         <!-- Monitored Interns Strip (For quick assignment) -->
         <div class="section-container" style="margin-top: 20px;">
           <h3 class="section-heading">Assign Tasks by Intern</h3>
-          <p class="section-subtext">Click on any intern below to assign targeted duties or inspect their dossier.</p>
+          <p class="section-subtext">Click on any intern below to assign targeted duties or view their profile.</p>
           
           <div class="students-task-grid">
             <div class="task-student-tile" *ngFor="let s of students" (click)="openAssignTaskModal(s)">
@@ -807,7 +808,7 @@
         <!-- Modal Top Bar -->
         <div class="modal-header">
           <div class="modal-title-box">
-            <span class="modal-kicker">Intern Dossier</span>
+            <span class="modal-kicker">Intern Profile</span>
             <h3 class="modal-title">{{ selectedStudent?.full_name }}</h3>
           </div>
           <button class="modal-close-btn" (click)="closeStudentDossier()" aria-label="Close">

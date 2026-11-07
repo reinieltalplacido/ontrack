@@ -136,13 +136,20 @@ $bg-canvas: #f1f5f9;
 }
 
 // Filters Card (Exact Reference Design)
-.filters-card {
+.filters-card, ion-card.filters-card {
+  --background: #{$card-bg};
   background: $card-bg;
   border: 1px solid $border-color;
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 0;
+  margin: 0 0 16px 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  .filters-card-content {
+    padding: 16px;
+    font-size: inherit;
+    color: inherit;
+  }
 
   .search-input-wrap {
     position: relative;
@@ -239,12 +246,15 @@ $bg-canvas: #f1f5f9;
   gap: 12px;
   margin-bottom: 14px;
 
-  .metric-box {
+  .metric-box, ion-card.metric-box {
+    --background: #{$card-bg};
     background: $card-bg;
     border: 1px solid $border-color;
     border-radius: 10px;
     padding: 14px;
+    margin: 0;
     text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 
     .metric-title {
       display: block;
@@ -319,14 +329,22 @@ $bg-canvas: #f1f5f9;
     gap: 10px;
   }
 
-  .task-card {
+  .task-card, ion-card.task-card {
+    --background: #{$card-bg};
     background: $card-bg;
     border: 1px solid $border-color;
     border-radius: 10px;
-    padding: 12px 14px;
-    display: flex;
-    gap: 12px;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     transition: transform 0.15s ease, border-color 0.15s ease;
+
+    .task-card-inner {
+      padding: 12px 14px;
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
 
     &.is-completed {
       opacity: 0.75;

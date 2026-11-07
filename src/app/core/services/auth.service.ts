@@ -68,12 +68,20 @@ export class AuthService {
    * Register new student into ontrack_db.users table
    */
   register(userData: any): Observable<AuthResponse> {
+    const course = userData.course || 'BSIT';
+    const yearLevel = userData.year_level || 4;
+    const section = userData.section || 'A';
+    const courseSection = userData.course_section || `${course} ${yearLevel}-${section}`;
+
     const payload = {
       student_id: userData.student_id || userData.student_no,
       full_name: userData.full_name,
       email: userData.email,
       password: userData.password,
-      course_section: userData.course || userData.course_section || 'BSIT 4-A',
+      course,
+      year_level: yearLevel,
+      section,
+      course_section: courseSection,
       school_campus: userData.school_campus || 'NEUST - Sumacab Campus',
       company_name: userData.company_name,
       adviser_name: userData.adviser_name,
@@ -93,6 +101,28 @@ export class AuthService {
         const errorMsg = err?.error?.message || 'Registration failed. Please check inputs.';
         return of({ success: false, message: errorMsg });
       })
+    );
+  }
+
+  /**
+   * Fetch coordinator assigned to a specific section (e.g. BSIT 4-B or B)
+   */
+  getCoordinatorForSection(section: string): Observable<{ success: boolean; found: boolean; coordinator: any }> {
+    return this.http.get<{ success: boolean; found: boolean; coordinator: any }>(
+      `${this.apiUrl}/coordinators.php?section=${encodeURIComponent(section)}`
+    ).pipe(
+      catchError(() => of({ success: false, found: false, coordinator: null }))
+    );
+  }
+
+  /**
+   * Fetch all section coordinators
+   */
+  getCoordinators(): Observable<{ success: boolean; count: number; coordinators: any[] }> {
+    return this.http.get<{ success: boolean; count: number; coordinators: any[] }>(
+      `${this.apiUrl}/coordinators.php`
+    ).pipe(
+      catchError(() => of({ success: false, count: 0, coordinators: [] }))
     );
   }
 

@@ -40,26 +40,28 @@ try {
     $todayStr = date('Y-m-d');
     $results = [];
 
+    // Prepare statements ONCE before the loop for maximum performance
+    $hStmt = $pdo->prepare("SELECT SUM(total_hours) as total_hrs FROM attendance_logs WHERE user_id = :uid AND status = 'completed'");
+    $dutyStmt = $pdo->prepare("SELECT id, time_in, location_name FROM attendance_logs WHERE user_id = :uid AND log_date = :today AND status = 'ongoing' LIMIT 1");
+    $tStmt = $pdo->prepare("SELECT COUNT(*) as pending_cnt FROM tasks WHERE user_id = :uid AND status != 'completed'");
+
     foreach ($students as $s) {
         $studentId = (int)$s['id'];
         $studentNo = $s['student_no'];
         $requiredHours = floatval($s['required_hours'] ?? 486);
 
-        // Compute accumulated hours
-        $hStmt = $pdo->prepare("SELECT SUM(total_hours) as total_hrs FROM attendance_logs WHERE (user_id = :uid OR student_no = :sno) AND status = 'completed'");
-        $hStmt->execute(['uid' => $studentId, 'sno' => $studentNo]);
+        // 1. Compute accumulated hours using indexed user_id lookup
+        $hStmt->execute(['uid' => $studentId]);
         $hRow = $hStmt->fetch();
         $accumulated = round(floatval($hRow['total_hrs'] ?? 0), 2);
 
-        // Check if currently on duty today
-        $dutyStmt = $pdo->prepare("SELECT id, time_in, location_name FROM attendance_logs WHERE (user_id = :uid OR student_no = :sno) AND log_date = :today AND status = 'ongoing' LIMIT 1");
-        $dutyStmt->execute(['uid' => $studentId, 'sno' => $studentNo, 'today' => $todayStr]);
+        // 2. Check if currently on duty today using index
+        $dutyStmt->execute(['uid' => $studentId, 'today' => $todayStr]);
         $ongoingLog = $dutyStmt->fetch();
         $isOnDuty = !empty($ongoingLog);
 
-        // Check pending tasks
-        $tStmt = $pdo->prepare("SELECT COUNT(*) as pending_cnt FROM tasks WHERE (user_id = :uid OR student_no = :sno) AND status != 'completed'");
-        $tStmt->execute(['uid' => $studentId, 'sno' => $studentNo]);
+        // 3. Check pending tasks using index
+        $tStmt->execute(['uid' => $studentId]);
         $tRow = $tStmt->fetch();
         $pendingTasksCount = (int)($tRow['pending_cnt'] ?? 0);
 
@@ -89,7 +91,7 @@ try {
             'current_shift'       => $ongoingLog ?: null,
             'pending_tasks_count' => $pendingTasksCount,
             'professor_id'        => (int)($s['professor_id'] ?? 0),
-            'adviser_name'        => $s['adviser_full_name'] ?? $s['adviser_name'],
+            'adviser_name'        => $s['adviser_full_name'] ?? ($s['adviser_name'] ?? 'OJT Coordinator'),
         ];
     }
 
@@ -101,4 +103,3 @@ try {
 } catch (PDOException $e) {
     respond(500, ['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
-

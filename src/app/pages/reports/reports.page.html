@@ -33,7 +33,7 @@
     </header>
 
     <!-- Section 1: Generate Reports (Exact Reference Layout) -->
-    <section class="content-card generate-reports-section">
+    <ion-card class="content-card generate-reports-section">
       <div class="section-title-wrap">
         <ion-icon name="copy-outline" class="title-icon"></ion-icon>
         <div class="title-meta">
@@ -61,10 +61,10 @@
           <p class="type-desc">Overview of progress, hours completed, and pending tasks</p>
         </button>
       </div>
-    </section>
+    </ion-card>
 
     <!-- Section 2: My Reports (Exact Reference Layout) -->
-    <section class="content-card my-reports-section">
+    <ion-card class="content-card my-reports-section">
       <h2 class="card-heading">My Reports</h2>
 
       <!-- Filters & Search Toolbar -->
@@ -123,17 +123,17 @@
                   <span class="rep-date">{{ formatDate(rep.date) }}</span>
                 </div>
                 <div class="col-status">
-                  <span class="status-pill ready">{{ rep.status }}</span>
+                  <ion-badge color="success" class="status-pill ready">{{ rep.status }}</ion-badge>
                 </div>
               </div>
             }
           </div>
         }
       </div>
-    </section>
+    </ion-card>
 
     <!-- Section 3: OJT Information (Exact Reference Layout) -->
-    <section class="content-card ojt-info-section">
+    <ion-card class="content-card ojt-info-section">
       <h2 class="card-heading">OJT Information</h2>
       <p class="card-subheading">Information that will be included in the report header</p>
 
@@ -177,7 +177,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </ion-card>
   </div>
 
   <!-- INTERACTIVE REPORT PREVIEW & PRINT MODAL -->

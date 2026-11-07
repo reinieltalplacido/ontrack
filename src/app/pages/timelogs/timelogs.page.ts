@@ -10,6 +10,8 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
+  IonCard,
+  IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -53,6 +55,8 @@ import { User } from '../../models/user.model';
     IonRefresher,
     IonRefresherContent,
     IonSpinner,
+    IonCard,
+    IonBadge,
   ],
 })
 export class TimeLogsPage implements OnInit {

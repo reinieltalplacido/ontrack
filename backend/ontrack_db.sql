@@ -22,7 +22,8 @@ CREATE TABLE `attendance_logs` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `idx_attendance_student` (`student_no`),
-  KEY `idx_attendance_user` (`user_id`)
+  KEY `idx_attendance_user` (`user_id`),
+  KEY `idx_user_date_time` (`user_id`, `log_date`, `time_in`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `attendance_logs` (`id`, `user_id`, `student_no`, `log_date`, `time_in`, `time_out`, `total_hours`, `latitude`, `longitude`, `location_name`, `photo_url`, `activity_notes`, `status`, `created_at`) VALUES ('1', '1', '2026-0001', '2026-11-04', '16:47:39', '16:47:56', '0.25', '15.48590000', '120.96780000', 'Innovate Tech Main Office', NULL, 'Configured backend REST API and connected Ionic mobile front-end.', 'completed', '2026-11-04 16:47:39');
@@ -49,7 +50,18 @@ CREATE TABLE `professors` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `professors` (`id`, `employee_id`, `full_name`, `email`, `password`, `department`, `role`, `assigned_section`, `contact_number`, `avatar_url`, `created_at`, `updated_at`) VALUES ('1', 'PROF-2026-001', 'Prof. Alexander Reyes', 'admin@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'admin', 'BSIT 4-A', '0917-555-0199', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40');
+INSERT INTO `professors` (`id`, `employee_id`, `full_name`, `email`, `password`, `department`, `role`, `assigned_section`, `contact_number`, `avatar_url`, `created_at`, `updated_at`) VALUES 
+('1', 'PROF-2026-001', 'Prof. Alexander Reyes', 'admin@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'admin', 'BSIT 4-A', '0917-555-0199', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('2', 'PROF-2026-002', 'Prof. Maria Santos', 'maria.santos@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-B', '0917-555-0102', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('3', 'PROF-2026-003', 'Engr. Roberto Gomez', 'roberto.gomez@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-C', '0917-555-0103', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('4', 'PROF-2026-004', 'Prof. Jennifer Diaz', 'jennifer.diaz@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-D', '0917-555-0104', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('5', 'PROF-2026-005', 'Prof. Eduardo Ramos', 'eduardo.ramos@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-E', '0917-555-0105', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('6', 'PROF-2026-006', 'Prof. Cristina Fernandez', 'cristina.fernandez@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-F', '0917-555-0106', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('7', 'PROF-2026-007', 'Prof. Mark Anthony Villanueva', 'mark.villanueva@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-G', '0917-555-0107', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('8', 'PROF-2026-008', 'Prof. Rowena Dizon', 'rowena.dizon@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-H', '0917-555-0108', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('9', 'PROF-2026-009', 'Prof. Gabriel Mercado', 'gabriel.mercado@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-I', '0917-555-0109', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('10', 'PROF-2026-010', 'Prof. Patricia Aguilar', 'patricia.aguilar@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-J', '0917-555-0110', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40'),
+('11', 'PROF-2026-011', 'Prof. Dennis Soriano', 'dennis.soriano@neust.edu.ph', '$2y$10$NfMZIvpf6F/zyfNVHyrKROONFWKMkmowB1unV49kaY2nBbtqmIOgG', 'College of Information and Communications Technology', 'coordinator', 'BSIT 4-K', '0917-555-0111', NULL, '2026-11-04 18:50:40', '2026-11-04 18:50:40');
 
 DROP TABLE IF EXISTS `students`;
 CREATE TABLE `students` (
@@ -94,7 +106,8 @@ CREATE TABLE `tasks` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `idx_tasks_student` (`student_no`),
-  KEY `idx_tasks_user` (`user_id`)
+  KEY `idx_tasks_user` (`user_id`),
+  KEY `idx_user_id_desc` (`user_id`, `id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `tasks` (`id`, `user_id`, `student_no`, `title`, `description`, `deadline`, `priority`, `status`, `proof_file`, `proof_url`, `verified_at`, `verified_by`, `created_at`) VALUES ('2', '1', '2026-0001', 'Create ER Diagram', 'Design comprehensive database entity-relationship schema for internship project.', '2026-11-15', 'high', 'completed', 'er_diagram.pdf', 'uploads/er_diagram.pdf', '2026-11-04 21:27:46', 'Prof. Alexander Reyes', '2026-11-04 21:18:47');

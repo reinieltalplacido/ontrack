@@ -13,11 +13,20 @@ if (!$studentId && $studentNo === '') {
 try {
     $pdo = get_db_connection();
 
+    // 1. Fetch student info and assigned adviser
     if ($studentId) {
-        $stmt = $pdo->prepare('SELECT s.*, p.full_name as adviser_full_name, p.email as adviser_full_email FROM students s LEFT JOIN professors p ON s.professor_id = p.id WHERE s.id = :id LIMIT 1');
+        $stmt = $pdo->prepare('SELECT s.*, p.full_name as adviser_full_name, p.email as adviser_full_email 
+                               FROM students s 
+                               LEFT JOIN professors p ON s.professor_id = p.id 
+                               WHERE s.id = :id 
+                               LIMIT 1');
         $stmt->execute(['id' => $studentId]);
     } else {
-        $stmt = $pdo->prepare('SELECT s.*, p.full_name as adviser_full_name, p.email as adviser_full_email FROM students s LEFT JOIN professors p ON s.professor_id = p.id WHERE s.student_no = :sno LIMIT 1');
+        $stmt = $pdo->prepare('SELECT s.*, p.full_name as adviser_full_name, p.email as adviser_full_email 
+                               FROM students s 
+                               LEFT JOIN professors p ON s.professor_id = p.id 
+                               WHERE s.student_no = :sno 
+                               LIMIT 1');
         $stmt->execute(['sno' => $studentNo]);
     }
 
@@ -27,12 +36,17 @@ try {
     }
 
     $sId = (int)$student['id'];
-    $sNo = $student['student_no'];
+    $sNo = (string)$student['student_no'];
     $requiredHours = floatval($student['required_hours'] ?? 486);
 
-    // Fetch attendance logs
-    $lStmt = $pdo->prepare('SELECT * FROM attendance_logs WHERE user_id = :uid OR student_no = :sno ORDER BY log_date DESC, time_in DESC');
-    $lStmt->execute(['uid' => $sId, 'sno' => $sNo]);
+    // 2. Fetch attendance logs using fast index seek (avoids unindexed OR scan)
+    if ($sId > 0) {
+        $lStmt = $pdo->prepare('SELECT * FROM attendance_logs WHERE user_id = :uid ORDER BY log_date DESC, time_in DESC');
+        $lStmt->execute(['uid' => $sId]);
+    } else {
+        $lStmt = $pdo->prepare('SELECT * FROM attendance_logs WHERE student_no = :sno ORDER BY log_date DESC, time_in DESC');
+        $lStmt->execute(['sno' => $sNo]);
+    }
     $logs = $lStmt->fetchAll();
 
     $accumulated = 0.0;
@@ -53,9 +67,14 @@ try {
     $percent = $requiredHours > 0 ? round(($accumulated / $requiredHours) * 100, 1) : 0;
     if ($percent > 100) $percent = 100;
 
-    // Fetch tasks
-    $tStmt = $pdo->prepare('SELECT * FROM tasks WHERE user_id = :uid OR student_no = :sno ORDER BY id DESC');
-    $tStmt->execute(['uid' => $sId, 'sno' => $sNo]);
+    // 3. Fetch tasks using fast index seek
+    if ($sId > 0) {
+        $tStmt = $pdo->prepare('SELECT * FROM tasks WHERE user_id = :uid ORDER BY id DESC');
+        $tStmt->execute(['uid' => $sId]);
+    } else {
+        $tStmt = $pdo->prepare('SELECT * FROM tasks WHERE student_no = :sno ORDER BY id DESC');
+        $tStmt->execute(['sno' => $sNo]);
+    }
     $tasks = $tStmt->fetchAll();
 
     respond(200, [
@@ -76,8 +95,8 @@ try {
             'completion_percent' => $percent,
             'days_logged'        => count($distinctDays),
             'target_date'        => $student['target_date'] ?? '2026-12-15',
-            'adviser_name'       => $student['adviser_full_name'] ?? $student['adviser_name'],
-            'adviser_email'      => $student['adviser_full_email'] ?? $student['adviser_email'],
+            'adviser_name'       => $student['adviser_full_name'] ?? ($student['adviser_name'] ?? 'OJT Coordinator'),
+            'adviser_email'      => $student['adviser_full_email'] ?? ($student['adviser_email'] ?? 'adviser@neust.edu.ph'),
         ],
         'logs'  => $logs,
         'tasks' => $tasks,
@@ -85,4 +104,3 @@ try {
 } catch (PDOException $e) {
     respond(500, ['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
-

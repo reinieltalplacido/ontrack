@@ -49,85 +49,87 @@
     </header>
 
     <!-- Filter & Search Card (Exact Reference Design) -->
-    <section class="filters-card">
-      <div class="search-input-wrap">
-        <ion-icon name="search-outline" class="search-icon"></ion-icon>
-        <input
-          type="text"
-          class="custom-search-input"
-          placeholder="Search by title or description..."
-          [(ngModel)]="searchQuery"
-          (input)="applyFilters()"
-        />
-        @if (searchQuery) {
-          <button class="clear-search-btn" (click)="searchQuery = ''; applyFilters()">
-            <ion-icon name="close-outline"></ion-icon>
+    <ion-card class="filters-card">
+      <ion-card-content class="filters-card-content">
+        <div class="search-input-wrap">
+          <ion-icon name="search-outline" class="search-icon"></ion-icon>
+          <input
+            type="text"
+            class="custom-search-input"
+            placeholder="Search by title or description..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          />
+          @if (searchQuery) {
+            <button class="clear-search-btn" (click)="searchQuery = ''; applyFilters()">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+          }
+        </div>
+
+        <div class="filter-dropdown-group">
+          <div class="filter-field">
+            <label class="filter-label">Status</label>
+            <div class="select-wrapper">
+              <select [(ngModel)]="statusFilter" (change)="applyFilters()" class="custom-select">
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-field">
+            <label class="filter-label">Priority</label>
+            <div class="select-wrapper">
+              <select [(ngModel)]="priorityFilter" (change)="applyFilters()" class="custom-select">
+                <option value="all">All Priorities</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-field">
+            <label class="filter-label">Sort By</label>
+            <div class="select-wrapper">
+              <select [(ngModel)]="sortBy" (change)="applyFilters()" class="custom-select">
+                <option value="deadline">Due Date</option>
+                <option value="title">Title</option>
+                <option value="status">Status</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-actions-row">
+          <button class="clear-filters-btn" (click)="clearFilters()">
+            Clear Filters
           </button>
-        }
-      </div>
-
-      <div class="filter-dropdown-group">
-        <div class="filter-field">
-          <label class="filter-label">Status</label>
-          <div class="select-wrapper">
-            <select [(ngModel)]="statusFilter" (change)="applyFilters()" class="custom-select">
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
         </div>
-
-        <div class="filter-field">
-          <label class="filter-label">Priority</label>
-          <div class="select-wrapper">
-            <select [(ngModel)]="priorityFilter" (change)="applyFilters()" class="custom-select">
-              <option value="all">All Priorities</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="filter-field">
-          <label class="filter-label">Sort By</label>
-          <div class="select-wrapper">
-            <select [(ngModel)]="sortBy" (change)="applyFilters()" class="custom-select">
-              <option value="deadline">Due Date</option>
-              <option value="title">Title</option>
-              <option value="status">Status</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-actions-row">
-        <button class="clear-filters-btn" (click)="clearFilters()">
-          Clear Filters
-        </button>
-      </div>
-    </section>
+      </ion-card-content>
+    </ion-card>
 
     <!-- 4 Metrics Grid (Exact Reference Design) -->
     <section class="metrics-grid">
-      <div class="metric-box">
+      <ion-card class="metric-box">
         <span class="metric-title">Total Tasks</span>
         <strong class="metric-count">{{ totalTasksCount }}</strong>
-      </div>
-      <div class="metric-box">
+      </ion-card>
+      <ion-card class="metric-box">
         <span class="metric-title">Completed</span>
         <strong class="metric-count completed-color">{{ completedTasksCount }}</strong>
-      </div>
-      <div class="metric-box">
+      </ion-card>
+      <ion-card class="metric-box">
         <span class="metric-title">In Progress</span>
         <strong class="metric-count progress-color">{{ inProgressTasksCount }}</strong>
-      </div>
-      <div class="metric-box">
+      </ion-card>
+      <ion-card class="metric-box">
         <span class="metric-title">Overdue</span>
         <strong class="metric-count overdue-color">{{ overdueTasksCount }}</strong>
-      </div>
+      </ion-card>
     </section>
 
     <!-- Filtered Results Count Bar -->
@@ -155,46 +157,48 @@
       } @else {
         <div class="tasks-items-wrap">
           @for (task of filteredTasks; track task.id) {
-            <div class="task-card" [class.is-completed]="task.status === 'completed'" [class.is-overdue]="isOverdue(task)">
-              <div class="task-check-col" (click)="toggleTaskStatus(task)">
-                <button class="checkbox-btn" [class.checked]="task.status === 'completed'" aria-label="Toggle complete">
-                  <ion-icon [name]="task.status === 'completed' ? 'checkmark-circle-outline' : 'square-outline'"></ion-icon>
-                </button>
-              </div>
-
-              <div class="task-details-col">
-                <div class="task-title-row">
-                  <h3 class="task-title" [class.strikethrough]="task.status === 'completed'">
-                    {{ task.title }}
-                  </h3>
-                  <button class="task-del-btn" (click)="deleteTask(task, $event)" aria-label="Delete task">
-                    <ion-icon name="trash-outline"></ion-icon>
+            <ion-card class="task-card" [class.is-completed]="task.status === 'completed'" [class.is-overdue]="isOverdue(task)">
+              <div class="task-card-inner">
+                <div class="task-check-col" (click)="toggleTaskStatus(task)">
+                  <button class="checkbox-btn" [class.checked]="task.status === 'completed'" aria-label="Toggle complete">
+                    <ion-icon [name]="task.status === 'completed' ? 'checkmark-circle-outline' : 'square-outline'"></ion-icon>
                   </button>
                 </div>
 
-                @if (task.description) {
-                  <p class="task-desc">{{ task.description }}</p>
-                }
-
-                <div class="task-tags-row">
-                  <!-- Due Date Tag -->
-                  <div class="tag-chip due-date" [class.overdue]="isOverdue(task)">
-                    <ion-icon name="calendar-outline"></ion-icon>
-                    <span>{{ formatDate(task.deadline) }}</span>
+                <div class="task-details-col">
+                  <div class="task-title-row">
+                    <h3 class="task-title" [class.strikethrough]="task.status === 'completed'">
+                      {{ task.title }}
+                    </h3>
+                    <button class="task-del-btn" (click)="deleteTask(task, $event)" aria-label="Delete task">
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
                   </div>
 
-                  <!-- Priority Tag -->
-                  <span class="tag-chip priority-tag" [class]="'priority-' + task.priority">
-                    {{ task.priority | titlecase }}
-                  </span>
+                  @if (task.description) {
+                    <p class="task-desc">{{ task.description }}</p>
+                  }
 
-                  <!-- Status Tag -->
-                  <span class="tag-chip status-tag" [class]="'status-' + task.status">
-                    {{ task.status === 'in_progress' ? 'In Progress' : (task.status | titlecase) }}
-                  </span>
+                  <div class="task-tags-row">
+                    <!-- Due Date Tag -->
+                    <div class="tag-chip due-date" [class.overdue]="isOverdue(task)">
+                      <ion-icon name="calendar-outline"></ion-icon>
+                      <span>{{ formatDate(task.deadline) }}</span>
+                    </div>
+
+                    <!-- Priority Tag -->
+                    <ion-badge class="tag-chip priority-tag" [class]="'priority-' + task.priority">
+                      {{ task.priority | titlecase }}
+                    </ion-badge>
+
+                    <!-- Status Tag -->
+                    <ion-badge class="tag-chip status-tag" [class]="'status-' + task.status">
+                      {{ task.status === 'in_progress' ? 'In Progress' : (task.status | titlecase) }}
+                    </ion-badge>
+                  </div>
                 </div>
               </div>
-            </div>
+            </ion-card>
           }
         </div>
       }

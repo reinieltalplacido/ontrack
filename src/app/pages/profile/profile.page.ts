@@ -8,6 +8,8 @@ import {
   IonContent,
   IonIcon,
   IonSpinner,
+  IonCard,
+  IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -50,6 +52,8 @@ import { DashboardStats } from '../../models/attendance.model';
     IonContent,
     IonIcon,
     IonSpinner,
+    IonCard,
+    IonBadge,
   ],
 })
 export class ProfilePage implements OnInit {

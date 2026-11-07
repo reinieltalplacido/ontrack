@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">OnTrack</string>
+    <string name="title_activity_main">OnTrack</string>
+    <string name="package_name">com.ontrack.app</string>
+    <string name="custom_url_scheme">com.ontrack.app</string>
+</resources>

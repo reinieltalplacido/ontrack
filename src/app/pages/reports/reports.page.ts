@@ -8,6 +8,8 @@ import {
   IonContent,
   IonIcon,
   IonModal,
+  IonCard,
+  IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -62,6 +64,8 @@ export interface GeneratedReport {
     IonContent,
     IonIcon,
     IonModal,
+    IonCard,
+    IonBadge,
   ],
 })
 export class ReportsPage implements OnInit {

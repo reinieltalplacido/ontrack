@@ -17,6 +17,12 @@ import {
   IonTextarea,
   IonInput,
   IonSpinner,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
+  IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -76,6 +82,12 @@ import { AttendanceLog, DashboardStats } from '../models/attendance.model';
     IonTextarea,
     IonInput,
     IonSpinner,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardSubtitle,
+    IonCardContent,
+    IonBadge,
   ],
 })
 export class HomePage implements OnInit {

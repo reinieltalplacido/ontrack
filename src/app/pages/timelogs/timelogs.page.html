@@ -30,7 +30,7 @@
     </header>
 
     <!-- Summary Stats Card -->
-    <section class="summary-card">
+    <ion-card class="summary-card">
       <div class="summary-col">
         <span class="summary-label">Rendered Hours</span>
         <strong class="summary-value">{{ totalRenderedHours }} hrs</strong>
@@ -40,7 +40,7 @@
         <span class="summary-label">Days Logged</span>
         <strong class="summary-value">{{ totalLogsCount }} days</strong>
       </div>
-    </section>
+    </ion-card>
 
     <!-- Filter & Search Bar -->
     <section class="filter-bar">
@@ -83,47 +83,49 @@
       } @else {
         <div class="logs-items-wrap">
           @for (log of filteredLogs; track log.id) {
-            <div class="log-card">
-              <div class="log-header-row">
-                <div class="log-date-group">
-                  <ion-icon name="calendar-outline" class="cal-icon"></ion-icon>
-                  <strong class="log-date">{{ formatDate(log.log_date) }}</strong>
+            <ion-card class="log-card">
+              <div class="log-card-inner">
+                <div class="log-header-row">
+                  <div class="log-date-group">
+                    <ion-icon name="calendar-outline" class="cal-icon"></ion-icon>
+                    <strong class="log-date">{{ formatDate(log.log_date) }}</strong>
+                  </div>
+                  <ion-badge class="status-badge" [class.completed]="log.status === 'completed'" [class.ongoing]="log.status === 'ongoing'">
+                    {{ log.status === 'completed' ? 'Completed' : 'Ongoing' }}
+                  </ion-badge>
                 </div>
-                <span class="status-badge" [class.completed]="log.status === 'completed'" [class.ongoing]="log.status === 'ongoing'">
-                  {{ log.status === 'completed' ? 'Completed' : 'Ongoing' }}
-                </span>
+
+                <div class="log-times-row">
+                  <div class="time-box">
+                    <span class="time-label">Time In</span>
+                    <strong class="time-val">{{ formatTime(log.time_in) }}</strong>
+                  </div>
+                  <div class="time-arrow">→</div>
+                  <div class="time-box">
+                    <span class="time-label">Time Out</span>
+                    <strong class="time-val">{{ formatTime(log.time_out) }}</strong>
+                  </div>
+                  <div class="hours-box">
+                    <span class="hours-val">{{ log.total_hours || '0.00' }}h</span>
+                    <span class="hours-sub">Rendered</span>
+                  </div>
+                </div>
+
+                @if (log.location_name) {
+                  <div class="log-location-row">
+                    <ion-icon name="location-outline"></ion-icon>
+                    <span>{{ log.location_name }} (GPS Verified)</span>
+                  </div>
+                }
+
+                @if (log.activity_notes) {
+                  <div class="log-notes-box">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <p>{{ log.activity_notes }}</p>
+                  </div>
+                }
               </div>
-
-              <div class="log-times-row">
-                <div class="time-box">
-                  <span class="time-label">Time In</span>
-                  <strong class="time-val">{{ formatTime(log.time_in) }}</strong>
-                </div>
-                <div class="time-arrow">→</div>
-                <div class="time-box">
-                  <span class="time-label">Time Out</span>
-                  <strong class="time-val">{{ formatTime(log.time_out) }}</strong>
-                </div>
-                <div class="hours-box">
-                  <span class="hours-val">{{ log.total_hours || '0.00' }}h</span>
-                  <span class="hours-sub">Rendered</span>
-                </div>
-              </div>
-
-              @if (log.location_name) {
-                <div class="log-location-row">
-                  <ion-icon name="location-outline"></ion-icon>
-                  <span>{{ log.location_name }} (GPS Verified)</span>
-                </div>
-              }
-
-              @if (log.activity_notes) {
-                <div class="log-notes-box">
-                  <ion-icon name="document-text-outline"></ion-icon>
-                  <p>{{ log.activity_notes }}</p>
-                </div>
-              }
-            </div>
+            </ion-card>
           }
         </div>
       }

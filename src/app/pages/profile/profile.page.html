@@ -27,7 +27,7 @@
     }
 
     <!-- Student Hero Profile Card -->
-    <section class="profile-hero-card">
+    <ion-card class="profile-hero-card">
       <div class="avatar-wrapper">
         <div class="large-avatar-circle">
           <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
@@ -38,7 +38,7 @@
       </div>
 
       <h1 class="student-name">{{ currentUser?.full_name }}</h1>
-      <div class="student-id-pill">{{ currentUser?.student_id }}</div>
+      <ion-badge color="primary" class="student-id-pill">{{ currentUser?.student_id }}</ion-badge>
 
       <div class="hero-meta-row">
         <span class="meta-item">
@@ -51,13 +51,13 @@
           {{ currentUser?.company_name || 'Project SOLO' }}
         </span>
       </div>
-    </section>
+    </ion-card>
 
     <!-- OJT Hour Progress Snapshot Card -->
-    <section class="progress-snapshot-card">
+    <ion-card class="progress-snapshot-card">
       <div class="snapshot-header">
         <span class="snapshot-title">Training Hours Progress</span>
-        <span class="snapshot-pct">{{ stats?.completion_percent || 0 }}%</span>
+        <ion-badge color="success" class="snapshot-pct">{{ stats?.completion_percent || 0 }}%</ion-badge>
       </div>
 
       <div class="progress-bar-track">
@@ -78,12 +78,12 @@
           <strong class="snapshot-val">{{ stats?.remaining_hours || 500 }} hrs</strong>
         </div>
       </div>
-    </section>
+    </ion-card>
 
     <!-- Edit Profile Form -->
     <form (ngSubmit)="saveProfile()" class="profile-edit-form">
       <!-- Card 1: Academic & Personal Details -->
-      <section class="form-section-card">
+      <ion-card class="form-section-card">
         <div class="section-title-group">
           <ion-icon name="person-outline" class="section-icon"></ion-icon>
           <h2 class="section-title">Personal & Academic Info</h2>
@@ -123,10 +123,10 @@
             <input type="text" [(ngModel)]="schoolCampus" name="schoolCampus" placeholder="e.g. NEUST Sumacab Campus" />
           </div>
         </div>
-      </section>
+      </ion-card>
 
       <!-- Card 2: OJT Placement & Targets -->
-      <section class="form-section-card">
+      <ion-card class="form-section-card">
         <div class="section-title-group">
           <ion-icon name="business-outline" class="section-icon"></ion-icon>
           <h2 class="section-title">OJT Placement & Targets</h2>
@@ -161,10 +161,10 @@
             </div>
           </div>
         </div>
-      </section>
+      </ion-card>
 
       <!-- Card 3: Security & Password -->
-      <section class="form-section-card">
+      <ion-card class="form-section-card">
         <div class="section-title-group">
           <ion-icon name="lock-closed-outline" class="section-icon"></ion-icon>
           <h2 class="section-title">Account Security</h2>
@@ -182,7 +182,7 @@
             />
           </div>
         </div>
-      </section>
+      </ion-card>
 
       <!-- Save Button -->
       <div class="form-actions-wrap">

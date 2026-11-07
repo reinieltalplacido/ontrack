@@ -69,13 +69,14 @@ $bg-canvas: #f1f5f9;
 }
 
 // Hero Profile Card
-.profile-hero-card {
+.profile-hero-card, ion-card.profile-hero-card {
+  --background: #{$card-bg};
   background: $card-bg;
   border: 1px solid $border-color;
   border-radius: 14px;
   padding: 24px 18px;
   text-align: center;
-  margin-bottom: 16px;
+  margin: 0 0 16px 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 
   .avatar-wrapper {
@@ -153,12 +154,14 @@ $bg-canvas: #f1f5f9;
 }
 
 // Progress Snapshot Card
-.progress-snapshot-card {
+.progress-snapshot-card, ion-card.progress-snapshot-card {
+  --background: #{$card-bg};
   background: $card-bg;
   border: 1px solid $border-color;
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 16px;
+  margin: 0 0 16px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 
   .snapshot-header {
     display: flex;
@@ -207,11 +210,14 @@ $bg-canvas: #f1f5f9;
   margin-bottom: 20px;
 }
 
-.form-section-card {
+.form-section-card, ion-card.form-section-card {
+  --background: #{$card-bg};
   background: $card-bg;
   border: 1px solid $border-color;
   border-radius: 12px;
   padding: 16px;
+  margin: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 
   .section-title-group {
     display: flex;

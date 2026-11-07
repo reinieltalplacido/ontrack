@@ -52,31 +52,14 @@
     </header>
 
     <!-- 1. Daily Duty Attendance Card -->
-    <section class="neat-card duty-card" [class.is-active]="stats.is_clocked_in">
-      <div class="card-top-header">
+    <ion-card class="neat-card duty-card" [class.is-active]="stats.is_clocked_in">
+      <ion-card-header class="card-top-header">
         <div class="card-title-group">
-          <span class="location-eyebrow">
-            <ion-icon name="location-outline"></ion-icon>
-            {{ stats.today_log?.location_name || currentUser?.company_name || 'Assigned Workplace' }}
-          </span>
-          <h2 class="card-main-title">Daily Attendance</h2>
+          <ion-card-title class="card-main-title">Daily Attendance</ion-card-title>
         </div>
-        <div class="status-badge-wrap">
-          @if (stats.is_clocked_in) {
-          <span class="duty-badge active">
-            <span class="beacon-dot"></span>
-            Duty Active
-          </span>
-          } @else {
-          <span class="duty-badge off">
-            <span class="off-dot"></span>
-            Off Duty
-          </span>
-          }
-        </div>
-      </div>
+      </ion-card-header>
 
-      <div class="card-inner-body">
+      <ion-card-content class="card-inner-body">
         <div class="duty-status-callout">
           @if (stats.is_clocked_in) {
           <div class="active-shift-info">
@@ -99,23 +82,23 @@
           <span>Clock In (GPS & Photo)</span>
         </button>
         }
-      </div>
-    </section>
+      </ion-card-content>
+    </ion-card>
 
     <!-- 2. OJT Hours & Completion Progress Card -->
-    <section class="neat-card progress-card">
-      <div class="card-top-header">
+    <ion-card class="neat-card progress-card">
+      <ion-card-header class="card-top-header">
         <div class="progress-title-col">
-          <span class="card-category-label">Target Overview</span>
-          <h2 class="card-main-title">OJT Hours Progress</h2>
+          <ion-card-subtitle class="card-category-label">Target Overview</ion-card-subtitle>
+          <ion-card-title class="card-main-title">OJT Hours Progress</ion-card-title>
         </div>
         <button class="edit-target-link" (click)="openEditGoalModal()">
           <ion-icon name="create-outline"></ion-icon>
           <span>Edit Goal</span>
         </button>
-      </div>
+      </ion-card-header>
 
-      <div class="card-inner-body">
+      <ion-card-content class="card-inner-body">
         <div class="hours-display-row">
           <div class="hours-numbers">
             <span class="current-hrs">{{ stats.accumulated_hours }}</span>
@@ -151,8 +134,8 @@
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </ion-card-content>
+    </ion-card>
 
     <!-- 3. Navigation Shortcuts (2x2 Grid) -->
     <section class="shortcuts-grid">
@@ -202,19 +185,19 @@
     </section>
 
     <!-- 4. Recent Attendance Log List Card -->
-    <section class="neat-card recent-logs-card">
-      <div class="card-top-header">
+    <ion-card class="neat-card recent-logs-card">
+      <ion-card-header class="card-top-header">
         <div>
-          <span class="card-category-label">History</span>
-          <h2 class="card-main-title">Recent Attendance</h2>
+          <ion-card-subtitle class="card-category-label">History</ion-card-subtitle>
+          <ion-card-title class="card-main-title">Recent Attendance</ion-card-title>
         </div>
         <button class="view-all-link" (click)="goToTimeLogs()">
           <span>View All</span>
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </button>
-      </div>
+      </ion-card-header>
 
-      <div class="card-inner-body no-pad-top">
+      <ion-card-content class="card-inner-body no-pad-top">
         @if (recentLogs.length === 0) {
         <div class="empty-logs-box">
           <div class="empty-icon-circle">
@@ -239,17 +222,17 @@
               @if (log.total_hours) {
               <span class="hours-tag">+{{ log.total_hours }} hrs</span>
               }
-              <span class="status-badge" [class.completed]="log.status === 'completed'"
+              <ion-badge class="status-badge" [class.completed]="log.status === 'completed'"
                 [class.ongoing]="log.status === 'ongoing'">
                 {{ log.status === 'completed' ? 'Completed' : 'Ongoing' }}
-              </span>
+              </ion-badge>
             </div>
           </div>
           }
         </div>
         }
-      </div>
-    </section>
+      </ion-card-content>
+    </ion-card>
 
     <!-- Extra Bottom Spacer for Safe Scrolling -->
     <div class="scroll-bottom-spacer"></div>

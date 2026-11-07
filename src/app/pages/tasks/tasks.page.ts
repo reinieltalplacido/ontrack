@@ -11,6 +11,9 @@ import {
   IonRefresherContent,
   IonModal,
   IonSpinner,
+  IonCard,
+  IonCardContent,
+  IonBadge,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -58,6 +61,9 @@ import { User } from '../../models/user.model';
     IonRefresherContent,
     IonModal,
     IonSpinner,
+    IonCard,
+    IonCardContent,
+    IonBadge,
   ],
 })
 export class TasksPage implements OnInit {
