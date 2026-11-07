@@ -202,6 +202,41 @@
               placeholder="e.g. TechCorp Solutions Inc." 
             />
           </div>
+          <p class="field-hint" *ngIf="registerForm.get('company_name')?.touched && registerForm.get('company_name')?.invalid">
+            Company name is required.
+          </p>
+        </div>
+
+        <!-- Address of the OJT Company -->
+        <div class="form-group">
+          <label class="form-label" for="company_address">Address of the OJT Company <span class="req">*</span></label>
+          <div class="input-shell" [class.error]="registerForm.get('company_address')?.touched && registerForm.get('company_address')?.invalid">
+            <input 
+              id="company_address"
+              type="text" 
+              formControlName="company_address" 
+              placeholder="e.g. Maharlika Highway, Cabanatuan City" 
+            />
+          </div>
+          <p class="field-hint" *ngIf="registerForm.get('company_address')?.touched && registerForm.get('company_address')?.invalid">
+            Company address is required.
+          </p>
+        </div>
+
+        <!-- Trainer Name / Company Supervisor -->
+        <div class="form-group">
+          <label class="form-label" for="trainer_name">Trainer Name <span class="req">*</span></label>
+          <div class="input-shell" [class.error]="registerForm.get('trainer_name')?.touched && registerForm.get('trainer_name')?.invalid">
+            <input 
+              id="trainer_name"
+              type="text" 
+              formControlName="trainer_name" 
+              placeholder="e.g. Engr. Michael Santos / Industry Trainer" 
+            />
+          </div>
+          <p class="field-hint" *ngIf="registerForm.get('trainer_name')?.touched && registerForm.get('trainer_name')?.invalid">
+            Trainer name is required.
+          </p>
         </div>
 
         <!-- OJT Coordinator / Adviser -->
@@ -220,27 +255,40 @@
           </p>
         </div>
 
-        <!-- Required Hours & Target Completion Date -->
+        <!-- Start Date & Target End Date Row -->
         <div class="form-row">
           <div class="form-group flex-1">
-            <label class="form-label" for="required_hours">Required Hours <span class="req">*</span></label>
-            <div class="input-shell">
-              <input 
-                id="required_hours"
-                type="number" 
-                formControlName="required_hours" 
-                placeholder="486" 
-              />
+            <label class="form-label" for="start_date">Start Date of OJT <span class="req">*</span></label>
+            <div class="input-shell date-picker-shell" (click)="openCalendar('start_date')">
+              <span class="date-text">{{ getFormattedDate(registerForm.get('start_date')?.value) }}</span>
+              <ion-icon name="calendar-outline" class="calendar-btn-icon"></ion-icon>
             </div>
           </div>
 
           <div class="form-group flex-1">
             <label class="form-label" for="target_date">Target End Date <span class="req">*</span></label>
-            <div class="input-shell date-picker-shell" (click)="openCalendar()">
+            <div class="input-shell date-picker-shell" (click)="openCalendar('target_date')">
               <span class="date-text">{{ getFormattedDate(registerForm.get('target_date')?.value) }}</span>
               <ion-icon name="calendar-outline" class="calendar-btn-icon"></ion-icon>
             </div>
           </div>
+        </div>
+
+        <!-- Required Hours -->
+        <div class="form-group">
+          <label class="form-label" for="required_hours">Required Hours <span class="req">*</span></label>
+          <div class="input-shell" [class.error]="registerForm.get('required_hours')?.touched && registerForm.get('required_hours')?.invalid">
+            <input 
+              id="required_hours"
+              type="number" 
+              formControlName="required_hours" 
+              placeholder="0" 
+              min="0"
+            />
+          </div>
+          <p class="field-hint" *ngIf="registerForm.get('required_hours')?.touched && registerForm.get('required_hours')?.invalid">
+            Please enter valid required hours (0 or more).
+          </p>
         </div>
 
       </div>
@@ -379,12 +427,12 @@
     <ng-template>
       <div class="calendar-wrapper">
         <div class="calendar-modal-header">
-          <h3>Select Target End Date</h3>
+          <h3>{{ activeDateField === 'start_date' ? 'Select Start Date of OJT' : 'Select Target End Date' }}</h3>
           <button type="button" class="close-cal-btn" (click)="closeCalendar()">&times;</button>
         </div>
         <ion-datetime 
           presentation="date"
-          [value]="registerForm.get('target_date')?.value"
+          [value]="registerForm.get(activeDateField)?.value || (activeDateField === 'start_date' ? '2026-08-15' : '2026-12-15')"
           (ionChange)="onDateSelected($event)"
           class="custom-datetime">
         </ion-datetime>

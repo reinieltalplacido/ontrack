@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -90,12 +90,17 @@ import { AttendanceLog, DashboardStats } from '../models/attendance.model';
     IonBadge,
   ],
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private attendanceService = inject(AttendanceService);
   private nativeService = inject(NativeService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+
+  // Realtime Clock State
+  currentTimeString = '';
+  currentDateString = '';
+  private clockInterval?: any;
 
   quickNotes = [
     'Routine daily tasks',
@@ -127,15 +132,14 @@ export class HomePage implements OnInit {
   feedbackMessage = '';
   feedbackType: 'success' | 'error' = 'success';
 
-  // Clock In modal state
+  // Time In modal state
   showClockInModal = false;
   isGettingLocation = false;
   currentCoords: { latitude: number; longitude: number } | null = null;
   locationName = 'Office / Duty Workplace';
-  selfiePreview: string | null = null;
   isSubmittingClockIn = false;
 
-  // Clock Out modal state
+  // Time Out modal state
   showClockOutModal = false;
   activityNotes = '';
   isSubmittingClockOut = false;
@@ -204,7 +208,36 @@ export class HomePage implements OnInit {
     this.editRequiredHours = this.currentUser.required_hours || 486;
     this.editTargetDate = this.currentUser.target_date || '2026-12-15';
 
+    // Start Live Realtime Clock
+    this.updateRealtimeClock();
+    this.clockInterval = setInterval(() => {
+      this.updateRealtimeClock();
+      this.cdr.detectChanges();
+    }, 1000);
+
     this.loadDashboardData();
+  }
+
+  ngOnDestroy() {
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
+  }
+
+  updateRealtimeClock() {
+    const now = new Date();
+    this.currentTimeString = now.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
+    this.currentDateString = now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   }
 
   loadDashboardData(event?: any) {
@@ -255,7 +288,7 @@ export class HomePage implements OnInit {
 
   openClockInModal() {
     this.showClockInModal = true;
-    this.selfiePreview = null;
+    this.updateRealtimeClock();
 
     if (this.nativeService.hasCachedLocation) {
       this.locationName = this.nativeService.lastKnownLocationName!;
@@ -277,21 +310,37 @@ export class HomePage implements OnInit {
         this.locationName = readablePlace;
       }
       this.isGettingLocation = false;
+      this.cdr.detectChanges();
     }).catch(() => {
       this.isGettingLocation = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  refreshLocation() {
+    this.isGettingLocation = true;
+    this.cdr.detectChanges();
+
+    this.nativeService.getCurrentPosition().then(async (pos) => {
+      this.currentCoords = {
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+      };
+      const readablePlace = await this.nativeService.reverseGeocode(pos.latitude, pos.longitude);
+      if (readablePlace) {
+        this.locationName = readablePlace;
+      }
+      this.isGettingLocation = false;
+      this.nativeService.triggerHapticFeedback('medium');
+      this.cdr.detectChanges();
+    }).catch(() => {
+      this.isGettingLocation = false;
+      this.cdr.detectChanges();
     });
   }
 
   closeClockInModal() {
     this.showClockInModal = false;
-  }
-
-  async captureSelfieProof() {
-    const photo = await this.nativeService.takeAttendanceSelfie();
-    if (photo) {
-      this.selfiePreview = photo;
-      this.nativeService.triggerHapticFeedback('medium');
-    }
   }
 
   submitClockIn() {
@@ -303,7 +352,7 @@ export class HomePage implements OnInit {
       latitude: this.currentCoords?.latitude ?? 15.4859,
       longitude: this.currentCoords?.longitude ?? 120.9678,
       location_name: this.locationName || this.currentUser.company_name || 'Assigned Duty Workplace',
-      photo_base64: this.selfiePreview,
+      photo_base64: null,
     };
 
     this.attendanceService.clockIn(payload).subscribe({
@@ -312,10 +361,10 @@ export class HomePage implements OnInit {
         this.showClockInModal = false;
         if (res.success) {
           this.nativeService.triggerHapticFeedback('success');
-          this.showFeedback('Clocked In Successfully! Duty session active.', 'success');
+          this.showFeedback('Time-In Recorded Successfully! Duty session active.', 'success');
           this.loadDashboardData();
         } else {
-          this.showFeedback(res.message || 'Could not record clock in.', 'error');
+          this.showFeedback(res.message || 'Could not record time in.', 'error');
         }
       },
       error: (err) => {
@@ -356,10 +405,10 @@ export class HomePage implements OnInit {
           if (res.success) {
             this.nativeService.triggerHapticFeedback('success');
             const hours = res.rendered_today ? ` (${res.rendered_today} hrs rendered)` : '';
-            this.showFeedback(`Clocked Out Successfully!${hours}`, 'success');
+            this.showFeedback(`Time-Out Recorded Successfully!${hours}`, 'success');
             this.loadDashboardData();
           } else {
-            this.showFeedback(res.message || 'Could not record clock out.', 'error');
+            this.showFeedback(res.message || 'Could not record time out.', 'error');
           }
         },
         error: (err) => {

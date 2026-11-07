@@ -84,11 +84,13 @@ export class AuthService {
       course_section: courseSection,
       school_campus: userData.school_campus || 'NEUST - Sumacab Campus',
       company_name: userData.company_name,
+      company_address: userData.company_address || '',
+      trainer_name: userData.trainer_name || '',
       adviser_name: userData.adviser_name,
       adviser_email: userData.adviser_email || 'adviser@neust.edu.ph',
       start_date: userData.start_date || '2026-08-15',
       target_date: userData.target_date || '2026-12-15',
-      required_hours: Number(userData.required_hours) || 486,
+      required_hours: userData.required_hours !== undefined && userData.required_hours !== null && userData.required_hours !== '' ? Number(userData.required_hours) : 0,
     };
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register.php`, payload).pipe(

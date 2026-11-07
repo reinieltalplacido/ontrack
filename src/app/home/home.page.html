@@ -67,19 +67,19 @@
             <span>Started today at <strong>{{ formatTime(stats.today_log?.time_in) }}</strong></span>
           </div>
           } @else {
-          <p class="ready-subtext">Ready to record today's time-in with GPS verification & photo proof.</p>
+          <p class="ready-subtext">Ready to record today's time-in with GPS verification.</p>
           }
         </div>
 
         @if (stats.is_clocked_in) {
         <button class="duty-action-btn clock-out" (click)="openClockOutModal()">
           <ion-icon name="stopwatch-outline"></ion-icon>
-          <span>Clock Out & Log Accomplishment</span>
+          <span>Time Out & Log Accomplishment</span>
         </button>
         } @else {
         <button class="duty-action-btn clock-in" (click)="openClockInModal()">
           <ion-icon name="time-outline"></ion-icon>
-          <span>Clock In (GPS & Photo)</span>
+          <span>Time In (GPS)</span>
         </button>
         }
       </ion-card-content>
@@ -239,12 +239,12 @@
 
   </div>
 
-  <!-- CLOCK IN MODAL -->
+  <!-- TIME IN MODAL -->
   <ion-modal [isOpen]="showClockInModal" (didDismiss)="closeClockInModal()" class="neat-sheet-modal">
     <ng-template>
       <ion-header class="ion-no-border">
         <ion-toolbar class="modal-toolbar">
-          <ion-title>Duty Clock-In</ion-title>
+          <ion-title>Duty Time-In</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="closeClockInModal()">
               <ion-icon name="close-outline"></ion-icon>
@@ -254,6 +254,16 @@
       </ion-header>
 
       <ion-content class="ion-padding modal-content">
+        <!-- REALTIME CLOCK DISPLAY -->
+        <div class="realtime-clock-display">
+          <div class="clock-live-pill">
+            <span class="pulse-beacon"></span>
+            <span>LIVE SYSTEM CLOCK</span>
+          </div>
+          <div class="clock-time-val">{{ currentTimeString }}</div>
+          <div class="clock-date-val">{{ currentDateString }}</div>
+        </div>
+
         <div class="modal-card-block">
           <div class="modal-row-item">
             <ion-icon name="location-outline" class="modal-item-icon"></ion-icon>
@@ -269,22 +279,24 @@
           </div>
 
           <div class="modal-row-item">
-            <ion-icon name="camera-outline" class="modal-item-icon"></ion-icon>
+            <ion-icon name="radioButtonOnOutline" class="modal-item-icon emerald"></ion-icon>
             <div class="modal-item-text">
-              <span class="item-label">Selfie Verification</span>
-              <span class="item-desc">{{ selfiePreview ? 'Proof photo attached' : 'Duty selfie photo required' }}</span>
+              <span class="item-label">GPS Coordinates</span>
+              <span class="item-desc" *ngIf="currentCoords">
+                {{ currentCoords.latitude.toFixed(6) }}, {{ currentCoords.longitude.toFixed(6) }}
+              </span>
+              <span class="item-desc" *ngIf="!currentCoords && isGettingLocation">
+                Acquiring precise satellite fix...
+              </span>
+              <span class="item-desc" *ngIf="!currentCoords && !isGettingLocation">
+                Location acquired from device sensors
+              </span>
             </div>
-            <button class="small-action-btn" (click)="captureSelfieProof()">
-              {{ selfiePreview ? 'Retake' : 'Take Photo' }}
+            <button class="small-action-btn" (click)="refreshLocation()">
+              Refresh
             </button>
           </div>
         </div>
-
-        @if (selfiePreview) {
-        <div class="photo-preview-wrap">
-          <img [src]="selfiePreview" alt="Duty verification proof" class="preview-img" />
-        </div>
-        }
       </ion-content>
 
       <ion-footer class="ion-no-border">
@@ -302,61 +314,61 @@
     </ng-template>
   </ion-modal>
 
-  <!-- CLOCK OUT MODAL -->
-    <ion-modal [isOpen]="showClockOutModal" (didDismiss)="closeClockOutModal()" class="neat-sheet-modal clockout-modal">
-      <ng-template>
-        <ion-header class="ion-no-border">
-          <ion-toolbar class="modal-toolbar">
-            <ion-title>End Duty Session</ion-title>
-            <ion-buttons slot="end">
-              <ion-button (click)="closeClockOutModal()">
-                <ion-icon name="close-outline"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
+  <!-- TIME OUT MODAL -->
+  <ion-modal [isOpen]="showClockOutModal" (didDismiss)="closeClockOutModal()" class="neat-sheet-modal clockout-modal">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="modal-toolbar">
+          <ion-title>Duty Time-Out</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeClockOutModal()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
 
-        <ion-content class="ion-padding modal-content">
-          <div class="clockout-meta-card">
-            <div class="meta-row">
-              <span class="meta-label">Time Started</span>
-              <strong class="meta-val">{{ formatTime(stats.today_log?.time_in) }}</strong>
-            </div>
-            <p class="meta-tip">Clock out now to calculate rendered hours and finalize today's DTR.</p>
+      <ion-content class="ion-padding modal-content">
+        <div class="clockout-meta-card">
+          <div class="meta-row">
+            <span class="meta-label">Time Started</span>
+            <strong class="meta-val">{{ formatTime(stats.today_log?.time_in) }}</strong>
+          </div>
+          <p class="meta-tip">Record your time-out now to calculate rendered hours and finalize today's DTR.</p>
+        </div>
+
+        <div class="quick-notes-group">
+          <label class="quick-notes-label">Accomplishments (Optional)</label>
+          <div class="quick-chips-wrap">
+            @for (note of quickNotes; track note) {
+            <button type="button" class="note-chip-btn" [class.active]="activityNotes === note"
+              (click)="selectQuickNote(note)">
+              {{ note }}
+            </button>
+            }
           </div>
 
-            <div class="quick-notes-group">
-              <label class="quick-notes-label">Accomplishments (Optional)</label>
-              <div class="quick-chips-wrap">
-                @for (note of quickNotes; track note) {
-                <button type="button" class="note-chip-btn" [class.active]="activityNotes === note"
-                  (click)="selectQuickNote(note)">
-                  {{ note }}
-                </button>
-                }
-              </div>
+          <div class="compact-textarea-wrap">
+            <ion-textarea [(ngModel)]="activityNotes" placeholder="Tap a chip or write brief notes..." [rows]="2"
+              [autoGrow]="true"></ion-textarea>
+          </div>
+        </div>
+      </ion-content>
 
-              <div class="compact-textarea-wrap">
-                <ion-textarea [(ngModel)]="activityNotes" placeholder="Tap a chip or write brief notes..." [rows]="2"
-                  [autoGrow]="true"></ion-textarea>
-              </div>
-            </div>
-        </ion-content>
-
-        <ion-footer class="ion-no-border">
-          <ion-toolbar class="modal-footer-toolbar">
-            <button class="modal-submit-btn danger" [disabled]="isSubmittingClockOut" (click)="submitClockOut()">
-              @if (isSubmittingClockOut) {
-              <ion-spinner name="crescent"></ion-spinner>
-              } @else {
-              <ion-icon name="stopwatch-outline"></ion-icon>
-              <span>Clock Out</span>
-              }
-            </button>
-          </ion-toolbar>
-        </ion-footer>
-      </ng-template>
-    </ion-modal>
+      <ion-footer class="ion-no-border">
+        <ion-toolbar class="modal-footer-toolbar">
+          <button class="modal-submit-btn danger" [disabled]="isSubmittingClockOut" (click)="submitClockOut()">
+            @if (isSubmittingClockOut) {
+            <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+            <ion-icon name="stopwatch-outline"></ion-icon>
+            <span>Confirm Time-Out</span>
+            }
+          </button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
 
     <!-- EDIT GOAL MODAL -->
     <ion-modal [isOpen]="showEditGoalModal" (didDismiss)="closeEditGoalModal()" class="neat-sheet-modal">

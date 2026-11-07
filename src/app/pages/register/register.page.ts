@@ -72,6 +72,7 @@ export class RegisterPage {
   showToast = false;
   toastMessage = '';
   isCalendarOpen = false;
+  activeDateField: 'start_date' | 'target_date' = 'target_date';
 
   collegeCourses: CollegeProgramGroup[] = [
     {
@@ -189,9 +190,12 @@ export class RegisterPage {
 
       // Step 2: OJT & Company Details
       company_name: ['', [Validators.required]],
+      company_address: ['', [Validators.required]],
+      trainer_name: ['', [Validators.required]],
       adviser_name: ['', [Validators.required]],
       adviser_email: ['', [Validators.email]],
-      required_hours: [486, [Validators.required, Validators.min(50), Validators.max(1000)]],
+      start_date: ['2026-08-15', [Validators.required]],
+      required_hours: [0, [Validators.required, Validators.min(0)]],
       target_date: ['2026-12-15', [Validators.required]],
 
       // Step 3: Account Security
@@ -289,7 +293,7 @@ export class RegisterPage {
   }
 
   isStep2Valid(): boolean {
-    const s2 = ['company_name', 'adviser_name', 'required_hours', 'target_date'];
+    const s2 = ['company_name', 'company_address', 'trainer_name', 'adviser_name', 'start_date', 'required_hours', 'target_date'];
     return s2.every((field) => this.registerForm.get(field)?.valid);
   }
 
@@ -311,8 +315,8 @@ export class RegisterPage {
       this.currentStep = 2;
     } else if (this.currentStep === 2) {
       if (!this.isStep2Valid()) {
-        this.markFieldsTouched(['company_name', 'adviser_name', 'required_hours', 'target_date']);
-        this.errorMessage = 'Please specify your company and target rendering hours.';
+        this.markFieldsTouched(['company_name', 'company_address', 'trainer_name', 'adviser_name', 'start_date', 'required_hours', 'target_date']);
+        this.errorMessage = 'Please specify all company, trainer, and OJT schedule details.';
         return;
       }
       this.currentStep = 3;
@@ -336,7 +340,8 @@ export class RegisterPage {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  openCalendar() {
+  openCalendar(field: 'start_date' | 'target_date' = 'target_date') {
+    this.activeDateField = field;
     this.isCalendarOpen = true;
   }
 
@@ -349,7 +354,7 @@ export class RegisterPage {
     if (selectedVal) {
       // Extract YYYY-MM-DD
       const dateOnly = selectedVal.split('T')[0];
-      this.registerForm.patchValue({ target_date: dateOnly });
+      this.registerForm.patchValue({ [this.activeDateField]: dateOnly });
     }
     this.closeCalendar();
   }
@@ -386,9 +391,12 @@ export class RegisterPage {
       section: '4-A',
       email: `reiniel.talplacido${randomNum}@neust.edu.ph`,
       company_name: 'Innovatech Systems Hub',
+      company_address: 'Maharlika Highway, Cabanatuan City, Nueva Ecija',
+      trainer_name: 'Engr. Michael Santos',
       adviser_name: 'Prof. Alexander Reyes',
       adviser_email: 'admin@neust.edu.ph',
-      required_hours: 486,
+      start_date: '2026-08-15',
+      required_hours: 0,
       target_date: '2026-12-15',
       password: 'Password123!',
       confirm_password: 'Password123!',
