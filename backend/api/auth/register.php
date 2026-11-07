@@ -29,12 +29,15 @@ if (!empty($body['course_section'])) {
     $courseSection = "{$course} 4-A";
 }
 
-$schoolCampus  = trim((string)($body['school_campus'] ?? 'NEUST - Sumacab Campus'));
-$companyName   = trim((string)($body['company_name'] ?? 'Assigned Agency'));
-$adviserName   = trim((string)($body['adviser_name'] ?? 'OJT Coordinator'));
-$adviserEmail  = trim((string)($body['adviser_email'] ?? 'adviser@neust.edu.ph'));
-$targetDate    = !empty($body['target_date']) ? $body['target_date'] : '2026-12-15';
-$requiredHours = intval($body['required_hours'] ?? 486);
+$schoolCampus   = trim((string)($body['school_campus'] ?? 'NEUST - Sumacab Campus'));
+$companyName    = trim((string)($body['company_name'] ?? 'Assigned Agency'));
+$companyAddress = trim((string)($body['company_address'] ?? ''));
+$trainerName    = trim((string)($body['trainer_name'] ?? ''));
+$adviserName    = trim((string)($body['adviser_name'] ?? 'OJT Coordinator'));
+$adviserEmail   = trim((string)($body['adviser_email'] ?? 'adviser@neust.edu.ph'));
+$startDate      = !empty($body['start_date']) ? $body['start_date'] : null;
+$targetDate     = !empty($body['target_date']) ? $body['target_date'] : '2026-12-15';
+$requiredHours  = intval($body['required_hours'] ?? 0);
 
 if ($studentId === '' || $fullName === '' || $password === '') {
     respond(422, ['success' => false, 'message' => 'Student ID, full name, and password are required.']);
@@ -72,8 +75,8 @@ try {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO students (professor_id, student_no, full_name, email, password, course, year_level, course_section, school_campus, company_name, adviser_name, adviser_email, target_date, required_hours)
-         VALUES (:pid, :sid, :fn, :em, :pwd, :crs, :yl, :cs, :sc, :cn, :an, :ae, :td, :rh)'
+        'INSERT INTO students (professor_id, student_no, full_name, email, password, course, year_level, course_section, school_campus, company_name, company_address, trainer_name, adviser_name, adviser_email, start_date, target_date, required_hours)
+         VALUES (:pid, :sid, :fn, :em, :pwd, :crs, :yl, :cs, :sc, :cn, :ca, :tn, :an, :ae, :sd, :td, :rh)'
     );
     $stmt->execute([
         'pid' => $professorId,
@@ -86,8 +89,11 @@ try {
         'cs'  => $courseSection,
         'sc'  => $schoolCampus,
         'cn'  => $companyName,
+        'ca'  => $companyAddress !== '' ? $companyAddress : null,
+        'tn'  => $trainerName !== '' ? $trainerName : null,
         'an'  => $adviserName,
         'ae'  => $adviserEmail,
+        'sd'  => $startDate,
         'td'  => $targetDate,
         'rh'  => $requiredHours,
     ]);

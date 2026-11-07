@@ -1046,7 +1046,7 @@ export class AdminDashboardPage implements OnInit {
   logout() {
     this.closeSideMenu();
     this.adminService.logout();
-    this.router.navigate(['/admin/login']);
+    this.router.navigate(['/login']);
   }
 
   goToStudentPortal() {

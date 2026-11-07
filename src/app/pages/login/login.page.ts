@@ -88,10 +88,6 @@ export class LoginPage {
     this.router.navigate(['/register']);
   }
 
-  goToAdminLogin() {
-    this.router.navigate(['/admin/login']);
-  }
-
   fillDemoStudent() {
     this.loginForm.patchValue({
       email: '2026-0001',

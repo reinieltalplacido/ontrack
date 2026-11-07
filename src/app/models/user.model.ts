@@ -6,6 +6,8 @@ export interface User {
   course_section?: string;
   school_campus?: string;
   company_name?: string;
+  company_address?: string;
+  trainer_name?: string;
   adviser_name?: string;
   adviser_email?: string;
   start_date?: string;
