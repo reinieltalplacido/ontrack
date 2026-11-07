@@ -313,6 +313,14 @@ export class ReportsPage implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  get currentDateFormatted(): string {
+    return new Date().toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+
   get completedTasksCount(): number {
     return this.tasks.filter((t) => t.status === 'completed').length;
   }

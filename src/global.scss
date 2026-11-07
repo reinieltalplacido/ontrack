@@ -182,8 +182,8 @@ ion-toast.ontrack-top-toast {
    ======================================================= */
 @media print {
   @page {
-    size: landscape;
-    margin: 8mm 10mm;
+    size: letter landscape;
+    margin: 12mm 15mm;
   }
 
   *, *::before, *::after {
@@ -238,7 +238,10 @@ ion-toast.ontrack-top-toast {
   .side-drawer,
   .side-drawer-backdrop,
   ion-backdrop,
-  .modal-shadow {
+  .modal-shadow,
+  app-toast,
+  .ontrack-toast-wrapper,
+  .feedback-banner {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;

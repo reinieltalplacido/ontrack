@@ -198,89 +198,109 @@
           @if (activeReportType === 'Summary') {
             <!-- OJT SUMMARY REPORT FORMAT (EXACT MATCH TO DESIGN) -->
             <div class="summary-report-sheet">
-              <h2 class="report-main-heading">OJT Summary Report</h2>
-
-              <div class="summary-meta-grid">
-                <div class="meta-col">
-                  <div class="meta-item">
-                    <span class="meta-label">Name:</span>
-                    <span class="meta-val">{{ currentUser?.full_name || 'Reiniel Talplacido' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">Company:</span>
-                    <span class="meta-val">{{ currentUser?.company_name || 'Project Solo' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">Completed OJT Hours:</span>
-                    <span class="meta-val">{{ stats?.accumulated_hours || '0.0' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">Total No. of Tasks:</span>
-                    <span class="meta-val">{{ tasks.length }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">No. of Overdue Tasks:</span>
-                    <span class="meta-val">{{ overdueTasksCount }}</span>
+              
+              <!-- Official Document Header Banner -->
+              <div class="summary-doc-header">
+                <div class="header-branding">
+                  <div class="header-titles">
+                    <span class="univ-kicker">NUEVA ECIJA UNIVERSITY OF SCIENCE AND TECHNOLOGY</span>
+                    <h2 class="report-main-heading">OJT Summary Report</h2>
+                    <span class="report-sub-tag">Comprehensive Daily Attendance & Task Milestone Accomplishment Record</span>
                   </div>
                 </div>
+                <div class="header-meta-stamp">
+                  <span class="stamp-lbl">GENERATED ON</span>
+                  <strong class="stamp-date">{{ currentDateFormatted }}</strong>
+                  <span class="stamp-pill">CONFIRMED SUMMARY</span>
+                </div>
+              </div>
 
-                <div class="meta-col">
-                  <div class="meta-item">
-                    <span class="meta-label">Student ID:</span>
-                    <span class="meta-val">{{ currentUser?.student_id || 'SUM2023-00980' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">Supervisor:</span>
-                    <span class="meta-val">{{ currentUser?.adviser_name || 'Sir gel' }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">Required Hours:</span>
-                    <span class="meta-val">{{ currentUser?.required_hours || 500 }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">No. of Completed Tasks:</span>
-                    <span class="meta-val">{{ completedTasksCount }}</span>
-                  </div>
+              <!-- Structured Trainee & OJT Placement Metadata Card -->
+              <div class="summary-meta-card">
+                <div class="meta-card-header">
+                  <span class="meta-section-title">Internship Profile & Placement Credentials</span>
+                  <span class="meta-status-tag">Status: In Progress</span>
                 </div>
 
-                <div class="meta-col">
-                  <div class="meta-item">
-                    <span class="meta-label">Course:</span>
-                    <span class="meta-val">{{ currentUser?.course_section || 'BSIT' }}</span>
+                <div class="summary-meta-grid">
+                  <!-- Column 1: Trainee & Agency Details -->
+                  <div class="meta-col">
+                    <div class="meta-item">
+                      <span class="meta-label">Trainee Name</span>
+                      <strong class="meta-val">{{ currentUser?.full_name || 'Juan Dela Cruz' }}</strong>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Assigned Company / Agency</span>
+                      <strong class="meta-val">{{ currentUser?.company_name || 'Innovate Tech Solutions Inc.' }}</strong>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Completed OJT Hours</span>
+                      <strong class="meta-val text-primary">{{ stats?.accumulated_hours || '0.0' }} hrs</strong>
+                    </div>
                   </div>
-                  <div class="meta-item">
-                    <span class="meta-label">OJT Period:</span>
-                    <span class="meta-val">{{ formatDate(currentUser?.start_date || '2027-02-03') }} - {{ formatDate(currentUser?.target_date || '2027-05-19') }}</span>
+
+                  <!-- Column 2: Academic & Supervisor Credentials -->
+                  <div class="meta-col">
+                    <div class="meta-item">
+                      <span class="meta-label">Student ID Number</span>
+                      <strong class="meta-val">{{ currentUser?.student_id || '2026-0001' }}</strong>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">OJT Adviser / Coordinator</span>
+                      <strong class="meta-val">{{ currentUser?.adviser_name || 'Engr. Roberto Gomez' }}</strong>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Required Total Hours</span>
+                      <strong class="meta-val">{{ currentUser?.required_hours || 486 }} hrs</strong>
+                    </div>
                   </div>
-                  <div class="meta-item">
-                    <span class="meta-label">No. of Pending Tasks:</span>
-                    <span class="meta-val">{{ pendingTasksCount }}</span>
+
+                  <!-- Column 3: Academic Program & Task Statistics -->
+                  <div class="meta-col">
+                    <div class="meta-item">
+                      <span class="meta-label">Degree Course & Section</span>
+                      <strong class="meta-val">{{ currentUser?.course_section || 'BSIT 4-A' }}</strong>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Target OJT Period</span>
+                      <strong class="meta-val">{{ formatDate(currentUser?.start_date || '2026-08-15') }} — {{ formatDate(currentUser?.target_date || '2026-12-15') }}</strong>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Task Milestones Summary</span>
+                      <strong class="meta-val">{{ tasks.length }} Total ({{ completedTasksCount }} Done, {{ pendingTasksCount }} Pending)</strong>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- 1. TIME LOGS (DATE, TIME, HOURS, ACTIVITIES, STATUS) -->
+              <!-- 1. TIME LOGS TABLE -->
               <div class="report-section-block">
-                <h3 class="section-title">Time Logs</h3>
+                <div class="section-title-bar">
+                  <div class="title-left">
+                    <h3 class="section-title">1. Daily Time Record (DTR) History</h3>
+                  </div>
+                  <span class="section-badge">{{ logs.length }} Shift Logs Recorded</span>
+                </div>
+
                 <div class="report-table-wrap">
                   <table class="report-table">
                     <thead>
                       <tr>
-                        <th style="width: 14%;">Date</th>
-                        <th style="width: 22%;">Time</th>
-                        <th style="width: 12%;">Hours</th>
-                        <th style="width: 38%;">Activities</th>
-                        <th style="width: 14%;">Status</th>
+                        <th style="width: 14%;">Log Date</th>
+                        <th style="width: 22%;">Duty Time (In — Out)</th>
+                        <th style="width: 12%;">Rendered</th>
+                        <th style="width: 38%;">Accomplished Tasks / Activities</th>
+                        <th style="width: 14%; text-align: center;">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       @for (log of logs; track log.log_date) {
                         <tr>
-                          <td>{{ formatDate(log.log_date) }}</td>
+                          <td><strong>{{ formatDate(log.log_date) }}</strong></td>
                           <td>{{ formatShiftTime(log.time_in, log.time_out) }}</td>
-                          <td><strong>{{ formatHours(log.total_hours) }}</strong></td>
-                          <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
-                          <td>
+                          <td><strong class="hours-val">{{ formatHours(log.total_hours) }}</strong></td>
+                          <td>{{ log.activity_notes || 'Duty shift completed' }}</td>
+                          <td style="text-align: center;">
                             <span class="status-cell-pill" [class]="log.status || 'completed'">
                               {{ log.status === 'ongoing' ? 'Ongoing' : 'Completed' }}
                             </span>
@@ -289,7 +309,7 @@
                       }
                       @if (logs.length === 0) {
                         <tr>
-                          <td colspan="5" class="table-empty-cell">No time logs recorded yet.</td>
+                          <td colspan="5" class="table-empty-cell">No attendance records logged yet.</td>
                         </tr>
                       }
                     </tbody>
@@ -297,17 +317,23 @@
                 </div>
               </div>
 
-              <!-- 2. TASKS OVERVIEW (TASK NAME, DESCRIPTION, STATUS, DUE DATE) - SECOND -->
+              <!-- 2. TASKS OVERVIEW TABLE -->
               <div class="report-section-block">
-                <h3 class="section-title">Tasks Overview</h3>
+                <div class="section-title-bar">
+                  <div class="title-left">
+                    <h3 class="section-title">2. Assigned Deliverables & Tasks Accomplishment</h3>
+                  </div>
+                  <span class="section-badge">{{ tasks.length }} Tasks Monitored</span>
+                </div>
+
                 <div class="report-table-wrap">
                   <table class="report-table">
                     <thead>
                       <tr>
-                        <th style="width: 26%;">Task Name</th>
-                        <th style="width: 38%;">Description</th>
-                        <th style="width: 18%;">Status</th>
-                        <th style="width: 18%;">Due Date</th>
+                        <th style="width: 24%;">Task Title</th>
+                        <th style="width: 42%;">Description / Specific Objectives</th>
+                        <th style="width: 16%; text-align: center;">Status</th>
+                        <th style="width: 18%;">Target Due Date</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -315,7 +341,7 @@
                         <tr>
                           <td><strong>{{ t.title }}</strong></td>
                           <td>{{ t.description || '—' }}</td>
-                          <td>
+                          <td style="text-align: center;">
                             <span class="status-cell-pill" [class]="t.status">
                               {{ t.status === 'completed' ? 'Completed' : (t.status === 'in_progress' ? 'In Progress' : 'Pending') }}
                             </span>
@@ -333,9 +359,33 @@
                 </div>
               </div>
 
-              <!-- Centered Report Footer -->
+              <!-- Official Tripartite Endorsement & Signatures Block -->
+              <div class="doc-signatures-block">
+                <div class="sig-column">
+                  <div class="sig-line"></div>
+                  <strong class="sig-name">{{ currentUser?.full_name || 'Juan Dela Cruz' }}</strong>
+                  <span class="sig-role">Student Trainee (Signature over Printed Name)</span>
+                  <span class="sig-sub">Date Signed: _______________</span>
+                </div>
+
+                <div class="sig-column">
+                  <div class="sig-line"></div>
+                  <strong class="sig-name">{{ currentUser?.company_name || 'Innovate Tech Solutions Inc.' }}</strong>
+                  <span class="sig-role">Immediate Industry Supervisor / Trainer</span>
+                  <span class="sig-sub">Date Certified: _______________</span>
+                </div>
+
+                <div class="sig-column">
+                  <div class="sig-line"></div>
+                  <strong class="sig-name">{{ currentUser?.adviser_name || 'Engr. Roberto Gomez' }}</strong>
+                  <span class="sig-role">Academic OJT Coordinator / Chair</span>
+                  <span class="sig-sub">Date Approved: _______________</span>
+                </div>
+              </div>
+
+              <!-- Formal Document Footer -->
               <div class="report-doc-footer">
-                <span>OnTrack - OJT Monitoring System</span>
+                <span>OnTrack Mobile OJT Monitoring System • Nueva Ecija University of Science and Technology • Academic Year 2026-2027</span>
               </div>
             </div>
           } @else {
