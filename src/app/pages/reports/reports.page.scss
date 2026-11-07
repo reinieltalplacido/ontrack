@@ -428,7 +428,7 @@ $bg-canvas: #f1f5f9;
         min-width: 960px;
         max-width: 1060px;
         margin: 0 auto;
-        padding: 28px 36px;
+        padding: 28px 48px;
         box-sizing: border-box;
         border-radius: 0;
         box-shadow: none;
@@ -910,21 +910,24 @@ $bg-canvas: #f1f5f9;
     margin: 0 !important;
     overflow: visible !important;
     background: #ffffff !important;
+    box-sizing: border-box !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 
     .summary-report-sheet,
     .doc-sheet-wrapper {
+      box-sizing: border-box !important;
       min-width: 100% !important;
       max-width: 100% !important;
       width: 100% !important;
       box-shadow: none !important;
       border: none !important;
-      padding: 0 !important;
-      margin: 0 !important;
+      padding: 18px 48px !important;
+      margin: 0 auto !important;
 
       .report-table-wrap {
-        border: 1px solid #cbd5e1 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        box-sizing: border-box !important;
         
         .report-table {
           thead tr th {

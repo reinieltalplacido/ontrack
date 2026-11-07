@@ -16,6 +16,10 @@
           <ion-icon name="shield-checkmark-outline"></ion-icon>
           <span>Coordinator</span>
         </button>
+        <button class="demo-chip-btn server" (click)="configureServerUrl()" aria-label="Configure Server IP" title="Configure Backend Server IP">
+          <ion-icon name="server-outline"></ion-icon>
+          <span>Server</span>
+        </button>
       </div>
     </div>
 
@@ -29,9 +33,9 @@
     </div>
 
     <!-- Error Banner -->
-    <div class="error-banner" *ngIf="errorMessage">
+    <div class="error-banner" *ngIf="errorMessage" (click)="configureServerUrl()" style="cursor: pointer;" title="Tap to configure backend server IP">
       <ion-icon name="alert-circle-outline"></ion-icon>
-      <span>{{ errorMessage }}</span>
+      <span>{{ errorMessage }} <br><small style="text-decoration: underline;">Tap to configure server IP for mobile APK</small></span>
     </div>
 
     <!-- Login Form -->

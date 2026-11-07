@@ -8,6 +8,7 @@ import {
   IonIcon,
   IonSpinner,
   IonAlert,
+  AlertController,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -21,9 +22,11 @@ import {
   alertCircleOutline,
   shieldCheckmarkOutline,
   personOutline,
+  serverOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -46,6 +49,7 @@ export class LoginPage {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private toastService = inject(ToastService);
+  private alertCtrl = inject(AlertController);
 
   loginForm: FormGroup;
   showPassword = false;
@@ -67,6 +71,7 @@ export class LoginPage {
       alertCircleOutline,
       shieldCheckmarkOutline,
       personOutline,
+      serverOutline,
     });
 
     this.loginForm = this.fb.group({
@@ -158,5 +163,47 @@ export class LoginPage {
 
   forgotPassword() {
     this.showForgotAlert = true;
+  }
+
+  async configureServerUrl() {
+    const currentUrl = localStorage.getItem('ontrack_api_url') || environment.apiUrl;
+    const alert = await this.alertCtrl.create({
+      header: 'Backend Server URL',
+      subHeader: 'For APK testing on your mobile phone, set your PC\'s Wi-Fi IP (e.g. http://192.168.1.9/ontrack-api/api)',
+      inputs: [
+        {
+          name: 'url',
+          type: 'url',
+          placeholder: 'http://192.168.1.9/ontrack-api/api',
+          value: currentUrl,
+        },
+      ],
+      buttons: [
+        {
+          text: 'Reset Default',
+          role: 'cancel',
+          handler: () => {
+            localStorage.removeItem('ontrack_api_url');
+            this.toastService.showInfo('Reset to default: http://localhost/ontrack-api/api');
+          },
+        },
+        {
+          text: 'Save',
+          handler: (data) => {
+            if (data.url && data.url.trim()) {
+              let u = data.url.trim().replace(/\/+$/, '');
+              if (!u.endsWith('/api')) {
+                u += '/api';
+              }
+              localStorage.setItem('ontrack_api_url', u);
+              this.toastService.showSuccess('Server connected to: ' + u);
+              this.errorMessage = '';
+              this.cdr.detectChanges();
+            }
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

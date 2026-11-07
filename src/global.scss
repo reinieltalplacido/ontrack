@@ -305,9 +305,10 @@ ion-toast.ontrack-top-toast {
     background: #ffffff !important;
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box !important;
     height: auto !important;
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
@@ -317,33 +318,35 @@ ion-toast.ontrack-top-toast {
 
     .summary-report-sheet,
     .doc-sheet-wrapper {
+      box-sizing: border-box !important;
       background: #ffffff !important;
       width: 100% !important;
       min-width: 100% !important;
       max-width: 100% !important;
       height: auto !important;
-      padding: 0 !important;
-      margin: 0 !important;
+      padding: 18px 48px !important;
+      margin: 0 auto !important;
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
 
       .report-table-wrap {
-        border: 1px solid #000000 !important;
-        border-radius: 0 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 6px !important;
         box-shadow: none !important;
         width: 100% !important;
+        box-sizing: border-box !important;
 
         .report-table {
           width: 100% !important;
           border-collapse: collapse !important;
 
           thead tr th {
-            background-color: #2563eb !important;
+            background-color: #234160 !important;
             color: #ffffff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            border: 1px solid #2563eb !important;
+            border: 1px solid #1a324a !important;
           }
 
           tbody tr td {

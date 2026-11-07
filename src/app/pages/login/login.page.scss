@@ -72,6 +72,16 @@
           background: #f1f5f9;
         }
       }
+
+      &.server {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+
+        &:active {
+          background: #e2e8f0;
+        }
+      }
     }
   }
 }
