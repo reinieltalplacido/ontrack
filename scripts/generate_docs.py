@@ -57,7 +57,7 @@ def create_document():
     sub_p = doc.add_paragraph()
     sub_p.paragraph_format.space_before = Pt(0)
     sub_p.paragraph_format.space_after = Pt(18)
-    run_sub = sub_p.add_run("Mobile Application Technology — System Specifications & AI Usage Disclosure")
+    run_sub = sub_p.add_run("Mobile Application Technology — Technical Specifications & AI Usage Disclosure")
     run_sub.font.size = Pt(12)
     run_sub.font.italic = True
     run_sub.font.color.rgb = SECONDARY
@@ -82,8 +82,9 @@ def create_document():
     drun1.bold = True
     drun1.font.color.rgb = PRIMARY
     drun2 = dp.add_run(
-        "OnTrack is a cross-platform mobile application and web administration portal engineered for On-the-Job Training (OJT) monitoring. "
-        "It replaces manual Daily Time Records (DTR) by integrating automated hour computation, GPS geolocation verification, selfie proof-of-work, and comprehensive academic coordinator oversight."
+        "OnTrack is a cross-platform mobile application and academic administration portal engineered for On-the-Job Training (OJT) monitoring. "
+        "It replaces manual Daily Time Records (DTR) by integrating automated rendering hour computation, native GPS geolocation verification, "
+        "a live real-time system clock, student task deliverables management, and comprehensive academic coordinator oversight."
     )
     drun2.font.color.rgb = TEXT_DARK
     
@@ -133,37 +134,37 @@ def create_document():
     intro_client = doc.add_paragraph()
     intro_client.paragraph_format.space_after = Pt(8)
     intro_client.add_run(
-        "The client side application is built using Ionic 9 and Angular 22 (Standalone Components) paired with Capacitor native plugins. "
-        "It provides interns with an intuitive interface to log attendance, record daily activities, track required duty hours, and manage academic submissions."
+        "The client-side mobile application is built using Ionic 9 and Angular 22 (Standalone Components) paired with Capacitor native plugins. "
+        "It provides interns with an intuitive interface to record attendance, track rendering hours, log daily accomplishments, and manage deliverables."
     )
 
     add_sub_heading("1. Authentication & Onboarding")
     add_bullet("Multi-Step Student Registration:", "Guided 3-step registration workflow that captures comprehensive student OJT information.")
     add_bullet("Step 1 (Academic Details):", "Inputs Student ID Number, Full Name, Academic Program, Year Level, and Section selection (BSIT 4-A to 4-K).", level=1)
     add_bullet("Automated Coordinator Pairing:", "Selecting an academic section automatically pairs the student with that section's designated faculty coordinator.", level=1)
-    add_bullet("Step 2 (OJT Placement):", "Records Host Training Establishment (HTE) / Company Name, Assigned Department, Supervisor Name, and Supervisor Contact Details.", level=1)
+    add_bullet("Step 2 (OJT Placement):", "Records Host Training Establishment (HTE) / Company Name, Company Address, Trainer Name, Start Date, Target End Date, and Required Hours.", level=1)
     add_bullet("Step 3 (Security & Review):", "Secure password creation with BCrypt encryption, password visibility toggles, and an instant summary review card before submitting.", level=1)
-    add_bullet("Student Login & Session Handling:", "Secure authentication using Student ID or Institutional Email with hashed password verification. Includes persistent local session storage and Angular Route Guards.")
+    add_bullet("Unified Sign-In & Session Handling:", "Secure authentication using Student ID or Institutional Email with hashed password verification. Includes persistent local session storage and Angular Route Guards.")
 
     add_sub_heading("2. Student Dashboard (Home)")
     add_bullet("Profile Header:", "Displays user avatar with initials, active duty beacon indicator, student name, student ID, academic section, and assigned company badge.")
-    add_bullet("Daily Attendance Card:", "Streamlined single-card attendance console with one-tap Clock In / Clock Out button, dynamic duty indicator, and shift start timestamp.")
+    add_bullet("Daily Attendance Console:", "Streamlined single-card attendance console with one-tap Time In / Time Out button, dynamic duty indicator, and shift start timestamp.")
     add_bullet("Rendered vs. Required Hours:", "Real-time counter displaying accumulated rendering hours against the target requirement (e.g., 120.00 / 486 hrs).")
     add_bullet("Visual Progress Ring & Bar:", "Live percentage indicator illustrating overall OJT completion progress (0% to 100%).")
     add_bullet("Hours Remaining Metric:", "Automatically computed countdown showing exact hours left to complete internship requirements.")
     add_bullet("Target Completion Countdown:", "Calculates calendar days remaining until the intern's target completion date.")
     add_bullet("Edit Goal Modal:", "Allows students to adjust their required hours target (e.g., 486 or 500 hours) and targeted completion date.")
-    add_bullet("Quick Navigation Shortcuts:", "2x2 icon grid providing one-tap access to Time Logs (DTR), Tasks, Reports, and Profile.")
+    add_bullet("Quick Navigation Shortcuts:", "Grid providing one-tap access to Time Logs (DTR), Tasks, Reports, and Profile.")
     add_bullet("Recent Activity Feeds:", "Instant preview of latest attendance logs and pending tasks directly on the main dashboard feed.")
 
-    add_sub_heading("3. Geolocation & Photo Duty Tracking (Time Logs / DTR)")
-    add_bullet("GPS Geolocation Verification:", "Captures high-accuracy latitude and longitude coordinates upon check-in via @capacitor/geolocation to verify physical workplace presence.")
-    add_bullet("Interactive Leaflet Map:", "Displays the student's real-time physical GPS location pin on an interactive map inside the clock-in modal.")
-    add_bullet("Proof Selfie Camera Integration:", "Prompts the student to capture an instant front-facing selfie or duty photo via @capacitor/camera as proof of presence.")
-    add_bullet("Tactile Haptic Feedback:", "Triggers device vibration via @capacitor/haptics upon successful check-in or check-out.")
-    add_bullet("Clock-Out Accomplishment Logging:", "Includes an accomplishment summary text area where students log daily duties and tasks finished upon duty completion.")
+    add_sub_heading("3. GPS Attendance & Duty Tracking (Time Logs / DTR)")
+    add_bullet("GPS Geolocation Verification:", "Captures high-accuracy latitude and longitude coordinates upon Time In via @capacitor/geolocation to verify physical workplace presence.")
+    add_bullet("Live Realtime System Clock:", "Displays a live ticking digital clock (HH:MM:SS AM/PM) with current date and pulsing live beacon to record exact check-in timing.")
+    add_bullet("Location Name Resolution:", "Resolves GPS coordinates into human-readable workplace street names and establishments with a one-tap manual refresh option.")
+    add_bullet("Tactile Haptic Feedback:", "Triggers device vibration via @capacitor/haptics upon successful Time In or Time Out.")
+    add_bullet("Time-Out Accomplishment Logging:", "Includes an accomplishment summary text area where students log daily duties and tasks finished upon duty completion.")
     add_bullet("Automated Hour Computation:", "Accurately computes total hours rendered for the shift based on Time In and Time Out timestamps.")
-    add_bullet("DTR History & Timesheet Explorer:", "Complete reverse-chronological list of past attendance entries showing date, timestamps, rendered hours, accomplishment logs, and photo verification thumbnails.")
+    add_bullet("DTR History & Timesheet Explorer:", "Complete reverse-chronological list of past attendance entries showing date, timestamps, rendered hours, accomplishment logs, and coordinates.")
 
     add_sub_heading("4. Task & Deliverable Management (Tasks)")
     add_bullet("Task Status Filtering:", "Organizes deliverables into All, Pending, In Progress, and Completed filter tabs.")
@@ -172,8 +173,8 @@ def create_document():
     add_bullet("Status Toggling:", "One-tap mechanism to update task status from pending to completed.")
 
     add_sub_heading("5. Reports & Profile Management")
-    add_bullet("Weekly & Monthly Summaries:", "Aggregates weekly rendered hours, daily averages, and attendance consistency.")
-    add_bullet("Digital DTR Export:", "Prepares structured attendance summary tables ready for printing and academic submission.")
+    add_bullet("Structured Summary Report:", "Organized 3-column metadata header (Student Info, Placement, Hours & Tasks) followed by Time Logs table (Date, Time, Hours) and Tasks Overview table (Task Name, Description, Status, Due Date).")
+    add_bullet("Digital DTR Export & Print:", "Prepares clean, high-contrast attendance summary tables ready for printing and academic submission via print-ready stylesheets.")
     add_bullet("Profile & Contact Management:", "Displays academic details, adviser credentials, and emergency contact details with secure one-tap logout.")
 
     # ==================== PART 2: ADMIN SIDE ====================
@@ -183,7 +184,7 @@ def create_document():
     intro_admin.paragraph_format.space_after = Pt(8)
     intro_admin.add_run(
         "The coordinator portal provides academic OJT supervisors with real-time oversight tools to monitor student attendance, "
-        "audit Daily Time Records, inspect GPS coordinates and photo evidence, review student deliverables, and filter cohorts by academic section."
+        "audit Daily Time Records, inspect GPS coordinates, review student deliverables, and filter cohorts by academic section."
     )
 
     add_sub_heading("1. Coordinator Authentication & Section Filtering")
@@ -193,7 +194,7 @@ def create_document():
 
     add_sub_heading("2. System-Wide Analytics & KPI Metrics")
     add_bullet("Total Monitored Interns:", "Live count of registered students currently active in the selected academic section.")
-    add_bullet("Active on Duty Counter:", "Real-time count of students who are currently clocked in at their company placements.")
+    add_bullet("Active on Duty Counter:", "Real-time count of students who are currently on active duty at their company placements.")
     add_bullet("Total Rendered Hours:", "Aggregate sum of all internship hours rendered across the student cohort.")
     add_bullet("Task Completion Metrics:", "Visual breakdown of pending versus completed student deliverables.")
 
@@ -206,9 +207,8 @@ def create_document():
     add_sub_heading("4. Detailed Student Record & Audit View")
     add_bullet("Student Overview Modal:", "In-depth modal presenting the student's complete profile, contact details, total hours rendered, remaining hours, and progress percentage.")
     add_bullet("Tab 1: Complete Attendance History (DTR Audit):", "Audit log showing every shift rendered by the student, including date, exact Time In, Time Out, and rendered hours.", level=1)
-    add_bullet("Daily Accomplishment Review:", "Inspects the daily accomplishment notes written by the student upon clocking out.", level=1)
-    add_bullet("GPS Coordinates & Map Inspection:", "Verifies exact GPS latitude and longitude captured at the moment of clock-in.", level=1)
-    add_bullet("Photo Proof Viewer:", "High-resolution viewer allowing coordinators to inspect selfie/duty photos captured via the camera.", level=1)
+    add_bullet("Daily Accomplishment Review:", "Inspects the daily accomplishment notes written by the student upon time-out.", level=1)
+    add_bullet("GPS Coordinates Inspection:", "Verifies exact GPS latitude and longitude captured at the moment of time-in.", level=1)
     add_bullet("Tab 2: Student Tasks & Deliverables:", "Displays all deliverables submitted by the student with status indicators and submitted attachments.", level=1)
 
     add_sub_heading("5. Student Task Monitoring & Proof Verification Console")
@@ -229,11 +229,11 @@ def create_document():
     # Table creation
     headers = ["Capability / Functional Area", "Student Intern (Client Side)", "Academic Coordinator (Admin Side)"]
     rows_data = [
-        ("Authentication & Access", "Multi-step registration & student login", "Faculty ID login with role-based access"),
+        ("Authentication & Access", "Unified login & multi-step registration", "Unified login with role-based faculty permissions"),
         ("Section Assignment", "Selects section (BSIT 4-A to 4-K)", "Switches & filters by sections (A to K)"),
-        ("Duty Status Tracking", "Single-tap Clock In / Clock Out", "Live monitoring of on-duty interns"),
+        ("Duty Status Tracking", "Single-tap Time In / Time Out", "Live monitoring of on-duty interns"),
         ("GPS Verification", "Captures device latitude/longitude", "Audits coordinates and location tags"),
-        ("Photo Evidence", "Captures duty selfie via camera", "Inspects photo proof in Student Record"),
+        ("Realtime Clock", "Live ticking system clock display", "Audits exact server & client timestamps"),
         ("Rendered Hours Computation", "Automated daily & remaining hours", "Cohort-wide aggregated hours & stats"),
         ("Accomplishment Logging", "Submits daily accomplishment logs", "Audits accomplishment notes per shift"),
         ("Task & Deliverables", "Creates tasks and uploads proof files", "Monitors deliverables & verifies proofs"),
@@ -277,8 +277,119 @@ def create_document():
                 if c_idx == 0:
                     run.font.bold = True
 
-    # ==================== PART 4: AI USAGE DISCLOSURE ====================
-    add_major_heading("PART 4: AI Usage Disclosure")
+    # ==================== PART 4: TECHNICAL IMPLEMENTATION ====================
+    add_major_heading("PART 4: Technical Implementation")
+    
+    intro_tech = doc.add_paragraph()
+    intro_tech.paragraph_format.space_after = Pt(8)
+    intro_tech.add_run(
+        "This section details the technical architecture, native Capacitor capabilities, data handling strategies, "
+        "RESTful API operations, and pivotal engineering choices implemented across the OnTrack system."
+    )
+
+    add_sub_heading("1. Relevant Capacitor Capabilities & Native Hardware Integration")
+    add_bullet("@capacitor/geolocation (Workplace GPS Verification):", 
+               "Interfaces directly with Android native location services (GPS hardware and fused network positioning). "
+               "Upon initiating Time-In, it captures high-accuracy latitude and longitude coordinates to verify the intern's physical presence "
+               "at the designated training company. Coordinates are cached in-memory to prevent repeated satellite acquisition delays, "
+               "and reverse geocoding via OpenStreetMap Nominatim translates raw coordinates into human-readable workplace street addresses.")
+    
+    add_bullet("@capacitor/camera (Deliverable & Profile Capture):", 
+               "Bridges native mobile camera hardware and device photo albums. Allows interns to capture profile avatars and attach photographic "
+               "proof of completed tasks and project deliverables. Handles runtime permissions (CAMERA and READ_MEDIA_IMAGES), automatic image "
+               "orientation normalization, and Base64/Blob conversion with JPEG compression to minimize bandwidth and storage overhead.")
+    
+    add_bullet("@capacitor/haptics (Tactile Feedback):", 
+               "Engages the physical device vibration motor to provide immediate tactile feedback upon user interactions. Triggers distinct sensory "
+               "feedback patterns—such as medium impacts when opening dialogs, submitting attendance logs, or completing deliverables, "
+               "and notification success bursts upon successful backend API confirmation—enhancing the mobile user experience.")
+    
+    add_bullet("@capacitor/status-bar & @capacitor/keyboard (Native Viewport Polish):", 
+               "Dynamically configures the native Android status bar styling to align with OnTrack's dark-navy brand aesthetic (#2B5578) "
+               "with light icon themes. Simultaneously listens to native soft keyboard appearance and dismissal events, ensuring input fields "
+               "automatically scroll into view without layout clipping or modal overflow.")
+    
+    add_bullet("@capacitor/app (Application Lifecycle Management):", 
+               "Monitors native application lifecycle states (app pause, resume, and hardware back-button navigation). Ensures that "
+               "active timers, background requests, and unsaved form states recover gracefully without data loss when switching apps.")
+
+    add_sub_heading("2. Data Handling & State Architecture")
+    add_bullet("Angular 22 Standalone Architecture:", 
+               "Built with modern Angular standalone components without NgModules. Each page and UI component independently imports its necessary "
+               "dependencies (Ionic standalone directives, CommonModule, ReactiveFormsModule), enabling granular tree-shaking, fast cold-start performance, "
+               "and reduced JavaScript bundle sizes on mobile devices.")
+    
+    add_bullet("Reactive Form Validation & Strict Typing:", 
+               "All inputs are managed through Angular Reactive Forms (FormGroup, FormBuilder) backed by TypeScript models. Multi-step forms (such as "
+               "the 3-step registration wizard) maintain step-specific validation gates, prevent premature submissions, and provide real-time field error hints.")
+    
+    add_bullet("RxJS Observable Streams & Reactive State:", 
+               "Authentication and user session states are managed using RxJS BehaviorSubjects within AuthService. State transitions automatically "
+               "propagate across components, enabling live updates to user avatars, duty beacons, and rendered hour statistics without manual reloads.")
+    
+    add_bullet("Local Storage Persistence & Route Protection:", 
+               "Authenticated user credentials, profile records, and active sessions persist in browser/device localStorage. Angular Route Guards "
+               "(canActivate) inspect active session tokens and role metadata, automatically redirecting unauthenticated users to login and preventing "
+               "students from accessing administrative coordinator endpoints.")
+    
+    add_bullet("Decoupled Real-Time Clock Engine:", 
+               "A dedicated 1,000ms system timer drives the live digital clock (HH:MM:SS AM/PM) and formatted date on the Time-In console. "
+               "Updates trigger Angular ChangeDetectorRef to ensure smooth second-by-second UI rendering, and the interval is cleanly torn down "
+               "in ngOnDestroy() to prevent background memory leaks.")
+    
+    add_bullet("Location Data Caching:", 
+               "Coordinates and reverse-geocoded location strings are cached in-memory with timestamp freshness markers. If the device already has "
+               "a recent valid position, the modal renders immediately while fresh satellite polling executes seamlessly in the background.")
+
+    add_sub_heading("3. API Operations & Backend Architecture (XAMPP / PHP 8.x + MySQL)")
+    add_bullet("RESTful JSON Communication Standards:", 
+               "All backend endpoints communicate exclusively using application/json payloads and return standardized response envelopes "
+               "(success boolean, message string, and typed data payload). Standard HTTP response codes (200 OK, 400 Bad Request, 401 Unauthorized, "
+               "409 Conflict) are strictly enforced, alongside comprehensive CORS headers for frictionless cross-origin mobile communication.")
+    
+    add_bullet("Authentication Endpoints (/api/auth/):", 
+               "POST /api/auth/register.php processes multi-step student registration, verifies email formatting, enforces unique school IDs, and automatically "
+               "binds students to coordinators based on academic section. POST /api/auth/login.php provides unified authentication across students and faculty, "
+               "validating passwords against BCrypt hashes (password_verify).")
+    
+    add_bullet("Attendance & DTR Operations (/api/attendance/):", 
+               "POST /api/attendance/clock_in.php validates active duty state, records timestamp and GPS coordinates, and initializes shift status. "
+               "POST /api/attendance/clock_out.php computes shift duration using MySQL TIMEDIFF, saves student accomplishment notes, and marks the shift completed. "
+               "GET /api/attendance/history.php returns reverse-chronological DTR history optimized for timesheet audits.")
+    
+    add_bullet("Dashboard & Analytics Endpoints (/api/dashboard/ & /api/admin/):", 
+               "GET /api/dashboard/stats.php computes rendered hours, target hours, progress percentage, remaining hours, and target countdown. "
+               "Admin endpoints (GET /api/admin/dashboard/stats.php and GET /api/admin/students/list.php) provide cohort-wide aggregated metrics, "
+               "real-time duty rosters, and section filtering (BSIT 4-A to 4-K).")
+    
+    add_bullet("Task Management Endpoints (/api/tasks/):", 
+               "Provides full CRUD functionality (list.php, create.php, update_status.php), managing task titles, descriptions, deadlines, "
+               "statuses (pending, in_progress, completed), and deliverable verification stamps.")
+
+    add_sub_heading("4. Important Implementation Choices")
+    add_bullet("Strict PDO Prepared Statements (Zero SQL Injection):", 
+               "All database interactions use PHP Data Objects (PDO) with parameterized prepared statements. No raw user input is concatenated into SQL queries, "
+               "completely eliminating SQL injection vulnerabilities and ensuring enterprise-grade data security.")
+    
+    add_bullet("Single Unified Sign-In with Intelligent Role Routing:", 
+               "Rather than forcing users through separate, disjointed login screens, OnTrack implements a unified, modern sign-in interface. "
+               "The backend automatically resolves the user's role (student intern vs. academic coordinator) from their credentials and routes them to their "
+               "respective portal seamlessly.")
+    
+    add_bullet("Streamlined GPS-Centric Time-In with Realtime Clock:", 
+               "Shifted from friction-heavy selfie capture to rapid GPS geolocation combined with a live system clock. This eliminates camera latency "
+               "and bandwidth costs while ensuring verifiable location accuracy and tamper-proof temporal logging.")
+    
+    add_bullet("Database Performance Optimization via Composite Indexes:", 
+               "Introduced strategic composite indexes (idx_user_date_time on attendance_logs and idx_user_id_desc on tasks). This resolves table scanning "
+               "bottlenecks, guaranteeing sub-millisecond query responses even as attendance records grow over entire academic semesters.")
+    
+    add_bullet("Multi-Environment Network Base URL Configuration:", 
+               "Structured environment.ts with configurable base API URLs, supporting rapid zero-reconfiguration switching between desktop browsers (localhost), "
+               "Android Studio Emulators (10.0.2.2), and physical mobile hardware connected via local area network Wi-Fi.")
+
+    # ==================== PART 5: AI USAGE DISCLOSURE ====================
+    add_major_heading("PART 5: AI Usage Disclosure")
     
     add_sub_heading("1. Identification of AI Tools Used")
     add_bullet("Primary AI Tool:", "Google Antigravity / Gemini AI Coding Assistant (DeepMind Advanced Agentic Environment).")
@@ -287,7 +398,7 @@ def create_document():
 
     add_sub_heading("2. How the AI Assisted Development")
     add_bullet("Architecture & Scaffolding:", "Assisted in structuring the Ionic 9 and Angular 22 standalone component architecture, configuring routes, models, and type-safe HTTP communication with the backend.")
-    add_bullet("Device Hardware Integration:", "Guided the configuration of Capacitor plugins (@capacitor/camera for selfie capture, @capacitor/geolocation for workplace GPS coordinate recording, and @capacitor/haptics for tactile user feedback).")
+    add_bullet("Device Hardware Integration:", "Guided the configuration of Capacitor plugins (@capacitor/camera for deliverable photo capture, @capacitor/geolocation for workplace GPS coordinate recording, and @capacitor/haptics for tactile user feedback).")
     add_bullet("Backend RESTful API & Database Integration:", "Constructed secure PHP REST API endpoints utilizing PDO prepared statements to eliminate SQL injection, implemented CORS headers, and authored the normalized MySQL database schema.")
     add_bullet("Native Android Bridge Configuration:", "Generated and synchronized native Android platform assets, configured AndroidManifest.xml permissions (Camera, Location, and cleartext HTTP traffic), and prepared Gradle integration for Android Studio.")
     add_bullet("Bug Diagnosis & Query Optimization:", "Diagnosed UI change detection locks during registration, applied Angular ChangeDetectorRef updates, and eliminated database latency by introducing targeted composite indexes on high-traffic tables.")
@@ -296,7 +407,7 @@ def create_document():
     add_bullet("UI/UX & Mobile Visual Hierarchy Review:", "The group reviewed mobile viewport layouts and removed redundant interface clutter—such as repeated company tags and unnecessary 'Off Duty' badges—to maintain a clean and accessible user experience.")
     add_bullet("Academic Workflow & Section Assignment Review:", "Reviewed university coordination requirements and structured automated section mapping (BSIT 4-A through 4-K), ensuring newly registered students are automatically paired with their respective academic coordinators.")
     add_bullet("Database Schema & Integrity Verification:", "Audited database tables and schema structures in phpMyAdmin to verify referential integrity, foreign key relations, and accurate storage across ontrack_db.")
-    add_bullet("Comprehensive Functional Testing:", "Conducted end-to-end testing of student registration, duplicate credential validation (handling HTTP 409 conflict states), GPS coordinate capture, selfie camera uploads, and automated daily rendering hour calculation.")
+    add_bullet("Comprehensive Functional Testing:", "Conducted end-to-end testing of student registration, duplicate credential validation (handling HTTP 409 conflict states), GPS coordinate capture, deliverable proof uploads, and automated daily rendering hour calculation.")
     add_bullet("Multi-Environment Network Testing:", "Tested API connectivity across web browsers (localhost), Android Studio Emulators (10.0.2.2), and physical mobile hardware connected via local Wi-Fi.")
     add_bullet("Administrative Scope Modifications:", "Refactored the Coordinator Portal to eliminate unnecessary 'add task' buttons, refocusing the coordinator role purely on oversight, DTR auditing, and student deliverable verification.")
     add_bullet("Performance Tuning:", "Added composite database indexes (idx_user_date_time and idx_user_id_desc), resolving slow loading times when fetching detailed student attendance histories.")
