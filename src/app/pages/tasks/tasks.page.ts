@@ -55,6 +55,8 @@ import {
   expandOutline,
   shieldCheckmarkOutline,
   arrowUndoOutline,
+  chevronDownOutline,
+  chevronUpOutline,
 } from 'ionicons/icons';
 
 @Component({
@@ -103,6 +105,7 @@ export class TasksPage implements OnInit {
   newTaskDescription = '';
   newTaskDeadline = '';
   newTaskPriority: TaskPriority = 'medium';
+  isPriorityDropdownOpen = false;
 
   // Task Details Modal State
   showTaskDetailModal = false;
@@ -155,6 +158,8 @@ export class TasksPage implements OnInit {
       expandOutline,
       shieldCheckmarkOutline,
       arrowUndoOutline,
+      chevronDownOutline,
+      chevronUpOutline,
     });
   }
 
@@ -442,6 +447,7 @@ export class TasksPage implements OnInit {
 
   saveTaskDocumentation(task: TaskItem, photoData: string) {
     this.isSavingProof = true;
+    this.cdr.detectChanges();
     this.taskService.attachTaskProof(task.id, photoData).subscribe({
       next: (res) => {
         this.isSavingProof = false;
@@ -452,6 +458,7 @@ export class TasksPage implements OnInit {
         }
         this.nativeService.triggerHapticFeedback('success');
         this.showFeedback('Documentation photo attached successfully!', 'success');
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isSavingProof = false;
@@ -460,6 +467,7 @@ export class TasksPage implements OnInit {
           this.selectedTask.proof_url = photoData;
         }
         this.showFeedback('Documentation photo saved locally.', 'success');
+        this.cdr.detectChanges();
       },
     });
   }
@@ -510,10 +518,12 @@ export class TasksPage implements OnInit {
           this.tasks = this.tasks.filter((t) => t.id !== task.id);
           this.applyFilters();
           this.showFeedback('Task removed.', 'success');
+          this.cdr.detectChanges();
         }
       },
       error: () => {
         this.showFeedback('Could not delete task.', 'error');
+        this.cdr.detectChanges();
       },
     });
   }
@@ -524,11 +534,49 @@ export class TasksPage implements OnInit {
     this.newTaskDescription = '';
     this.newTaskDeadline = '';
     this.newTaskPriority = 'medium';
+    this.isPriorityDropdownOpen = false;
     this.showNewTaskModal = true;
+    this.cdr.detectChanges();
   }
 
   closeNewTaskModal() {
     this.showNewTaskModal = false;
+    this.isPriorityDropdownOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  togglePriorityDropdown() {
+    this.isPriorityDropdownOpen = !this.isPriorityDropdownOpen;
+    this.cdr.detectChanges();
+  }
+
+  selectPriority(priority: TaskPriority) {
+    this.newTaskPriority = priority;
+    this.isPriorityDropdownOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  getPriorityLabel(priority: TaskPriority): string {
+    switch (priority) {
+      case 'low': return 'Low Priority';
+      case 'medium': return 'Medium Priority';
+      case 'high': return 'High Priority';
+      default: return 'Medium Priority';
+    }
+  }
+
+  openDatePicker(inputEl: HTMLInputElement) {
+    if (inputEl) {
+      if (typeof (inputEl as any).showPicker === 'function') {
+        try {
+          (inputEl as any).showPicker();
+        } catch {
+          inputEl.focus();
+        }
+      } else {
+        inputEl.focus();
+      }
+    }
   }
 
   submitNewTask() {
@@ -537,13 +585,19 @@ export class TasksPage implements OnInit {
       this.showFeedback('Please provide a task title.', 'error');
       return;
     }
+    if (!this.newTaskDeadline) {
+      this.showFeedback('Due date is required. Please set a deadline.', 'error');
+      return;
+    }
 
     this.isSubmitting = true;
+    this.cdr.detectChanges();
+
     const payload = {
       user_id: this.currentUser.id,
       title: this.newTaskTitle.trim(),
       description: this.newTaskDescription.trim(),
-      deadline: this.newTaskDeadline || undefined,
+      deadline: this.newTaskDeadline,
       priority: this.newTaskPriority,
     };
 
@@ -554,15 +608,21 @@ export class TasksPage implements OnInit {
         if (res.success && res.task) {
           this.tasks.unshift(res.task);
           this.applyFilters();
+          this.newTaskTitle = '';
+          this.newTaskDescription = '';
+          this.newTaskDeadline = '';
+          this.newTaskPriority = 'medium';
           this.nativeService.triggerHapticFeedback('success');
           this.showFeedback('Task added successfully!', 'success');
         } else {
           this.showFeedback(res.message || 'Could not create task.', 'error');
         }
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isSubmitting = false;
         this.showFeedback('Unable to connect to server.', 'error');
+        this.cdr.detectChanges();
       },
     });
   }
