@@ -70,6 +70,7 @@ import { AdminService, AdminStats, MonitoredStudent } from '../../../core/servic
 import { NativeService } from '../../../core/services/native.service';
 import { Professor } from '../../../models/user.model';
 import { environment } from '../../../../environments/environment';
+import { formatHours } from '../../../core/utils/format.util';
 
 export interface AdminAttendanceLog {
   id: number;
@@ -178,6 +179,7 @@ export class AdminDashboardPage implements OnInit {
   private adminService = inject(AdminService);
   private nativeService = inject(NativeService);
   private router = inject(Router);
+  formatHours = formatHours;
   private cdr = inject(ChangeDetectorRef);
 
   currentProfessor: Professor | null = null;
@@ -204,7 +206,7 @@ export class AdminDashboardPage implements OnInit {
   }
 
   // Active Segment
-  selectedSegment: 'overview' | 'students' | 'attendance' | 'tasks' = 'overview';
+  selectedSegment: 'overview' | 'students' | 'attendance' | 'tasks' | 'profile' = 'overview';
 
   // Loading States
   isLoadingStats = true;
@@ -589,20 +591,21 @@ export class AdminDashboardPage implements OnInit {
     this.cdr.detectChanges();
   }
 
-  selectMenuItem(segment: 'overview' | 'students' | 'attendance' | 'tasks') {
+  selectMenuItem(segment: 'overview' | 'students' | 'attendance' | 'tasks' | 'profile') {
     this.selectedSegment = segment;
     this.closeSideMenu();
     this.switchSegment(segment);
   }
 
-  switchSegment(segment: 'overview' | 'students' | 'attendance' | 'tasks') {
+  switchSegment(segment: 'overview' | 'students' | 'attendance' | 'tasks' | 'profile') {
     this.selectedSegment = segment;
     this.nativeService.triggerHapticFeedback('medium');
     if (segment === 'students' && this.students.length === 0) {
       this.loadStudents();
     } else if (segment === 'attendance' && this.attendanceLogs.length === 0) {
       this.loadAttendanceLogs();
-    this.loadTasks();
+    } else if (segment === 'tasks' && this.allTasks.length === 0) {
+      this.loadTasks();
     }
     this.cdr.detectChanges();
   }

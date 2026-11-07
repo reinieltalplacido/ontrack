@@ -33,7 +33,7 @@
     <ion-card class="summary-card">
       <div class="summary-col">
         <span class="summary-label">Rendered Hours</span>
-        <strong class="summary-value">{{ totalRenderedHours }} hrs</strong>
+        <strong class="summary-value">{{ formatHours(totalRenderedHours) }}</strong>
       </div>
       <div class="summary-divider"></div>
       <div class="summary-col">
@@ -106,7 +106,7 @@
                     <strong class="time-val">{{ formatTime(log.time_out) }}</strong>
                   </div>
                   <div class="hours-box">
-                    <span class="hours-val">{{ log.total_hours || '0.00' }}h</span>
+                    <span class="hours-val">{{ formatHours(log.total_hours) }}</span>
                     <span class="hours-sub">Rendered</span>
                   </div>
                 </div>

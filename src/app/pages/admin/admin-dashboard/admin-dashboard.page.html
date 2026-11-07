@@ -162,7 +162,7 @@
               <!-- Status Badge -->
               <span class="duty-pill" [class.ongoing]="act.status === 'ongoing'" [class.completed]="act.status === 'completed'">
                 <span class="indicator-dot"></span>
-                {{ act.status === 'ongoing' ? 'Clocked In' : (act.total_hours + ' hrs logged') }}
+                {{ act.status === 'ongoing' ? 'Clocked In' : (formatHours(act.total_hours) + ' logged') }}
               </span>
             </div>
 
@@ -279,7 +279,7 @@
           <div class="student-progress-box">
             <div class="progress-labels">
               <span class="hours-rendered">
-                <strong>{{ s.accumulated_hours }}</strong> / {{ s.required_hours }} hrs
+                <strong>{{ formatHours(s.accumulated_hours) }}</strong> / {{ s.required_hours }} hrs
               </span>
               <span class="percent-label">{{ s.completion_percent }}%</span>
             </div>
@@ -296,7 +296,7 @@
                 In: {{ s.current_shift.time_in }}
               </span>
               <span *ngIf="!s.is_on_duty" class="remaining-hours-text">
-                {{ s.remaining_hours }} hrs remaining
+                {{ formatHours(s.remaining_hours) }} remaining
               </span>
             </div>
 
@@ -381,7 +381,7 @@
         <!-- Weekly Summary KPI Strip -->
         <div class="weekly-metrics-strip">
           <div class="weekly-metric-box">
-            <span class="m-val">{{ weeklyTotalHours }} hrs</span>
+            <span class="m-val">{{ formatHours(weeklyTotalHours) }}</span>
             <span class="m-lbl">Rendered This Week</span>
           </div>
           <div class="weekly-metric-box">
@@ -410,7 +410,7 @@
 
               <div class="student-header-right">
                 <span class="weekly-hrs-badge" [class.has-hours]="item.weeklyHours > 0">
-                  {{ item.weeklyHours }} hrs
+                  {{ formatHours(item.weeklyHours) }}
                 </span>
                 <button class="expand-icon-btn" aria-label="Toggle details">
                   <ion-icon [name]="item.isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
@@ -435,7 +435,7 @@
 
                 <!-- Day Status Pill -->
                 <div class="col-status-pill" [class.done]="dayLog.status === 'completed'" [class.live]="dayLog.status === 'ongoing'" [class.empty]="!dayLog.hasDuty">
-                  <span *ngIf="dayLog.status === 'completed'">{{ dayLog.totalHours }}h</span>
+                  <span *ngIf="dayLog.status === 'completed'">{{ formatHours(dayLog.totalHours) }}</span>
                   <span *ngIf="dayLog.status === 'ongoing'" class="live-pulse">Live</span>
                   <span *ngIf="!dayLog.hasDuty" class="dash">-</span>
                 </div>
@@ -458,7 +458,7 @@
                 <div class="insp-times-row">
                   <span>In: <strong>{{ item.activeSelectedDay.timeIn }}</strong></span>
                   <span *ngIf="item.activeSelectedDay.timeOut">Out: <strong>{{ item.activeSelectedDay.timeOut }}</strong></span>
-                  <span class="hrs-tag">{{ item.activeSelectedDay.totalHours }} hrs rendered</span>
+                  <span class="hrs-tag">{{ formatHours(item.activeSelectedDay.totalHours) }} rendered</span>
                 </div>
 
                 <div class="insp-location" *ngIf="item.activeSelectedDay.locationName">
@@ -564,7 +564,7 @@
             </div>
             
             <span class="hours-badge" [class.ongoing]="log.status === 'ongoing'">
-              {{ log.status === 'ongoing' ? 'ONGOING' : (log.total_hours + ' HRS') }}
+              {{ log.status === 'ongoing' ? 'ONGOING' : (formatHours(log.total_hours) | uppercase) }}
             </span>
           </div>
 
@@ -753,6 +753,153 @@
 
     </section>
 
+    <!-- ========================================== -->
+    <!-- TAB 5: PROFILE (ACADEMIC COORDINATOR) -->
+    <!-- ========================================== -->
+    <section *ngIf="selectedSegment === 'profile'" class="tab-pane fade-in coordinator-profile-pane">
+      <!-- 1. Hero Card -->
+      <ion-card class="admin-prof-hero-card">
+        <div class="prof-avatar-wrapper">
+          <div class="prof-large-avatar-circle">
+            {{ (currentProfessor?.full_name || 'Prof').charAt(0) }}
+          </div>
+        </div>
+
+        <h1 class="prof-hero-name">{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</h1>
+        <div class="prof-badge-row">
+          <span class="prof-role-badge">{{ currentProfessor?.role === 'admin' ? 'Lead Administrator' : 'Academic Coordinator' }}</span>
+          <span class="prof-id-pill">{{ currentProfessor?.employee_id || 'PROF-2026-001' }}</span>
+        </div>
+
+        <div class="prof-hero-meta-row">
+          <span class="meta-item">
+            <ion-icon name="business-outline"></ion-icon>
+            {{ currentProfessor?.department || 'College of Information and Communications Technology' }}
+          </span>
+          <span class="meta-dot">•</span>
+          <span class="meta-item">
+            <ion-icon name="people-outline"></ion-icon>
+            {{ currentSection }}
+          </span>
+        </div>
+      </ion-card>
+
+      <!-- 2. Supervisory Scope Snapshot Card -->
+      <ion-card class="admin-prof-snapshot-card">
+        <div class="snapshot-header">
+          <span class="snapshot-title">Supervisory Scope</span>
+          <span class="snapshot-section-pill">Section {{ currentSection }}</span>
+        </div>
+
+        <div class="snapshot-grid-4">
+          <div class="stat-col">
+            <span class="stat-val">{{ students.length }}</span>
+            <span class="stat-lbl">Monitored Interns</span>
+          </div>
+          <div class="stat-col">
+            <span class="stat-val text-green">{{ stats.active_on_duty }}</span>
+            <span class="stat-lbl">Active On Duty</span>
+          </div>
+          <div class="stat-col">
+            <span class="stat-val text-blue">{{ stats.total_hours_rendered || 0 }}h</span>
+            <span class="stat-lbl">Total Hours</span>
+          </div>
+          <div class="stat-col">
+            <span class="stat-val text-purple">{{ stats.pending_tasks || 0 }}</span>
+            <span class="stat-lbl">Pending Tasks</span>
+          </div>
+        </div>
+      </ion-card>
+
+      <!-- 3. Faculty & Academic Details Card -->
+      <ion-card class="admin-prof-detail-card">
+        <div class="card-title-group">
+          <ion-icon name="school-outline" class="title-icon"></ion-icon>
+          <h2 class="title-text">Faculty & Academic Info</h2>
+        </div>
+
+        <div class="detail-rows-list">
+          <div class="detail-item">
+            <span class="detail-label">Full Name</span>
+            <span class="detail-val highlight">{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Faculty / Employee ID</span>
+            <span class="detail-val mono">{{ currentProfessor?.employee_id || 'PROF-2026-001' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Institutional Email</span>
+            <span class="detail-val email">{{ currentProfessor?.email || 'admin@neust.edu.ph' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">College / Department</span>
+            <span class="detail-val">{{ currentProfessor?.department || 'College of Information and Communications Technology' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Designation & Role</span>
+            <span class="detail-val">{{ currentProfessor?.role === 'admin' ? 'Lead Administrator & Academic Supervisor' : 'OJT Practicum Coordinator' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Assigned Sections</span>
+            <span class="detail-val">BSIT 4-A, BSIT 4-B, BSIT 4-C</span>
+          </div>
+        </div>
+      </ion-card>
+
+      <!-- 4. Campus & Office Details Card -->
+      <ion-card class="admin-prof-detail-card">
+        <div class="card-title-group">
+          <ion-icon name="location-outline" class="title-icon"></ion-icon>
+          <h2 class="title-text">Campus & Office Location</h2>
+        </div>
+
+        <div class="detail-rows-list">
+          <div class="detail-item">
+            <span class="detail-label">Campus</span>
+            <span class="detail-val">NEUST - Sumacab Campus</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Faculty Office</span>
+            <span class="detail-val">CICT Faculty Room • 2nd Floor</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Contact Number</span>
+            <span class="detail-val">{{ currentProfessor?.contact_number || '+63 917 123 4567' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Academic Term</span>
+            <span class="detail-val">A.Y. 2026 - 2027 • 2nd Semester</span>
+          </div>
+        </div>
+      </ion-card>
+
+      <!-- 5. Profile Actions -->
+      <div class="admin-prof-actions-wrap">
+        <button type="button" class="prof-action-btn primary" (click)="switchSegment('students')">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>View Monitored Interns ({{ students.length }})</span>
+        </button>
+
+        <button type="button" class="prof-action-btn outline" (click)="loadAllData()">
+          <ion-icon name="refresh-outline"></ion-icon>
+          <span>Refresh All Duty Data</span>
+        </button>
+
+        <button type="button" class="prof-action-btn danger" (click)="logout()">
+          <ion-icon name="log-out-outline"></ion-icon>
+          <span>Sign Out of Coordinator Portal</span>
+        </button>
+      </div>
+    </section>
+
   </div>
 
   <!-- ========================================== -->
@@ -800,11 +947,11 @@
             <!-- Stats Bar -->
             <div class="dossier-stats-grid">
               <div class="dossier-stat">
-                <span class="val">{{ selectedStudent.accumulated_hours }} hrs</span>
+                <span class="val">{{ formatHours(selectedStudent.accumulated_hours) }}</span>
                 <span class="lbl">Rendered</span>
               </div>
               <div class="dossier-stat">
-                <span class="val text-amber">{{ selectedStudent.remaining_hours }} hrs</span>
+                <span class="val text-amber">{{ formatHours(selectedStudent.remaining_hours) }}</span>
                 <span class="lbl">Remaining</span>
               </div>
               <div class="dossier-stat">
@@ -882,7 +1029,7 @@
                         <span class="current-week-tag" *ngIf="week.isCurrentWeek">This Week</span>
                       </div>
                       <div class="week-meta-row">
-                        <span class="meta-item"><ion-icon name="time-outline"></ion-icon> {{ week.totalWeeklyHours }} hrs</span>
+                        <span class="meta-item"><ion-icon name="time-outline"></ion-icon> {{ formatHours(week.totalWeeklyHours) }}</span>
                         <span class="meta-item"><ion-icon name="checkmark-circle-outline"></ion-icon> {{ week.daysPresent }} / 5 days</span>
                       </div>
                     </div>
@@ -925,7 +1072,7 @@
                         </div>
                         <div class="inspector-header-right">
                           <span class="day-status-badge" [class.badge-completed]="sDay.hasDuty && sDay.status === 'completed'" [class.badge-ongoing]="sDay.status === 'ongoing'" [class.badge-none]="!sDay.hasDuty">
-                            {{ sDay.hasDuty ? (sDay.status === 'ongoing' ? 'Ongoing Shift' : (sDay.log?.total_hours + ' hrs rendered')) : 'No Attendance' }}
+                            {{ sDay.hasDuty ? (sDay.status === 'ongoing' ? 'Ongoing Shift' : (formatHours(sDay.log?.total_hours) + ' rendered')) : 'No Attendance' }}
                           </span>
                           <button class="clear-day-btn" (click)="clearDossierSelectedDay(week)" title="View all logs for this week">
                             <ion-icon name="close-circle-outline"></ion-icon>
@@ -942,7 +1089,7 @@
                               <ion-icon name="time-outline"></ion-icon> Attendance Duty Record
                             </span>
                             <span class="log-hrs-pill" [class.ongoing]="l.status === 'ongoing'">
-                              {{ l.status === 'ongoing' ? 'ONGOING' : (l.total_hours + ' hrs') }}
+                              {{ l.status === 'ongoing' ? 'ONGOING' : formatHours(l.total_hours) }}
                             </span>
                           </div>
                           
@@ -1037,7 +1184,7 @@
                             <span class="log-day-name">{{ getDayOfWeekName(l.log_date) }}</span>
                           </div>
                           <span class="log-hrs-pill" [class.ongoing]="l.status === 'ongoing'">
-                            {{ l.status === 'ongoing' ? 'ONGOING' : (l.total_hours + ' hrs') }}
+                            {{ l.status === 'ongoing' ? 'ONGOING' : formatHours(l.total_hours) }}
                           </span>
                         </div>
                         
@@ -1077,7 +1224,7 @@
                       <span class="log-day-name">{{ getDayOfWeekName(l.log_date) }}</span>
                     </div>
                     <span class="log-hrs-pill" [class.ongoing]="l.status === 'ongoing'">
-                      {{ l.status === 'ongoing' ? 'ONGOING' : (l.total_hours + ' hrs') }}
+                      {{ l.status === 'ongoing' ? 'ONGOING' : formatHours(l.total_hours) }}
                     </span>
                   </div>
                   
@@ -1312,7 +1459,7 @@
 <div class="side-drawer-backdrop" [class.open]="isSideMenuOpen" (click)="closeSideMenu()"></div>
 <aside class="side-drawer" [class.open]="isSideMenuOpen">
   <div class="drawer-header">
-    <div class="prof-mini-profile">
+    <div class="prof-mini-profile" (click)="selectMenuItem('profile')" role="button" tabindex="0">
       <div class="mini-avatar">
         <span>{{ (currentProfessor?.full_name || 'Prof').charAt(0) }}</span>
       </div>
@@ -1352,16 +1499,9 @@
       <span class="drawer-count-badge" *ngIf="stats.pending_tasks > 0">{{ stats.pending_tasks }}</span>
     </button>
 
-    <div class="drawer-nav-divider"></div>
-
-    <button class="nav-item switch-portal" (click)="goToStudentPortal()">
-      <ion-icon name="school-outline" class="nav-icon"></ion-icon>
-      <span class="nav-label">Student Portal</span>
-    </button>
-
-    <button class="nav-item" (click)="loadAllData(); closeSideMenu()">
-      <ion-icon name="refresh-outline" class="nav-icon"></ion-icon>
-      <span class="nav-label">Refresh Duty Data</span>
+    <button class="nav-item" [class.active]="selectedSegment === 'profile'" (click)="selectMenuItem('profile')">
+      <ion-icon name="person-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Profile</span>
     </button>
   </nav>
 

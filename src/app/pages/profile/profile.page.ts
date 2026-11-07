@@ -42,6 +42,7 @@ import { AttendanceService } from '../../core/services/attendance.service';
 import { NativeService } from '../../core/services/native.service';
 import { User } from '../../models/user.model';
 import { DashboardStats } from '../../models/attendance.model';
+import { formatHours } from '../../core/utils/format.util';
 
 @Component({
   selector: 'app-profile',
@@ -68,6 +69,7 @@ export class ProfilePage implements OnInit {
 
   currentUser: User | null = null;
   stats: DashboardStats | null = null;
+  formatHours = formatHours;
   isLoading = false;
   isSaving = false;
   isEditMode = false;

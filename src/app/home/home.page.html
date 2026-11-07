@@ -101,7 +101,7 @@
       <ion-card-content class="card-inner-body">
         <div class="hours-display-row">
           <div class="hours-numbers">
-            <span class="current-hrs">{{ stats.accumulated_hours }}</span>
+            <span class="current-hrs">{{ formatHours(stats.accumulated_hours) }}</span>
             <span class="total-hrs">/ {{ stats.required_hours }} hrs</span>
           </div>
           <span class="percent-chip" [class.completed]="stats.completion_percent >= 100">
@@ -120,7 +120,7 @@
             </div>
             <div class="stat-pill-meta">
               <span class="stat-label">Hours Remaining</span>
-              <strong class="stat-value">{{ stats.remaining_hours }} hrs</strong>
+              <strong class="stat-value">{{ formatHours(stats.remaining_hours) }}</strong>
             </div>
           </div>
 
@@ -220,7 +220,7 @@
             </div>
             <div class="log-meta-col">
               @if (log.total_hours) {
-              <span class="hours-tag">+{{ log.total_hours }} hrs</span>
+              <span class="hours-tag">+{{ formatHours(log.total_hours) }}</span>
               }
               <ion-badge class="status-badge" [class.completed]="log.status === 'completed'"
                 [class.ongoing]="log.status === 'ongoing'">

@@ -276,7 +276,7 @@
                         <tr>
                           <td>{{ formatDate(log.log_date) }}</td>
                           <td>{{ formatShiftTime(log.time_in, log.time_out) }}</td>
-                          <td>{{ log.total_hours || '0.00' }}</td>
+                          <td>{{ formatHours(log.total_hours) }}</td>
                         </tr>
                       }
                       @if (logs.length === 0) {
@@ -365,7 +365,7 @@
                       <td>{{ formatDate(log.log_date) }}</td>
                       <td>{{ log.time_in }}</td>
                       <td>{{ log.time_out || '--:--' }}</td>
-                      <td><strong>{{ log.total_hours || '0.00' }}h</strong></td>
+                      <td><strong>{{ formatHours(log.total_hours) }}</strong></td>
                       <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
                     </tr>
                   }

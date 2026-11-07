@@ -61,6 +61,7 @@ import { AttendanceService } from '../core/services/attendance.service';
 import { NativeService } from '../core/services/native.service';
 import { User } from '../models/user.model';
 import { AttendanceLog, DashboardStats } from '../models/attendance.model';
+import { formatHours } from '../core/utils/format.util';
 
 @Component({
   selector: 'app-home',
@@ -100,6 +101,7 @@ export class HomePage implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   // Realtime Clock State & Observable
+  formatHours = formatHours;
   readonly liveClock$: Observable<{ time: string; date: string }> = timer(0, 1000).pipe(
     map(() => {
       const now = new Date();
@@ -465,7 +467,7 @@ export class HomePage implements OnInit, OnDestroy {
 
           if (res.success) {
             this.nativeService.triggerHapticFeedback('success');
-            const hours = res.rendered_today ? ` (${res.rendered_today} hrs rendered)` : '';
+            const hours = res.rendered_today ? ` (${this.formatHours(res.rendered_today)} rendered)` : '';
             this.showFeedback(`Time-Out Recorded Successfully!${hours}`, 'success');
             this.loadDashboardData();
           } else {

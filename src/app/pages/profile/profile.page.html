@@ -67,7 +67,7 @@
       <div class="snapshot-grid">
         <div class="snapshot-col">
           <span class="snapshot-label">Rendered</span>
-          <strong class="snapshot-val">{{ stats?.accumulated_hours || 0 }} hrs</strong>
+          <strong class="snapshot-val">{{ formatHours(stats?.accumulated_hours) }}</strong>
         </div>
         <div class="snapshot-col">
           <span class="snapshot-label">Required</span>
@@ -75,7 +75,7 @@
         </div>
         <div class="snapshot-col">
           <span class="snapshot-label">Remaining</span>
-          <strong class="snapshot-val">{{ stats?.remaining_hours || 0 }} hrs</strong>
+          <strong class="snapshot-val">{{ formatHours(stats?.remaining_hours) }}</strong>
         </div>
       </div>
     </ion-card>

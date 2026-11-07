@@ -42,6 +42,7 @@ import { NativeService } from '../../core/services/native.service';
 import { User } from '../../models/user.model';
 import { AttendanceLog, DashboardStats } from '../../models/attendance.model';
 import { TaskItem } from '../../models/task.model';
+import { formatHours } from '../../core/utils/format.util';
 
 export interface GeneratedReport {
   id: string;
@@ -80,6 +81,7 @@ export class ReportsPage implements OnInit {
   stats: DashboardStats | null = null;
   logs: AttendanceLog[] = [];
   tasks: TaskItem[] = [];
+  formatHours = formatHours;
 
   // My Reports list & filter
   reports: GeneratedReport[] = [];

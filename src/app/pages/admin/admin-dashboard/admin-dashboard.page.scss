@@ -2699,28 +2699,24 @@
       }
 
       &.active {
-        background: #eef3f7;
-        color: #2b5578;
+        background: #2b5578;
+        color: #ffffff;
         font-weight: 700;
 
         .nav-icon {
-          color: #2b5578;
+          color: #ffffff;
+        }
+
+        .drawer-count-badge {
+          background: rgba(255, 255, 255, 0.22);
+          color: #ffffff;
+
+          &.active {
+            background: #22c55e;
+            color: #ffffff;
+          }
         }
       }
-
-      &.switch-portal {
-        color: #0284c7;
-
-        .nav-icon {
-          color: #0284c7;
-        }
-      }
-    }
-
-    .drawer-nav-divider {
-      height: 1px;
-      background: #f1f5f9;
-      margin: 12px 10px;
     }
   }
 
@@ -3895,5 +3891,289 @@
     font-size: 0.7rem;
     font-weight: 700;
     color: #16a34a;
+  }
+}
+
+// ==========================================
+// COORDINATOR PROFILE TAB STYLES
+// ==========================================
+.coordinator-profile-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+
+  .admin-prof-hero-card {
+    --background: #ffffff;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 24px 18px 20px;
+    text-align: center;
+    margin: 0;
+    box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.05);
+
+    .prof-avatar-wrapper {
+      position: relative;
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 12px;
+
+      .prof-large-avatar-circle {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2b5578 0%, #1e3a5f 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.3rem;
+        font-weight: 800;
+        box-shadow: 0 4px 14px rgba(43, 85, 120, 0.25);
+      }
+    }
+
+    .prof-hero-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.3px;
+    }
+
+    .prof-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+
+      .prof-role-badge {
+        background: #eef3f7;
+        color: #2b5578;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(43, 85, 120, 0.15);
+      }
+
+      .prof-id-pill {
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 0.78rem;
+        font-weight: 700;
+        font-family: monospace;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+      }
+    }
+
+    .prof-hero-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: #64748b;
+      flex-wrap: wrap;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        ion-icon { color: #2b5578; }
+      }
+      .meta-dot { color: #cbd5e1; }
+    }
+  }
+
+  .admin-prof-snapshot-card {
+    --background: #ffffff;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+    .snapshot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
+
+      .snapshot-title {
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .snapshot-section-pill {
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: #eef3f7;
+        color: #2b5578;
+        padding: 3px 10px;
+        border-radius: 12px;
+      }
+    }
+
+    .snapshot-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      text-align: center;
+
+      .stat-col {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 6px 2px;
+        background: #f8fafc;
+        border-radius: 10px;
+
+        .stat-val {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #0f172a;
+
+          &.text-green { color: #16a34a; }
+          &.text-blue { color: #0284c7; }
+          &.text-purple { color: #7c3aed; }
+        }
+
+        .stat-lbl {
+          font-size: 0.65rem;
+          color: #64748b;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.2px;
+        }
+      }
+    }
+  }
+
+  .admin-prof-detail-card {
+    --background: #ffffff;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px 18px 18px;
+    margin: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+
+      .title-icon {
+        font-size: 1.25rem;
+        color: #2b5578;
+      }
+
+      .title-text {
+        font-size: 0.98rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+      }
+    }
+
+    .detail-rows-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .detail-label {
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .detail-val {
+          font-size: 0.88rem;
+          font-weight: 600;
+          color: #1e293b;
+
+          &.highlight {
+            color: #0f172a;
+            font-weight: 700;
+          }
+
+          &.mono {
+            font-family: monospace;
+            color: #2b5578;
+            font-weight: 700;
+          }
+
+          &.email {
+            color: #0284c7;
+          }
+        }
+      }
+    }
+  }
+
+  .admin-prof-actions-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+
+    .prof-action-btn {
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      ion-icon { font-size: 1.15rem; }
+
+      &:active {
+        transform: scale(0.98);
+      }
+
+      &.primary {
+        background: linear-gradient(135deg, #2b5578 0%, #1e3a5f 100%);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 4px 14px rgba(43, 85, 120, 0.25);
+      }
+
+      &.outline {
+        background: #ffffff;
+        color: #2b5578;
+        border: 1px solid rgba(43, 85, 120, 0.25);
+      }
+
+      &.danger {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fee2e2;
+      }
+    }
   }
 }

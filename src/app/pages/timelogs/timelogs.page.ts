@@ -40,6 +40,7 @@ import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceLog } from '../../models/attendance.model';
 import { User } from '../../models/user.model';
+import { formatHours } from '../../core/utils/format.util';
 
 @Component({
   selector: 'app-timelogs',
@@ -72,6 +73,7 @@ export class TimeLogsPage implements OnInit {
 
   totalRenderedHours = 0;
   totalLogsCount = 0;
+  formatHours = formatHours;
 
   // Filter
   statusFilter = 'all';
