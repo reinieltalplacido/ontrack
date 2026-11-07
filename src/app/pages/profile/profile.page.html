@@ -51,14 +51,6 @@
           {{ currentUser?.company_name || 'Assigned Agency' }}
         </span>
       </div>
-
-      <!-- Top Edit Mode Toggle Button -->
-      <div class="hero-actions-row">
-        <button class="hero-edit-toggle-btn" [class.active]="isEditMode" (click)="toggleEditMode()">
-          <ion-icon [name]="isEditMode ? 'close-outline' : 'create-outline'"></ion-icon>
-          <span>{{ isEditMode ? 'Cancel Editing' : 'Edit Profile' }}</span>
-        </button>
-      </div>
     </ion-card>
 
     <!-- OJT Hour Progress Snapshot Card -->
@@ -98,10 +90,6 @@
               <ion-icon name="person-outline" class="sec-icon"></ion-icon>
               <h2 class="sec-title">Personal & Academic Info</h2>
             </div>
-            <button class="quick-edit-pill" (click)="toggleEditMode()" aria-label="Edit personal details">
-              <ion-icon name="create-outline"></ion-icon>
-              <span>Edit</span>
-            </button>
           </div>
 
           <div class="detail-rows-list">
@@ -139,10 +127,6 @@
               <ion-icon name="business-outline" class="sec-icon"></ion-icon>
               <h2 class="sec-title">OJT Placement & Targets</h2>
             </div>
-            <button class="quick-edit-pill" (click)="toggleEditMode()" aria-label="Edit placement details">
-              <ion-icon name="create-outline"></ion-icon>
-              <span>Edit</span>
-            </button>
           </div>
 
           <div class="detail-rows-list">
