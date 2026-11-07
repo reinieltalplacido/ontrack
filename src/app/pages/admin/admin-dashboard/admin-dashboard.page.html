@@ -63,11 +63,7 @@
 
       <!-- Quick Action Strip -->
       <div class="quick-actions-bar">
-        <button class="quick-action-btn primary" (click)="openAssignTaskModal()">
-          <ion-icon name="add-outline"></ion-icon>
-          <span>Assign Task</span>
-        </button>
-        <button class="quick-action-btn" (click)="switchSegment('attendance'); setAttendanceMode('weekly')">
+        <button class="quick-action-btn primary" (click)="switchSegment('attendance'); setAttendanceMode('weekly')">
           <ion-icon name="calendar-outline"></ion-icon>
           <span>Weekly Timesheet</span>
         </button>
@@ -305,10 +301,6 @@
             </div>
 
             <div class="footer-actions" (click)="$event.stopPropagation()">
-              <button class="action-btn-sm" (click)="openAssignTaskModal(s)" aria-label="Assign Task">
-                <ion-icon name="add-outline"></ion-icon>
-                <span>Task</span>
-              </button>
               <button class="action-btn-sm primary" (click)="openStudentDossier(s); $event.stopPropagation()" aria-label="View Profile">
                 <span>View</span>
                 <ion-icon name="chevron-forward-outline"></ion-icon>
@@ -649,24 +641,6 @@
     <!-- ========================================== -->
     <section *ngIf="selectedSegment === 'tasks'" class="tab-pane fade-in">
       
-      <!-- Broadcast Callout Card -->
-      <div class="broadcast-task-card">
-        <div class="callout-header">
-          <div class="icon-wrap">
-            <ion-icon name="flag-outline"></ion-icon>
-          </div>
-          <div class="callout-title">
-            <h3>Supervisor Task Assignment</h3>
-            <p>Broadcast required OJT tasks or agency projects to {{ currentSection }} interns.</p>
-          </div>
-        </div>
-
-        <button class="assign-broadcast-btn" (click)="openAssignTaskModal()">
-          <ion-icon name="add-outline"></ion-icon>
-          <span>Assign New Task</span>
-        </button>
-      </div>
-
       <!-- Task Stats Strip -->
       <div class="tasks-summary-strip">
         <div class="summary-box">
@@ -772,23 +746,6 @@
             <div class="table-empty-box" *ngIf="!isLoadingTasks && filteredTasksList.length === 0">
               <ion-icon name="clipboard-outline"></ion-icon>
               <p>No student tasks found matching the selected filters.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Monitored Interns Strip (For quick assignment) -->
-        <div class="section-container" style="margin-top: 20px;">
-          <h3 class="section-heading">Assign Tasks by Intern</h3>
-          <p class="section-subtext">Click on any intern below to assign targeted duties or view their profile.</p>
-          
-          <div class="students-task-grid">
-            <div class="task-student-tile" *ngFor="let s of students" (click)="openAssignTaskModal(s)">
-              <div class="tile-avatar">{{ s.full_name.charAt(0) }}</div>
-              <div class="tile-info">
-                <span class="tile-name">{{ s.full_name }}</span>
-                <span class="tile-tasks-count">{{ s.pending_tasks_count }} pending tasks</span>
-              </div>
-              <ion-icon name="add-outline" class="tile-add-icon"></ion-icon>
             </div>
           </div>
         </div>
@@ -1199,137 +1156,8 @@
 
         <!-- Modal Bottom Actions -->
         <div class="modal-footer-actions">
-          <button class="modal-action-btn secondary" (click)="openAssignTaskModal(selectedStudent)">
-            <ion-icon name="add-outline"></ion-icon>
-            <span>Assign Task</span>
-          </button>
-          <button class="modal-action-btn primary" (click)="closeStudentDossier()">
+          <button class="modal-action-btn primary" (click)="closeStudentDossier()" style="width: 100%;">
             <span>Done</span>
-          </button>
-        </div>
-
-      </div>
-    </ng-template>
-  </ion-modal>
-
-  <!-- ========================================== -->
-  <!-- MODAL: ASSIGN TASK -->
-  <!-- ========================================== -->
-  <ion-modal [isOpen]="isAssignModalOpen" (didDismiss)="closeAssignTaskModal()" class="assign-task-modal">
-    <ng-template>
-      <div class="modal-wrapper">
-        
-        <div class="modal-header">
-          <div class="modal-title-box">
-            <span class="modal-kicker">Faculty Management</span>
-            <h3 class="modal-title">Assign OJT Task</h3>
-          </div>
-          <button class="modal-close-btn" (click)="closeAssignTaskModal()" aria-label="Close">
-            <ion-icon name="close-outline"></ion-icon>
-          </button>
-        </div>
-
-        <div class="modal-scrollable-body">
-          
-          <!-- Target selector -->
-          <div class="input-group">
-            <label class="input-label">Assign To</label>
-            <div class="target-toggle-group">
-              <button 
-                type="button" 
-                class="target-btn" 
-                [class.active]="newTask.target_type === 'section'" 
-                (click)="newTask.target_type = 'section'">
-                <ion-icon name="people-outline"></ion-icon>
-                <span>Entire Section ({{ currentSection }})</span>
-              </button>
-              <button 
-                type="button" 
-                class="target-btn" 
-                [class.active]="newTask.target_type === 'student'" 
-                (click)="newTask.target_type = 'student'">
-                <ion-icon name="person-outline"></ion-icon>
-                <span>Specific Student</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Student Dropdown (if specific student) -->
-          <div class="input-group" *ngIf="newTask.target_type === 'student'">
-            <label class="input-label" for="taskStudent">Select Intern</label>
-            <div class="custom-select-box">
-              <select id="taskStudent" [(ngModel)]="newTask.user_id">
-                <option [ngValue]="undefined" disabled>-- Choose Student --</option>
-                <option *ngFor="let s of students" [ngValue]="s.id">
-                  {{ s.full_name }} ({{ s.student_no }})
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Task Title -->
-          <div class="input-group">
-            <label class="input-label" for="taskTitle">Task Title *</label>
-            <div class="custom-input-box">
-              <input 
-                id="taskTitle" 
-                type="text" 
-                [(ngModel)]="newTask.title" 
-                placeholder="e.g. Weekly Progress Report / System Prototype" 
-              />
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div class="input-group">
-            <label class="input-label" for="taskDesc">Task Instructions & Scope</label>
-            <div class="custom-textarea-box">
-              <textarea 
-                id="taskDesc" 
-                rows="3" 
-                [(ngModel)]="newTask.description" 
-                placeholder="Detail the deliverables, format, and agency supervisor sign-off requirements...">
-              </textarea>
-            </div>
-          </div>
-
-          <!-- Priority & Deadline Row -->
-          <div class="form-dual-row">
-            <div class="input-group">
-              <label class="input-label" for="taskPriority">Priority</label>
-              <div class="custom-select-box">
-                <select id="taskPriority" [(ngModel)]="newTask.priority">
-                  <option value="low">Low Priority</option>
-                  <option value="medium">Medium Priority</option>
-                  <option value="high">High Priority</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label class="input-label" for="taskDeadline">Deadline</label>
-              <div class="custom-input-box">
-                <input 
-                  id="taskDeadline" 
-                  type="date" 
-                  [(ngModel)]="newTask.deadline" 
-                />
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="modal-footer-actions">
-          <button class="modal-action-btn secondary" (click)="closeAssignTaskModal()" [disabled]="isSubmittingTask">
-            <span>Cancel</span>
-          </button>
-          <button class="modal-action-btn primary" (click)="submitAssignTask()" [disabled]="isSubmittingTask">
-            <ion-spinner *ngIf="isSubmittingTask" name="crescent"></ion-spinner>
-            <span *ngIf="!isSubmittingTask">
-              <ion-icon name="send-outline"></ion-icon>
-              Publish Task
-            </span>
           </button>
         </div>
 
