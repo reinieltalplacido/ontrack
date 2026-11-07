@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 
 export interface GeoResult {
   latitude: number;
@@ -164,19 +163,58 @@ export class NativeService {
   }
 
   /**
-   * Tactile haptic feedback for mobile interactions
+   * Capture photo for task documentation/proof (Prompt: Camera or Gallery)
    */
-  async triggerHapticFeedback(type: 'success' | 'warning' | 'medium' = 'medium'): Promise<void> {
+  async captureTaskProof(): Promise<string | null> {
     try {
-      if (type === 'success') {
-        Haptics.notification({ type: NotificationType.Success });
-      } else if (type === 'warning') {
-        Haptics.notification({ type: NotificationType.Warning });
-      } else {
-        Haptics.impact({ style: ImpactStyle.Light });
+      const image = await Camera.getPhoto({
+        quality: 75,
+        width: 1024,
+        height: 1024,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Prompt,
+        promptLabelHeader: 'Task Documentation',
+        promptLabelPhoto: 'Choose from Gallery',
+        promptLabelPicture: 'Take Live Photo',
+      });
+
+      if (image.base64String) {
+        return `data:image/jpeg;base64,${image.base64String}`;
       }
+      return null;
     } catch {
-      // Non-blocking
+      return null;
     }
+  }
+
+  /**
+   * Directly open camera for instant task photo documentation
+   */
+  async openCameraForTask(): Promise<string | null> {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 75,
+        width: 1024,
+        height: 1024,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      });
+
+      if (image.base64String) {
+        return `data:image/jpeg;base64,${image.base64String}`;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Haptic feedback (disabled / removed)
+   */
+  async triggerHapticFeedback(_type?: 'success' | 'warning' | 'medium'): Promise<void> {
+    // Intentionally disabled / removed
   }
 }

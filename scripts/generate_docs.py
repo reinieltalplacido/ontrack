@@ -161,7 +161,6 @@ def create_document():
     add_bullet("GPS Geolocation Verification:", "Captures high-accuracy latitude and longitude coordinates upon Time In via @capacitor/geolocation to verify physical workplace presence.")
     add_bullet("Live Realtime System Clock:", "Displays a live ticking digital clock (HH:MM:SS AM/PM) with current date and pulsing live beacon to record exact check-in timing.")
     add_bullet("Location Name Resolution:", "Resolves GPS coordinates into human-readable workplace street names and establishments with a one-tap manual refresh option.")
-    add_bullet("Tactile Haptic Feedback:", "Triggers device vibration via @capacitor/haptics upon successful Time In or Time Out.")
     add_bullet("Time-Out Accomplishment Logging:", "Includes an accomplishment summary text area where students log daily duties and tasks finished upon duty completion.")
     add_bullet("Automated Hour Computation:", "Accurately computes total hours rendered for the shift based on Time In and Time Out timestamps.")
     add_bullet("DTR History & Timesheet Explorer:", "Complete reverse-chronological list of past attendance entries showing date, timestamps, rendered hours, accomplishment logs, and coordinates.")
@@ -299,11 +298,6 @@ def create_document():
                "proof of completed tasks and project deliverables. Handles runtime permissions (CAMERA and READ_MEDIA_IMAGES), automatic image "
                "orientation normalization, and Base64/Blob conversion with JPEG compression to minimize bandwidth and storage overhead.")
     
-    add_bullet("@capacitor/haptics (Tactile Feedback):", 
-               "Engages the physical device vibration motor to provide immediate tactile feedback upon user interactions. Triggers distinct sensory "
-               "feedback patterns—such as medium impacts when opening dialogs, submitting attendance logs, or completing deliverables, "
-               "and notification success bursts upon successful backend API confirmation—enhancing the mobile user experience.")
-    
     add_bullet("@capacitor/status-bar & @capacitor/keyboard (Native Viewport Polish):", 
                "Dynamically configures the native Android status bar styling to align with OnTrack's dark-navy brand aesthetic (#2B5578) "
                "with light icon themes. Simultaneously listens to native soft keyboard appearance and dismissal events, ensuring input fields "
@@ -398,7 +392,7 @@ def create_document():
 
     add_sub_heading("2. How the AI Assisted Development")
     add_bullet("Architecture & Scaffolding:", "Assisted in structuring the Ionic 9 and Angular 22 standalone component architecture, configuring routes, models, and type-safe HTTP communication with the backend.")
-    add_bullet("Device Hardware Integration:", "Guided the configuration of Capacitor plugins (@capacitor/camera for deliverable photo capture, @capacitor/geolocation for workplace GPS coordinate recording, and @capacitor/haptics for tactile user feedback).")
+    add_bullet("Device Hardware Integration:", "Guided the configuration of Capacitor plugins (@capacitor/camera for deliverable photo capture and @capacitor/geolocation for workplace GPS coordinate recording).")
     add_bullet("Backend RESTful API & Database Integration:", "Constructed secure PHP REST API endpoints utilizing PDO prepared statements to eliminate SQL injection, implemented CORS headers, and authored the normalized MySQL database schema.")
     add_bullet("Native Android Bridge Configuration:", "Generated and synchronized native Android platform assets, configured AndroidManifest.xml permissions (Camera, Location, and cleartext HTTP traffic), and prepared Gradle integration for Android Studio.")
     add_bullet("Bug Diagnosis & Query Optimization:", "Diagnosed UI change detection locks during registration, applied Angular ChangeDetectorRef updates, and eliminated database latency by introducing targeted composite indexes on high-traffic tables.")
