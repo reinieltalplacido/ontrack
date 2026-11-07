@@ -32,6 +32,7 @@ try {
     $priority    = in_array($input['priority'] ?? '', ['low', 'medium', 'high']) ? $input['priority'] : $existing['priority'];
     $newStatus   = in_array($status, ['pending', 'in_progress', 'completed']) ? $status : $existing['status'];
     $proofUrl    = isset($input['proof_url']) ? trim((string)$input['proof_url']) : ($existing['proof_url'] ?? null);
+    $proofFile   = isset($input['proof_file']) ? trim((string)$input['proof_file']) : ($existing['proof_file'] ?? null);
 
     if (!empty($input['proof_image'])) {
         $rawImage = $input['proof_image'];
@@ -46,25 +47,31 @@ try {
                 $fileName = 'task_proof_' . $taskId . '_' . time() . '.jpg';
                 file_put_contents($uploadsDir . '/' . $fileName, $imgData);
                 $proofUrl = 'uploads/tasks/' . $fileName;
+                $proofFile = $fileName;
             } else {
                 $proofUrl = $rawImage;
+                $proofFile = 'task_proof_' . $taskId . '.jpg';
             }
         } else {
             $proofUrl = $rawImage;
+            $proofFile = basename($rawImage);
         }
+    } elseif ($proofUrl && empty($proofFile)) {
+        $proofFile = basename($proofUrl);
     }
 
     $stmt = $pdo->prepare(
-        'UPDATE tasks SET title = :title, description = :desc, deadline = :deadline, priority = :priority, status = :status, proof_url = :proof WHERE id = :id'
+        'UPDATE tasks SET title = :title, description = :desc, deadline = :deadline, priority = :priority, status = :status, proof_url = :proof, proof_file = :proof_file WHERE id = :id'
     );
     $stmt->execute([
-        'title'    => $title,
-        'desc'     => $description,
-        'deadline' => $deadline,
-        'priority' => $priority,
-        'status'   => $newStatus,
-        'proof'    => $proofUrl,
-        'id'       => $taskId,
+        'title'      => $title,
+        'desc'       => $description,
+        'deadline'   => $deadline,
+        'priority'   => $priority,
+        'status'     => $newStatus,
+        'proof'      => $proofUrl,
+        'proof_file' => $proofFile,
+        'id'         => $taskId,
     ]);
 
     $tStmt = $pdo->prepare('SELECT * FROM tasks WHERE id = :id');

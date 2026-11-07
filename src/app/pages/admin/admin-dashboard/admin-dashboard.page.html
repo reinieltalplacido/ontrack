@@ -8,16 +8,6 @@
       </div>
       
       <div class="brand-right">
-        <div class="section-picker-wrap">
-          <select 
-            class="section-select-pill" 
-            [(ngModel)]="currentSection" 
-            (change)="onSectionChange(currentSection)"
-            aria-label="Monitored Section">
-            <option *ngFor="let s of availableSections" [value]="s">{{ s }}</option>
-          </select>
-          <ion-icon name="chevron-down-outline" class="pill-chevron"></ion-icon>
-        </div>
         <button class="header-menu-btn" (click)="openSideMenu()" aria-label="Open navigation menu">
           <ion-icon name="menu-outline"></ion-icon>
         </button>
@@ -118,7 +108,7 @@
           <div class="metric-tasks-split">
             <div class="split-col">
               <span class="split-num">{{ stats.total_tasks }}</span>
-              <span class="split-txt">Total Assigned</span>
+              <span class="split-txt">Student Tasks</span>
             </div>
             <div class="split-divider"></div>
             <div class="split-col">
@@ -986,7 +976,7 @@
               [class.active]="studentDossierTab === 'tasks'" 
               (click)="studentDossierTab = 'tasks'">
               <ion-icon name="checkbox-outline"></ion-icon>
-              <span>Assigned Tasks ({{ studentDossierTasks.length }})</span>
+              <span>Student Tasks ({{ studentDossierTasks.length }})</span>
             </button>
           </div>
 
@@ -1135,7 +1125,7 @@
                         <div class="inspector-tasks-header">
                           <div class="tasks-heading-left">
                             <ion-icon name="checkbox-outline"></ion-icon>
-                            <span>Tasks & Assignments ({{ getTasksForDossierDay(sDay.dateStr).length }})</span>
+                            <span>Student Tasks ({{ getTasksForDossierDay(sDay.dateStr).length }})</span>
                           </div>
                           <span class="tasks-hint-tag">On or prior to this date</span>
                         </div>
@@ -1290,13 +1280,13 @@
                 </div>
                 <div class="task-proof-row">
                   <button class="view-proof-btn" (click)="openTaskProof(t); $event.stopPropagation()">
-                    <ion-icon [name]="t.proof_file ? (isProofDocument(t.proof_file) ? 'document-text-outline' : 'image-outline') : 'eye-outline'"></ion-icon>
-                    <span>{{ t.proof_file ? 'View Proof: ' + t.proof_file : 'View Task Details' }}</span>
+                    <ion-icon [name]="hasTaskProof(t) ? (isProofDocument(t.proof_file || t.proof_url) ? 'document-text-outline' : 'image-outline') : 'eye-outline'"></ion-icon>
+                    <span>{{ hasTaskProof(t) ? 'View Proof: ' + getTaskProofFilename(t) : 'View Task Details' }}</span>
                   </button>
                   <span class="verified-tag" *ngIf="t.verified_at">
                     <ion-icon name="checkmark-circle"></ion-icon> Verified
                   </span>
-                  <span class="unverified-tag" *ngIf="!t.verified_at && t.status === 'completed'">
+                  <span class="unverified-tag" *ngIf="!t.verified_at && t.status === 'completed' && hasTaskProof(t)">
                     <ion-icon name="hourglass-outline"></ion-icon> Awaiting Verification
                   </span>
                 </div>
@@ -1305,7 +1295,7 @@
             <ng-template #noDossierTasks>
               <div class="dossier-empty">
                 <ion-icon name="checkbox-outline"></ion-icon>
-                <p>No assigned tasks yet for this student.</p>
+                <p>No tasks recorded yet by this student.</p>
               </div>
             </ng-template>
           </div>
@@ -1362,7 +1352,7 @@
       <div class="modal-wrapper">
         <div class="modal-header">
           <div class="modal-title-box">
-            <span class="modal-kicker">Deliverable Proof Verification</span>
+            <span class="modal-kicker">Deliverable Details</span>
             <h3 class="modal-title">{{ selectedTaskProof?.title }}</h3>
           </div>
           <button class="modal-close-btn" (click)="closeTaskProofModal()" aria-label="Close">
@@ -1388,33 +1378,30 @@
               <span class="meta-pill" *ngIf="selectedTaskProof.deadline">
                 <ion-icon name="calendar-outline"></ion-icon> Due: {{ formatFriendlyDate(selectedTaskProof.deadline) }}
               </span>
-              <span class="meta-pill verified" *ngIf="selectedTaskProof.verified_at">
-                <ion-icon name="checkmark-circle"></ion-icon> Verified
-              </span>
             </div>
           </div>
 
           <!-- Document or Image Preview Box (If Proof is attached) -->
-          <div class="proof-preview-frame" *ngIf="selectedTaskProof.proof_file">
+          <div class="proof-preview-frame" *ngIf="hasTaskProof(selectedTaskProof)">
             <div class="proof-header-bar">
               <div class="file-name-row">
-                <ion-icon [name]="isProofDocument(selectedTaskProof.proof_file) ? 'document-attach-outline' : 'image-outline'"></ion-icon>
-                <span class="fname">{{ selectedTaskProof.proof_file }}</span>
+                <ion-icon [name]="isProofDocument(getTaskProofFilename(selectedTaskProof)) ? 'document-attach-outline' : 'image-outline'"></ion-icon>
+                <span class="fname">{{ getTaskProofFilename(selectedTaskProof) }}</span>
               </div>
               <span class="fsize-tag">Submitted Deliverable</span>
             </div>
 
             <!-- PDF / Document Preview Card -->
-            <div class="document-showcase" *ngIf="isProofDocument(selectedTaskProof.proof_file)">
+            <div class="document-showcase" *ngIf="isProofDocument(getTaskProofFilename(selectedTaskProof))">
               <div class="doc-badge-icon">
                 <ion-icon name="document-text"></ion-icon>
               </div>
               <div class="doc-text-meta">
-                <h5>{{ selectedTaskProof.proof_file }}</h5>
-                <p>Official student internship deliverable submitted for supervisor verification.</p>
+                <h5>{{ getTaskProofFilename(selectedTaskProof) }}</h5>
+                <p>Official student internship deliverable submitted for review.</p>
               </div>
               <div class="doc-actions-row">
-                <button class="open-file-btn" (click)="presentToast('Deliverable file ready for review: ' + selectedTaskProof.proof_file, 'info')">
+                <button class="open-file-btn" (click)="presentToast('Deliverable file ready for review: ' + getTaskProofFilename(selectedTaskProof), 'info')">
                   <ion-icon name="download-outline"></ion-icon>
                   <span>Download / Inspect Document</span>
                 </button>
@@ -1422,45 +1409,23 @@
             </div>
 
             <!-- Image Proof Preview -->
-            <div class="image-showcase" *ngIf="!isProofDocument(selectedTaskProof.proof_file)">
-              <img [src]="getPhotoUrl(selectedTaskProof.proof_file) || selectedTaskProof.proof_url || 'assets/icon/ontrack-logo.png'" alt="Submitted Proof Preview" class="proof-render-img" />
+            <div class="image-showcase" *ngIf="!isProofDocument(getTaskProofFilename(selectedTaskProof))">
+              <img [src]="getPhotoUrl(selectedTaskProof.proof_url || selectedTaskProof.proof_file)" alt="Submitted Proof Preview" class="proof-render-img" />
             </div>
           </div>
 
           <!-- Empty State when NO proof file is attached yet -->
-          <div class="no-proof-card" *ngIf="!selectedTaskProof.proof_file">
+          <div class="no-proof-card" *ngIf="!hasTaskProof(selectedTaskProof)">
             <div class="no-proof-icon-wrap">
               <ion-icon name="document-text-outline"></ion-icon>
             </div>
             <h5>No Deliverable Proof Submitted Yet</h5>
             <p>The intern has not yet attached a photo, screenshot, or document deliverable for this task.</p>
           </div>
-
-          <!-- Verification Stamp Box -->
-          <div class="verification-stamp-box" [class.is-verified]="selectedTaskProof.verified_at">
-            <div class="stamp-icon">
-              <ion-icon [name]="selectedTaskProof.verified_at ? 'shield-checkmark' : 'alert-circle-outline'"></ion-icon>
-            </div>
-            <div class="stamp-details">
-              <h6 *ngIf="selectedTaskProof.verified_at">Academic Verification Approved</h6>
-              <p *ngIf="selectedTaskProof.verified_at">Verified by <strong>{{ selectedTaskProof.verified_by || 'Coordinator' }}</strong> on {{ selectedTaskProof.verified_at }}.</p>
-              
-              <h6 *ngIf="!selectedTaskProof.verified_at">Pending Supervisor Verification</h6>
-              <p *ngIf="!selectedTaskProof.verified_at">Inspect the deliverable document or proof above, then click Verify below to approve this internship milestone.</p>
-            </div>
-          </div>
         </div>
 
         <div class="modal-footer" *ngIf="selectedTaskProof">
           <button class="modal-btn secondary" (click)="closeTaskProofModal()">Close</button>
-          <button 
-            *ngIf="!selectedTaskProof.verified_at" 
-            class="modal-btn primary verify-btn" 
-            [disabled]="isVerifyingTask"
-            (click)="verifyTask(selectedTaskProof)">
-            <ion-icon name="checkmark-done-circle-outline"></ion-icon>
-            <span>Verify Deliverable</span>
-          </button>
         </div>
       </div>
     </ng-template>

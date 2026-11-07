@@ -20,6 +20,9 @@ try {
     foreach ($tasks as &$task) {
         $task['id'] = (int)$task['id'];
         $task['user_id'] = (int)($task['user_id'] ?? $userId);
+        if (!empty($task['proof_url']) && empty($task['proof_file'])) {
+            $task['proof_file'] = basename($task['proof_url']);
+        }
     }
     unset($task);
 

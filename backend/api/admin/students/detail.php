@@ -117,6 +117,14 @@ try {
         $tStmt->execute(['sno' => $sNo]);
     }
     $tasks = $tStmt->fetchAll();
+    foreach ($tasks as &$t) {
+        $t['id'] = (int)$t['id'];
+        $t['user_id'] = (int)($t['user_id'] ?? 0);
+        if (!empty($t['proof_url']) && empty($t['proof_file'])) {
+            $t['proof_file'] = basename($t['proof_url']);
+        }
+    }
+    unset($t);
 
     respond(200, [
         'success' => true,

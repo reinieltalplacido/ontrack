@@ -903,6 +903,21 @@ export class AdminDashboardPage implements OnInit {
     this.cdr.detectChanges();
   }
 
+  hasTaskProof(task: any): boolean {
+    if (!task) return false;
+    return !!(task.proof_file || task.proof_url);
+  }
+
+  getTaskProofFilename(task: any): string {
+    if (!task) return 'Attached Deliverable';
+    if (task.proof_file) return task.proof_file;
+    if (task.proof_url) {
+      const parts = task.proof_url.split('/');
+      return parts[parts.length - 1];
+    }
+    return 'Attached Deliverable';
+  }
+
   openTaskProof(task: any) {
     if (this.selectedStudent) {
       if (!task.student_name) task.student_name = this.selectedStudent.full_name;
@@ -910,7 +925,10 @@ export class AdminDashboardPage implements OnInit {
       if (!task.course_section) task.course_section = this.selectedStudent.course_section;
       if (!task.company_name) task.company_name = this.selectedStudent.company_name;
     }
-    if (task.proof_file && !task.proof_url) {
+    if (!task.proof_file && task.proof_url) {
+      task.proof_file = this.getTaskProofFilename(task);
+    }
+    if (!task.proof_url && task.proof_file) {
       task.proof_url = this.getPhotoUrl(task.proof_file);
     }
     this.selectedTaskProof = task;
@@ -1068,9 +1086,10 @@ export class AdminDashboardPage implements OnInit {
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
       return path;
     }
-    // Base API is e.g. http://localhost/ontrack-api/api -> base site is http://localhost/ontrack-api/
+    const clean = path.replace(/^\/+/, '');
+    const prefix = clean.startsWith('uploads/') ? '' : 'uploads/tasks/';
     const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
-    return `${baseUrl}/${path.replace(/^\/+/, '')}`;
+    return `${baseUrl}/${prefix}${clean}`;
   }
 
   presentToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {
