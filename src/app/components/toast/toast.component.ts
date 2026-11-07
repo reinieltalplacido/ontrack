@@ -16,7 +16,7 @@ import {
   sparklesOutline,
   arrowForwardOutline,
 } from 'ionicons/icons';
-import { ToastService, ToastItem } from '../../../core/services/toast.service';
+import { ToastService, ToastItem } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-toast',

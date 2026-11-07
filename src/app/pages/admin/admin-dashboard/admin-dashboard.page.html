@@ -1263,12 +1263,20 @@
           <!-- Dossier Tab: Assigned Tasks -->
           <div *ngIf="!isLoadingStudentDossier && studentDossierTab === 'tasks'" class="dossier-tasks-list">
             <div *ngIf="studentDossierTasks.length > 0; else noDossierTasks">
-              <div class="dossier-task-item" *ngFor="let t of studentDossierTasks">
+              <div class="dossier-task-item" *ngFor="let t of studentDossierTasks" (click)="openTaskProof(t)">
                 <div class="task-item-top">
-                  <h5 class="task-title">{{ t.title }}</h5>
-                  <span class="task-status-pill" [class.completed]="t.status === 'completed'" [class.pending]="t.status !== 'completed'">
-                    {{ t.status === 'completed' ? 'Done' : 'Pending' }}
-                  </span>
+                  <div class="task-title-wrap">
+                    <h5 class="task-title">{{ t.title }}</h5>
+                  </div>
+                  <div class="task-top-actions">
+                    <span class="task-status-pill" [class.completed]="t.status === 'completed'" [class.pending]="t.status !== 'completed'">
+                      {{ t.status === 'completed' ? 'Done' : 'Pending' }}
+                    </span>
+                    <button type="button" class="dossier-view-btn" (click)="openTaskProof(t); $event.stopPropagation()" aria-label="View Task Details">
+                      <ion-icon name="eye-outline"></ion-icon>
+                      <span>View</span>
+                    </button>
+                  </div>
                 </div>
                 <p class="task-desc" *ngIf="t.description">{{ t.description }}</p>
                 <div class="task-meta">
@@ -1280,13 +1288,16 @@
                     {{ t.priority | titlecase }} Priority
                   </span>
                 </div>
-                <div class="task-proof-row" *ngIf="t.proof_file">
-                  <button class="view-proof-btn" (click)="openTaskProof(t)">
-                    <ion-icon [name]="isProofDocument(t.proof_file) ? 'document-text-outline' : 'image-outline'"></ion-icon>
-                    <span>View Proof: {{ t.proof_file }}</span>
+                <div class="task-proof-row">
+                  <button class="view-proof-btn" (click)="openTaskProof(t); $event.stopPropagation()">
+                    <ion-icon [name]="t.proof_file ? (isProofDocument(t.proof_file) ? 'document-text-outline' : 'image-outline') : 'eye-outline'"></ion-icon>
+                    <span>{{ t.proof_file ? 'View Proof: ' + t.proof_file : 'View Task Details' }}</span>
                   </button>
                   <span class="verified-tag" *ngIf="t.verified_at">
                     <ion-icon name="checkmark-circle"></ion-icon> Verified
+                  </span>
+                  <span class="unverified-tag" *ngIf="!t.verified_at && t.status === 'completed'">
+                    <ion-icon name="hourglass-outline"></ion-icon> Awaiting Verification
                   </span>
                 </div>
               </div>
@@ -1383,12 +1394,12 @@
             </div>
           </div>
 
-          <!-- Document or Image Preview Box -->
-          <div class="proof-preview-frame">
+          <!-- Document or Image Preview Box (If Proof is attached) -->
+          <div class="proof-preview-frame" *ngIf="selectedTaskProof.proof_file">
             <div class="proof-header-bar">
               <div class="file-name-row">
                 <ion-icon [name]="isProofDocument(selectedTaskProof.proof_file) ? 'document-attach-outline' : 'image-outline'"></ion-icon>
-                <span class="fname">{{ selectedTaskProof.proof_file || 'Attached Proof' }}</span>
+                <span class="fname">{{ selectedTaskProof.proof_file }}</span>
               </div>
               <span class="fsize-tag">Submitted Deliverable</span>
             </div>
@@ -1403,7 +1414,7 @@
                 <p>Official student internship deliverable submitted for supervisor verification.</p>
               </div>
               <div class="doc-actions-row">
-                <button class="open-file-btn" (click)="presentToast('Deliverable file downloaded for academic audit: ' + selectedTaskProof.proof_file)">
+                <button class="open-file-btn" (click)="presentToast('Deliverable file ready for review: ' + selectedTaskProof.proof_file, 'info')">
                   <ion-icon name="download-outline"></ion-icon>
                   <span>Download / Inspect Document</span>
                 </button>
@@ -1412,8 +1423,17 @@
 
             <!-- Image Proof Preview -->
             <div class="image-showcase" *ngIf="!isProofDocument(selectedTaskProof.proof_file)">
-              <img [src]="selectedTaskProof.proof_url || ('assets/icon/ontrack-logo.png')" alt="Submitted Proof Preview" class="proof-render-img" />
+              <img [src]="getPhotoUrl(selectedTaskProof.proof_file) || selectedTaskProof.proof_url || 'assets/icon/ontrack-logo.png'" alt="Submitted Proof Preview" class="proof-render-img" />
             </div>
+          </div>
+
+          <!-- Empty State when NO proof file is attached yet -->
+          <div class="no-proof-card" *ngIf="!selectedTaskProof.proof_file">
+            <div class="no-proof-icon-wrap">
+              <ion-icon name="document-text-outline"></ion-icon>
+            </div>
+            <h5>No Deliverable Proof Submitted Yet</h5>
+            <p>The intern has not yet attached a photo, screenshot, or document deliverable for this task.</p>
           </div>
 
           <!-- Verification Stamp Box -->

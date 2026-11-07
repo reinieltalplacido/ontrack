@@ -904,6 +904,15 @@ export class AdminDashboardPage implements OnInit {
   }
 
   openTaskProof(task: any) {
+    if (this.selectedStudent) {
+      if (!task.student_name) task.student_name = this.selectedStudent.full_name;
+      if (!task.student_no) task.student_no = this.selectedStudent.student_no;
+      if (!task.course_section) task.course_section = this.selectedStudent.course_section;
+      if (!task.company_name) task.company_name = this.selectedStudent.company_name;
+    }
+    if (task.proof_file && !task.proof_url) {
+      task.proof_url = this.getPhotoUrl(task.proof_file);
+    }
     this.selectedTaskProof = task;
     this.isTaskProofModalOpen = true;
     this.nativeService.triggerHapticFeedback('medium');
@@ -927,6 +936,25 @@ export class AdminDashboardPage implements OnInit {
           task.status = 'completed';
           task.verified_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
           task.verified_by = profName;
+
+          if (this.studentDossierTasks && this.studentDossierTasks.length > 0) {
+            const dossierTask = this.studentDossierTasks.find((t: any) => Number(t.id) === Number(task.id));
+            if (dossierTask) {
+              dossierTask.status = 'completed';
+              dossierTask.verified_at = task.verified_at;
+              dossierTask.verified_by = task.verified_by;
+            }
+          }
+
+          if (this.allTasks && this.allTasks.length > 0) {
+            const generalTask = this.allTasks.find((t: any) => Number(t.id) === Number(task.id));
+            if (generalTask) {
+              generalTask.status = 'completed';
+              generalTask.verified_at = task.verified_at;
+              generalTask.verified_by = task.verified_by;
+            }
+          }
+
           this.presentToast('Task verified and marked completed.', 'success');
           this.nativeService.triggerHapticFeedback('success');
           this.loadDashboardStats();
