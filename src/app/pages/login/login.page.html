@@ -1,26 +1,11 @@
 <ion-content [fullscreen]="true" class="login-content">
   <div class="login-container">
     
-    <!-- Top Back Navigation & Demo Chips -->
+    <!-- Top Back Navigation -->
     <div class="top-nav">
       <button class="back-btn" (click)="goBack()" aria-label="Go back">
         <ion-icon name="arrow-back-outline"></ion-icon>
       </button>
-      
-      <div class="demo-chips-group">
-        <button class="demo-chip-btn" (click)="fillDemoStudent()" aria-label="Student Demo Fill">
-          <ion-icon name="person-outline"></ion-icon>
-          <span>Student</span>
-        </button>
-        <button class="demo-chip-btn admin" (click)="fillDemoCoordinator()" aria-label="Coordinator Demo Fill">
-          <ion-icon name="shield-checkmark-outline"></ion-icon>
-          <span>Coordinator</span>
-        </button>
-        <button class="demo-chip-btn server" (click)="configureServerUrl()" aria-label="Configure Server IP" title="Configure Backend Server IP">
-          <ion-icon name="server-outline"></ion-icon>
-          <span>Server</span>
-        </button>
-      </div>
     </div>
 
     <!-- Title & Greeting -->
