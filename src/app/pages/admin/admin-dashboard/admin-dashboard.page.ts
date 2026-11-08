@@ -1467,9 +1467,20 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
 
   openAttachedFile(url?: string) {
     if (!url) return;
-    const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    const full = url.startsWith('http') ? url : `${base}/${url.replace(/^\/+/, '')}`;
+    const full = this.getAttachmentFullUrl(url);
     window.open(full, '_blank');
+  }
+
+  getAttachmentFullUrl(url?: string): string {
+    if (!url) return '';
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    return url.startsWith('http') ? url : `${base}/${url.replace(/^\/+/, '')}`;
+  }
+
+  isImageFile(url?: string): boolean {
+    if (!url) return false;
+    const clean = url.split('?')[0].toLowerCase();
+    return clean.endsWith('.png') || clean.endsWith('.jpg') || clean.endsWith('.jpeg') || clean.endsWith('.webp') || clean.endsWith('.gif');
   }
 
   presentToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {

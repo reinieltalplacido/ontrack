@@ -1843,18 +1843,26 @@
           <div class="official-report-sheet">
             
             <!-- Student Uploaded Document Alert (if attached) -->
-            <div *ngIf="selectedReport.file_url" class="admin-doc-attachment-banner" style="display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin: 0 0 16px 0;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <ion-icon name="document-attach-outline" style="font-size: 1.6rem; color: #15803d;"></ion-icon>
-                <div>
-                  <strong style="color: #0f172a; font-size: 0.9rem; display: block;">{{ selectedReport.file_name || 'Student Uploaded Document' }}</strong>
-                  <span *ngIf="selectedReport.notes" style="color: #166534; font-size: 0.8rem;">Remarks: {{ selectedReport.notes }}</span>
+            <div *ngIf="selectedReport.file_url" class="admin-doc-attachment-banner">
+              <div class="attachment-main-row">
+                <div class="attachment-left">
+                  <ion-icon name="document-attach-outline"></ion-icon>
+                  <div>
+                    <strong class="attachment-filename">{{ selectedReport.file_name || 'Student Uploaded Document' }}</strong>
+                    <span *ngIf="selectedReport.notes" class="attachment-remarks">Remarks: {{ selectedReport.notes }}</span>
+                  </div>
                 </div>
+                <button type="button" class="btn-view-att" (click)="openAttachedFile(selectedReport.file_url)">
+                  <ion-icon name="open-outline"></ion-icon>
+                  <span>Open Full</span>
+                </button>
               </div>
-              <button type="button" (click)="openAttachedFile(selectedReport.file_url)" style="background: #15803d; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                <ion-icon name="open-outline"></ion-icon>
-                <span>View Attachment</span>
-              </button>
+
+              <!-- Inline Preview if screenshot or image -->
+              <div class="attachment-preview-img-box" *ngIf="isImageFile(selectedReport.file_url)">
+                <img [src]="getAttachmentFullUrl(selectedReport.file_url)" alt="Attached Proof" (click)="openAttachedFile(selectedReport.file_url)" />
+                <span class="preview-tap-hint">Tap image to view full resolution</span>
+              </div>
             </div>
 
             <!-- Document Header -->
@@ -2026,42 +2034,49 @@
 
         <!-- Viewer Modal Footer Actions Bar -->
         <div class="viewer-modal-footer">
-          <div class="footer-left">
-            <button class="btn-print-doc" (click)="printReportDocument()">
-              <ion-icon name="print-outline"></ion-icon>
-              <span>Print / Export PDF</span>
-            </button>
+          <!-- Full-Width Status Banner (Above Buttons) -->
+          <div class="modal-footer-banner banner-approved" *ngIf="selectedReport.status === 'approved'">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>Officially Approved by <strong>{{ selectedReport.reviewed_by || currentProfessor?.full_name || 'Academic Coordinator' }}</strong></span>
           </div>
 
-          <div class="footer-right">
-            <button
-              class="btn-review-status"
-              *ngIf="selectedReport.status === 'submitted'"
-              [disabled]="isUpdatingReportStatus"
-              (click)="updateReportStatus('reviewed')"
-            >
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              <span>{{ isUpdatingReportStatus ? 'Updating...' : 'Mark as Reviewed' }}</span>
+          <div class="modal-footer-banner banner-reviewed" *ngIf="selectedReport.status === 'reviewed'">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <span>Marked as Reviewed by <strong>{{ selectedReport.reviewed_by || currentProfessor?.full_name || 'Academic Coordinator' }}</strong></span>
+          </div>
+
+          <!-- Action Buttons Bar -->
+          <div class="modal-footer-actions">
+            <button class="btn-print-doc" (click)="printReportDocument()">
+              <ion-icon name="print-outline"></ion-icon>
+              <span>Print / PDF</span>
             </button>
 
-            <button
-              class="btn-approve-status"
-              *ngIf="selectedReport.status === 'submitted' || selectedReport.status === 'reviewed'"
-              [disabled]="isUpdatingReportStatus"
-              (click)="updateReportStatus('approved')"
-            >
-              <ion-icon name="checkmark-done-circle-outline"></ion-icon>
-              <span>{{ isUpdatingReportStatus ? 'Approving...' : 'Approve Report' }}</span>
-            </button>
+            <div class="action-buttons-group">
+              <button
+                class="btn-review-status"
+                *ngIf="selectedReport.status === 'submitted'"
+                [disabled]="isUpdatingReportStatus"
+                (click)="updateReportStatus('reviewed')"
+              >
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>{{ isUpdatingReportStatus ? 'Updating...' : 'Mark Reviewed' }}</span>
+              </button>
 
-            <div class="approved-tag-banner" *ngIf="selectedReport.status === 'approved'">
-              <ion-icon name="checkmark-circle"></ion-icon>
-              <span>Officially Approved by {{ selectedReport.reviewed_by || 'Coordinator' }}</span>
+              <button
+                class="btn-approve-status"
+                *ngIf="selectedReport.status === 'submitted' || selectedReport.status === 'reviewed'"
+                [disabled]="isUpdatingReportStatus"
+                (click)="updateReportStatus('approved')"
+              >
+                <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+                <span>{{ isUpdatingReportStatus ? 'Approving...' : 'Approve Report' }}</span>
+              </button>
+
+              <button class="btn-close-viewer" (click)="closeReportModal()">
+                Close
+              </button>
             </div>
-
-            <button class="btn-close-viewer" (click)="closeReportModal()">
-              Close
-            </button>
           </div>
         </div>
 
