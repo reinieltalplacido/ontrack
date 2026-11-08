@@ -49,41 +49,66 @@ try {
         }
     }
 
-    // Auto-fetch and bind assigned professor / coordinator for this course, college, and section
+    // Auto-fetch and bind assigned professor / coordinator for this campus, course, college, and section
     preg_match('/[A-Z0-9]+$/', strtoupper(trim($section)), $matches);
     $secLetter = !empty($matches) ? $matches[0] : 'A';
     $secEnd = '%-' . $secLetter;
     $courseSecPattern = $courseCode . ' %-' . $secLetter;
 
-    // Priority 1: Exact match on canonical section (e.g. BSCE 4-A)
-    $coordStmt = $pdo->prepare('SELECT id, full_name, email FROM professors WHERE assigned_section = :sec LIMIT 1');
-    $coordStmt->execute(['sec' => $courseSection]);
-    $coord = $coordStmt->fetch();
+    $coord = null;
 
-    // Priority 2: Match course code and section letter
+    // Campus-aware lookups
+    if ($schoolCampus !== '') {
+        $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE campus = :campus AND assigned_section = :sec LIMIT 1');
+        $coordStmt->execute(['campus' => $schoolCampus, 'sec' => $courseSection]);
+        $coord = $coordStmt->fetch();
+
+        if (!$coord) {
+            $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE campus = :campus AND assigned_section LIKE :courseSecPattern ORDER BY id ASC LIMIT 1');
+            $coordStmt->execute(['campus' => $schoolCampus, 'courseSecPattern' => $courseSecPattern]);
+            $coord = $coordStmt->fetch();
+        }
+
+        if (!$coord && $resolvedDept !== '') {
+            $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE campus = :campus AND department = :dept AND assigned_section LIKE :secEnd ORDER BY id ASC LIMIT 1');
+            $coordStmt->execute(['campus' => $schoolCampus, 'dept' => $resolvedDept, 'secEnd' => $secEnd]);
+            $coord = $coordStmt->fetch();
+        }
+
+        if (!$coord && $resolvedDept !== '') {
+            $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE campus = :campus AND department = :dept ORDER BY id ASC LIMIT 1');
+            $coordStmt->execute(['campus' => $schoolCampus, 'dept' => $resolvedDept]);
+            $coord = $coordStmt->fetch();
+        }
+    }
+
+    // Cross-campus fallback lookups
     if (!$coord) {
-        $coordStmt = $pdo->prepare('SELECT id, full_name, email FROM professors WHERE assigned_section LIKE :courseSecPattern ORDER BY id ASC LIMIT 1');
+        $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE assigned_section = :sec ORDER BY id ASC LIMIT 1');
+        $coordStmt->execute(['sec' => $courseSection]);
+        $coord = $coordStmt->fetch();
+    }
+
+    if (!$coord) {
+        $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE assigned_section LIKE :courseSecPattern ORDER BY id ASC LIMIT 1');
         $coordStmt->execute(['courseSecPattern' => $courseSecPattern]);
         $coord = $coordStmt->fetch();
     }
 
-    // Priority 3: Match department and section letter
     if (!$coord && $resolvedDept !== '') {
-        $coordStmt = $pdo->prepare('SELECT id, full_name, email FROM professors WHERE department = :dept AND assigned_section LIKE :secEnd ORDER BY id ASC LIMIT 1');
+        $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE department = :dept AND assigned_section LIKE :secEnd ORDER BY id ASC LIMIT 1');
         $coordStmt->execute(['dept' => $resolvedDept, 'secEnd' => $secEnd]);
         $coord = $coordStmt->fetch();
     }
 
-    // Priority 4: Match department
     if (!$coord && $resolvedDept !== '') {
-        $coordStmt = $pdo->prepare('SELECT id, full_name, email FROM professors WHERE department = :dept ORDER BY id ASC LIMIT 1');
+        $coordStmt = $pdo->prepare('SELECT id, full_name, email, campus FROM professors WHERE department = :dept ORDER BY id ASC LIMIT 1');
         $coordStmt->execute(['dept' => $resolvedDept]);
         $coord = $coordStmt->fetch();
     }
 
-    // Priority 5: Fallback to lead coordinator
     if (!$coord) {
-        $coordStmt = $pdo->query('SELECT id, full_name, email FROM professors ORDER BY id ASC LIMIT 1');
+        $coordStmt = $pdo->query('SELECT id, full_name, email, campus FROM professors ORDER BY id ASC LIMIT 1');
         $coord = $coordStmt->fetch();
     }
 

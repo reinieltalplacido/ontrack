@@ -176,7 +176,8 @@
             <h5 class="coord-name">{{ assignedCoordinator.full_name }}</h5>
             <p class="coord-meta">
               {{ assignedCoordinator.email }} • Section {{ assignedCoordinator.assigned_section || getCanonicalSection() }}
-              <span *ngIf="assignedCoordinator.department"> ({{ assignedCoordinator.department }})</span>
+              <span *ngIf="assignedCoordinator.campus"> • {{ assignedCoordinator.campus }}</span>
+              <span *ngIf="assignedCoordinator.department && !assignedCoordinator.campus"> ({{ assignedCoordinator.department }})</span>
             </p>
           </div>
         </div>

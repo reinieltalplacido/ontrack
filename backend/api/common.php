@@ -59,6 +59,7 @@ function format_professor_user(array $row): array {
         'full_name'        => $row['full_name'] ?? '',
         'email'            => $row['email'] ?? '',
         'department'       => $row['department'] ?? 'College of Information and Communications Technology',
+        'campus'           => $row['campus'] ?? 'NEUST - Sumacab Campus',
         'role'             => $row['role'] ?? 'admin',
         'assigned_section' => $row['assigned_section'] ?? 'BSIT 4-A',
         'contact_number'   => $row['contact_number'] ?? null,

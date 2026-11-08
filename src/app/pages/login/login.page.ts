@@ -74,8 +74,9 @@ export class LoginPage {
       serverOutline,
     });
 
+    const savedIdentifier = this.authService.getSavedIdentifier();
     this.loginForm = this.fb.group({
-      email: ['2026-0001', [Validators.required]],
+      email: [savedIdentifier || '2026-0001', [Validators.required]],
       password: ['Password123!', [Validators.required]],
       rememberMe: [true],
     });
@@ -132,9 +133,9 @@ export class LoginPage {
     this.errorMessage = '';
     this.cdr.detectChanges();
 
-    const { email, password } = this.loginForm.value;
+    const { email, password, rememberMe } = this.loginForm.value;
 
-    this.authService.login(email.trim(), password).subscribe({
+    this.authService.login(email.trim(), password, !!rememberMe).subscribe({
       next: (res) => {
         this.isLoading = false;
         if (res.success) {

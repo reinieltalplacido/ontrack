@@ -7,6 +7,8 @@ import { environment } from '../../../environments/environment';
 
 const SESSION_KEY = 'ontrack_user_session';
 const ADMIN_SESSION_KEY = 'ontrack_admin_session';
+const KEEP_SIGNED_IN_KEY = 'ontrack_keep_signed_in';
+const SAVED_IDENTIFIER_KEY = 'ontrack_saved_identifier';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +33,7 @@ export class AuthService {
   /**
    * Login against ontrack-api (validates BCrypt hash in MySQL for students & professors)
    */
-  login(identifier: string, password: string): Observable<AuthResponse> {
+  login(identifier: string, password: string, rememberMe: boolean = true): Observable<AuthResponse> {
     const payload = {
       email: identifier,
       password: password,
@@ -40,6 +42,14 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login.php`, payload).pipe(
       tap((res) => {
         if (res.success) {
+          if (rememberMe) {
+            localStorage.setItem(KEEP_SIGNED_IN_KEY, 'true');
+            localStorage.setItem(SAVED_IDENTIFIER_KEY, identifier);
+          } else {
+            localStorage.setItem(KEEP_SIGNED_IN_KEY, 'false');
+            localStorage.removeItem(SAVED_IDENTIFIER_KEY);
+          }
+
           if (res.role === 'professor' || res.professor) {
             const prof = res.professor || {
               id: res.user?.id,
@@ -109,12 +119,13 @@ export class AuthService {
   /**
    * Fetch coordinator assigned to a specific section and program
    */
-  getCoordinatorForSection(section: string, course?: string, college?: string, yearLevel?: number): Observable<{ success: boolean; found: boolean; coordinator: any; canonical_section?: string; course_code?: string; department?: string }> {
+  getCoordinatorForSection(section: string, course?: string, college?: string, yearLevel?: number, campus?: string): Observable<{ success: boolean; found: boolean; coordinator: any; canonical_section?: string; course_code?: string; department?: string; campus?: string }> {
     let url = `${this.apiUrl}/coordinators.php?section=${encodeURIComponent(section)}`;
     if (course) url += `&course=${encodeURIComponent(course)}`;
     if (college) url += `&college=${encodeURIComponent(college)}`;
     if (yearLevel) url += `&year_level=${encodeURIComponent(yearLevel)}`;
-    return this.http.get<{ success: boolean; found: boolean; coordinator: any; canonical_section?: string; course_code?: string; department?: string }>(url).pipe(
+    if (campus) url += `&campus=${encodeURIComponent(campus)}`;
+    return this.http.get<{ success: boolean; found: boolean; coordinator: any; canonical_section?: string; course_code?: string; department?: string; campus?: string }>(url).pipe(
       catchError(() => of({ success: false, found: false, coordinator: null }))
     );
   }
@@ -157,7 +168,30 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+    localStorage.removeItem(KEEP_SIGNED_IN_KEY);
     this.currentUserSubject.next(null);
+  }
+
+  public isAdminLoggedIn(): boolean {
+    try {
+      const data = localStorage.getItem(ADMIN_SESSION_KEY);
+      return !!data;
+    } catch {
+      return false;
+    }
+  }
+
+  public isKeepSignedIn(): boolean {
+    return localStorage.getItem(KEEP_SIGNED_IN_KEY) !== 'false';
+  }
+
+  public shouldAutoLogin(): boolean {
+    return (this.isLoggedIn() || this.isAdminLoggedIn()) && this.isKeepSignedIn();
+  }
+
+  public getSavedIdentifier(): string {
+    return localStorage.getItem(SAVED_IDENTIFIER_KEY) || '';
   }
 
   private setSession(user: User): void {

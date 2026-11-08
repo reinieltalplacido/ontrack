@@ -226,7 +226,11 @@ export class RegisterPage {
       }
     });
 
-    // Auto-fetch coordinator whenever section, course, or year level changes
+    // Auto-fetch coordinator whenever campus, section, course, or year level changes
+    this.registerForm.get('school_campus')?.valueChanges.subscribe(() => {
+      this.fetchAssignedCoordinator(this.registerForm.get('section')?.value || '4-A');
+    });
+
     this.registerForm.get('section')?.valueChanges.subscribe((sec) => {
       this.fetchAssignedCoordinator(sec);
     });
@@ -317,12 +321,13 @@ export class RegisterPage {
     const trimmed = (secInput || '').trim();
     const course = this.registerForm.get('course')?.value || '';
     const college = this.getCollegeForCourse(course);
+    const campus = this.registerForm.get('school_campus')?.value || 'NEUST - Sumacab Campus';
     const year = this.registerForm.get('year_level')?.value || 4;
 
     const canonicalSec = this.getCanonicalSection();
 
     this.isLoadingCoordinator = true;
-    this.authService.getCoordinatorForSection(trimmed || canonicalSec, course, college, year).subscribe({
+    this.authService.getCoordinatorForSection(trimmed || canonicalSec, course, college, year, campus).subscribe({
       next: (res) => {
         this.isLoadingCoordinator = false;
         if (res.success && res.coordinator) {

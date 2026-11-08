@@ -97,7 +97,7 @@ export class LandingPage {
       tag: 'Progress',
       badgeColor: 'success',
       title: 'Automated Hour Computation',
-      subtitle: 'Rendered hours calculate automatically each day toward your 486-hour OJT requirement.',
+      subtitle: 'Rendered hours calculate automatically each day toward your 486-hour requirement.',
     },
     {
       tag: 'Reports',

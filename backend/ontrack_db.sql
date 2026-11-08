@@ -39,6 +39,7 @@ CREATE TABLE `professors` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `department` varchar(150) NOT NULL DEFAULT 'College of Information and Communications Technology',
+  `campus` varchar(150) NOT NULL DEFAULT 'NEUST - Sumacab Campus',
   `role` enum('admin','coordinator','adviser') NOT NULL DEFAULT 'admin',
   `assigned_section` varchar(100) DEFAULT 'BSIT 4-A',
   `contact_number` varchar(50) DEFAULT NULL,
