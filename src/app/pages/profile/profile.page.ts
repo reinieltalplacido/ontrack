@@ -11,6 +11,7 @@ import {
   IonCard,
   IonBadge,
   IonModal,
+  IonDatetime,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -66,6 +67,7 @@ import { formatHours } from '../../core/utils/format.util';
     IonCard,
     IonBadge,
     IonModal,
+    IonDatetime,
   ],
 })
 export class ProfilePage implements OnInit {
@@ -144,6 +146,48 @@ export class ProfilePage implements OnInit {
   targetDate = '';
   requiredHours = 0;
   newPassword = '';
+
+  // Calendar Modal State
+  isCalendarOpen = false;
+  activeDateField: 'start_date' | 'target_date' = 'target_date';
+
+  openCalendar(field: 'start_date' | 'target_date') {
+    if (field === 'start_date' && this.isStartDateLocked) {
+      return;
+    }
+    this.activeDateField = field;
+    this.isCalendarOpen = true;
+    this.nativeService.triggerHapticFeedback('light');
+    this.cdr.detectChanges();
+  }
+
+  closeCalendar() {
+    this.isCalendarOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  onDateSelected(event: any) {
+    const selectedVal = event.detail?.value;
+    if (selectedVal) {
+      const dateOnly = selectedVal.split('T')[0];
+      if (this.activeDateField === 'start_date') {
+        this.startDate = dateOnly;
+        if (this.targetDate && this.targetDate < this.startDate) {
+          this.targetDate = this.startDate;
+        }
+      } else {
+        this.targetDate = dateOnly;
+      }
+    }
+    this.closeCalendar();
+    this.nativeService.triggerHapticFeedback('light');
+    this.cdr.detectChanges();
+  }
+
+  formatDisplayDate(dateStr?: string | null): string {
+    if (!dateStr) return 'Select Date';
+    return this.formatDate(dateStr);
+  }
 
   // Side Drawer
   isSideMenuOpen = false;

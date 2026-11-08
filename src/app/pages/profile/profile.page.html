@@ -315,6 +315,7 @@
           </div>
 
           <div class="form-row-2">
+            <!-- Start Date Field -->
             <div class="form-field" [class.field-locked]="isStartDateLocked">
               <div class="field-label-row">
                 <label class="field-label">Start Date of OJT</label>
@@ -325,14 +326,12 @@
                   </span>
                 }
               </div>
-              <div class="custom-input-box" [class.input-locked]="isStartDateLocked">
-                <input 
-                  type="date" 
-                  [(ngModel)]="startDate" 
-                  name="startDate"
-                  [disabled]="isStartDateLocked"
-                  [min]="minStartDate"
-                />
+              <div 
+                class="date-picker-shell" 
+                [class.disabled-shell]="isStartDateLocked"
+                (click)="!isStartDateLocked && openCalendar('start_date')">
+                <span class="date-text">{{ formatDisplayDate(startDate) }}</span>
+                <ion-icon name="calendar-outline" class="calendar-btn-icon"></ion-icon>
               </div>
               @if (isStartDateLocked) {
                 <span class="field-help-text locked-tip">
@@ -342,24 +341,21 @@
               } @else {
                 <span class="field-help-text">
                   <ion-icon name="calendar-outline"></ion-icon>
-                  Must be today or future (no backdates).
+                  Tap to view calendar (today/future only).
                 </span>
               }
             </div>
 
+            <!-- Target End Date Field -->
             <div class="form-field">
               <label class="field-label">Target End Date</label>
-              <div class="custom-input-box">
-                <input 
-                  type="date" 
-                  [(ngModel)]="targetDate" 
-                  name="targetDate"
-                  [min]="startDate || minStartDate"
-                />
+              <div class="date-picker-shell" (click)="openCalendar('target_date')">
+                <span class="date-text">{{ formatDisplayDate(targetDate) }}</span>
+                <ion-icon name="calendar-outline" class="calendar-btn-icon"></ion-icon>
               </div>
               <span class="field-help-text">
                 <ion-icon name="calendar-outline"></ion-icon>
-                Estimated finish date.
+                Tap to pick target finish date.
               </span>
             </div>
           </div>
@@ -419,6 +415,28 @@
         <span>Sign Out of Account</span>
       </button>
     </div>
+
+    <!-- Interactive Visual Calendar Modal -->
+    <ion-modal [isOpen]="isCalendarOpen" (didDismiss)="closeCalendar()" class="calendar-modal">
+      <ng-template>
+        <div class="calendar-wrapper">
+          <div class="calendar-modal-header">
+            <div class="cal-title-wrap">
+              <ion-icon name="calendar-outline" class="cal-header-icon"></ion-icon>
+              <h3>{{ activeDateField === 'start_date' ? 'Select Start Date of OJT' : 'Select Target End Date' }}</h3>
+            </div>
+            <button type="button" class="close-cal-btn" (click)="closeCalendar()">&times;</button>
+          </div>
+          <ion-datetime 
+            presentation="date"
+            [value]="activeDateField === 'start_date' ? (startDate || minStartDate) : (targetDate || minStartDate)"
+            [min]="activeDateField === 'start_date' ? minStartDate : (startDate || minStartDate)"
+            (ionChange)="onDateSelected($event)"
+            class="custom-datetime">
+          </ion-datetime>
+        </div>
+      </ng-template>
+    </ion-modal>
   </div>
 </ion-content>
 

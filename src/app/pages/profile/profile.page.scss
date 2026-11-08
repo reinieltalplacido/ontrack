@@ -614,6 +614,51 @@ $bg-canvas: #f1f5f9;
     }
   }
 
+  .date-picker-shell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+
+    .date-text {
+      font-size: 0.9rem;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .calendar-btn-icon {
+      font-size: 1.15rem;
+      color: var(--ion-color-primary, $primary);
+    }
+
+    &:hover:not(.disabled-shell) {
+      border-color: $primary;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(43, 85, 120, 0.1);
+    }
+
+    &.disabled-shell {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      cursor: not-allowed;
+      opacity: 0.85;
+
+      .date-text {
+        color: #64748b;
+      }
+
+      .calendar-btn-icon {
+        color: #94a3b8;
+      }
+    }
+  }
+
   .field-help-text {
     display: flex;
     align-items: center;
@@ -728,6 +773,65 @@ $bg-canvas: #f1f5f9;
     transition: background 0.2s ease;
 
     &:active { background: #fee2e2; }
+  }
+}
+
+/* Calendar Modal */
+.calendar-modal {
+  --border-radius: 20px;
+  --max-width: 360px;
+  --height: auto;
+
+  .calendar-wrapper {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 16px;
+
+    .calendar-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
+
+      .cal-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .cal-header-icon {
+          font-size: 1.15rem;
+          color: var(--ion-color-primary, $primary);
+        }
+
+        h3 {
+          margin: 0;
+          font-size: 0.96rem;
+          font-weight: 700;
+          color: #1e293b;
+        }
+      }
+
+      .close-cal-btn {
+        background: transparent;
+        border: none;
+        font-size: 1.6rem;
+        color: #64748b;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+
+        &:active {
+          color: #0f172a;
+        }
+      }
+    }
+
+    .custom-datetime {
+      border-radius: 14px;
+      --background: #f8fafc;
+      width: 100%;
+    }
   }
 }
 
@@ -965,19 +1069,38 @@ ion-modal.change-password-modal {
 
       .modal-close-btn {
         background: #f1f5f9;
-        border: none;
-        width: 32px;
-        height: 32px;
+        border: 1px solid #e2e8f0;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.15rem;
-        color: #64748b;
+        color: #475569;
         cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+
+        ion-icon {
+          font-size: 1.25rem;
+          color: #475569;
+          transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        &:hover {
+          background: #e2e8f0;
+          border-color: #cbd5e1;
+          transform: scale(1.05);
+
+          ion-icon {
+            color: #0f172a;
+            transform: rotate(90deg);
+          }
+        }
 
         &:active {
-          background: #e2e8f0;
+          transform: scale(0.94);
+          background: #cbd5e1;
         }
       }
     }

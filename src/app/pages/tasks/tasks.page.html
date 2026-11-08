@@ -610,7 +610,9 @@
   <ion-modal [isOpen]="isImageModalOpen" (didDismiss)="closeImageModal()" class="image-viewer-modal">
     <ng-template>
       <div class="image-lightbox-wrapper">
-        <button type="button" class="close-lightbox-btn" (click)="closeImageModal()">&times;</button>
+        <button type="button" class="close-lightbox-btn" (click)="closeImageModal()" aria-label="Close photo preview">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
         <div class="lightbox-img-center">
           <img [src]="previewImageUrl" alt="Task Proof Full View" class="lightbox-img" />
         </div>
