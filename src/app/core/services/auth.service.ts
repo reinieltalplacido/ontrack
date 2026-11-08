@@ -107,12 +107,14 @@ export class AuthService {
   }
 
   /**
-   * Fetch coordinator assigned to a specific section (e.g. BSIT 4-B or B)
+   * Fetch coordinator assigned to a specific section and program
    */
-  getCoordinatorForSection(section: string): Observable<{ success: boolean; found: boolean; coordinator: any }> {
-    return this.http.get<{ success: boolean; found: boolean; coordinator: any }>(
-      `${this.apiUrl}/coordinators.php?section=${encodeURIComponent(section)}`
-    ).pipe(
+  getCoordinatorForSection(section: string, course?: string, college?: string, yearLevel?: number): Observable<{ success: boolean; found: boolean; coordinator: any; canonical_section?: string; course_code?: string; department?: string }> {
+    let url = `${this.apiUrl}/coordinators.php?section=${encodeURIComponent(section)}`;
+    if (course) url += `&course=${encodeURIComponent(course)}`;
+    if (college) url += `&college=${encodeURIComponent(college)}`;
+    if (yearLevel) url += `&year_level=${encodeURIComponent(yearLevel)}`;
+    return this.http.get<{ success: boolean; found: boolean; coordinator: any; canonical_section?: string; course_code?: string; department?: string }>(url).pipe(
       catchError(() => of({ success: false, found: false, coordinator: null }))
     );
   }

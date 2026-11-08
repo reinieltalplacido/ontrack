@@ -36,6 +36,8 @@ import {
   checkboxOutline,
   schoolOutline,
   personAddOutline,
+  businessOutline,
+  peopleOutline,
 } from 'ionicons/icons';
 import { NativeService } from '../../core/services/native.service';
 
@@ -109,6 +111,12 @@ export class LandingPage {
       title: 'Daily Task Management',
       subtitle: 'Organize supervisor-assigned activities and attach accomplishment notes to your daily logs.',
     },
+    {
+      tag: 'Campuses & Courses',
+      badgeColor: 'tertiary',
+      title: 'For All Campuses & Programs',
+      subtitle: 'Supports all NEUST campuses—from Sumacab to satellite branches—and every college program with auto-linked coordinators.',
+    },
   ];
 
   constructor() {
@@ -123,6 +131,8 @@ export class LandingPage {
       checkboxOutline,
       schoolOutline,
       personAddOutline,
+      businessOutline,
+      peopleOutline,
     });
   }
 

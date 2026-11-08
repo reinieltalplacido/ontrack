@@ -14,6 +14,25 @@
   margin: 0 auto;
 }
 
+.campus-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(var(--ion-color-primary-rgb, 43, 85, 120), 0.08);
+  color: var(--ion-color-primary, #2b5578);
+  border: 1px solid rgba(var(--ion-color-primary-rgb, 43, 85, 120), 0.16);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  letter-spacing: 0.2px;
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+}
+
 /* Ionic Card Styling */
 .feature-card {
   width: 100%;
@@ -128,19 +147,5 @@
     margin: 0;
     font-weight: 600;
     height: 40px;
-  }
-
-  .institution-caption {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    font-size: 0.72rem;
-    text-align: center;
-    margin-top: 2px;
-
-    ion-icon {
-      font-size: 0.85rem;
-    }
   }
 }

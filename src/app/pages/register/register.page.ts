@@ -148,6 +148,18 @@ export class RegisterPage {
     },
   ];
 
+  campuses = [
+    'NEUST - Sumacab Campus',
+    'NEUST - General Tinio Campus',
+    'NEUST - San Isidro Campus',
+    'NEUST - Fort Magsaysay Campus',
+    'NEUST - Atate Campus',
+    'NEUST - Peñaranda Campus',
+    'NEUST - Gabaldon Campus',
+    'NEUST - Carranglan Campus',
+    'NEUST - Talavera Campus',
+  ];
+
   yearLevels = [
     { value: 1, label: '1st Year' },
     { value: 2, label: '2nd Year' },
@@ -183,6 +195,7 @@ export class RegisterPage {
       // Step 1: Academic & Personal
       student_no: ['', [Validators.required, Validators.pattern(/^[0-9a-zA-Z\-_]+$/)]],
       full_name: ['', [Validators.required, Validators.minLength(3)]],
+      school_campus: ['NEUST - Sumacab Campus', [Validators.required]],
       course: ['Bachelor of Science in Information Technology with Specialization in Web Systems Technology', [Validators.required]],
       year_level: [4, [Validators.required, Validators.min(1), Validators.max(5)]],
       section: ['4-A', [Validators.required]],
@@ -255,20 +268,61 @@ export class RegisterPage {
     }
   }
 
+  getCollegeForCourse(courseName: string): string {
+    for (const group of this.collegeCourses) {
+      if (group.programs.includes(courseName)) {
+        return group.college;
+      }
+    }
+    return '';
+  }
+
+  getCourseCode(courseName: string): string {
+    const c = (courseName || '').toUpperCase();
+    if (c.includes('CIVIL ENGINEERING')) return 'BSCE';
+    if (c.includes('ELECTRICAL ENGINEERING')) return 'BSEE';
+    if (c.includes('MECHANICAL ENGINEERING')) return 'BSME';
+    if (c.includes('ENGINEERING')) return 'BSCE';
+    if (c.includes('ARCHITECTURE') || c.includes('DRAFTING') || c.includes('CADD') || c.includes('BUILDING')) return 'BSARCH';
+    if (c.includes('ELEMENTARY EDUCATION') || c.includes('BEED')) return 'BEED';
+    if (c.includes('SECONDARY EDUCATION') || c.includes('BSED')) return 'BSED';
+    if (c.includes('EDUCATION') || c.includes('TEACHER') || c.includes('PHYSICAL EDUCATION')) return 'BSED';
+    if (c.includes('CRIMINOLOGY')) return 'BSCRIM';
+    if (c.includes('BUSINESS ADMINISTRATION') || c.includes('BSBA') || c.includes('ENTREPRENEURSHIP')) return 'BSBA';
+    if (c.includes('HOSPITALITY')) return 'BSHM';
+    if (c.includes('TOURISM')) return 'BSTM';
+    if (c.includes('PUBLIC ADMINISTRATION')) return 'BPA';
+    if (c.includes('DATA SCIENCE')) return 'BSDS';
+    return 'BSIT';
+  }
+
+  getCanonicalSection(): string {
+    const course = this.registerForm.get('course')?.value || '';
+    const code = this.getCourseCode(course);
+    const year = this.registerForm.get('year_level')?.value || 4;
+    const sec = (this.registerForm.get('section')?.value || '4-A').trim().toUpperCase();
+
+    // If user already typed "BSCE 4-A" or "BSIT 4-A", keep it
+    if (sec.startsWith('BS') || sec.startsWith('BE') || sec.startsWith('BP')) {
+      return sec;
+    }
+
+    // Extract section letter / number (e.g. "4-A" -> "A", "A" -> "A")
+    const match = sec.match(/[A-Z0-9]+$/);
+    const letter = match ? match[0] : 'A';
+    return `${code} ${year}-${letter}`;
+  }
+
   fetchAssignedCoordinator(secInput: string) {
     const trimmed = (secInput || '').trim();
-    if (!trimmed) return;
-
+    const course = this.registerForm.get('course')?.value || '';
+    const college = this.getCollegeForCourse(course);
     const year = this.registerForm.get('year_level')?.value || 4;
-    const upper = trimmed.toUpperCase();
 
-    // Extract letter/section code (e.g., "4-A" -> "A", "SECTION A" -> "A", "A" -> "A")
-    const match = upper.match(/[A-Z0-9]+$/i);
-    const secLetter = match ? match[0] : upper;
-    const fullSection = upper.includes('-') ? upper : `BSIT ${year}-${secLetter}`;
+    const canonicalSec = this.getCanonicalSection();
 
     this.isLoadingCoordinator = true;
-    this.authService.getCoordinatorForSection(fullSection).subscribe({
+    this.authService.getCoordinatorForSection(trimmed || canonicalSec, course, college, year).subscribe({
       next: (res) => {
         this.isLoadingCoordinator = false;
         if (res.success && res.coordinator) {
@@ -288,7 +342,7 @@ export class RegisterPage {
   }
 
   isStep1Valid(): boolean {
-    const s1 = ['student_no', 'full_name', 'course', 'year_level', 'section', 'email'];
+    const s1 = ['student_no', 'full_name', 'school_campus', 'course', 'year_level', 'section', 'email'];
     return s1.every((field) => this.registerForm.get(field)?.valid);
   }
 
@@ -308,7 +362,7 @@ export class RegisterPage {
     this.errorMessage = '';
     if (this.currentStep === 1) {
       if (!this.isStep1Valid()) {
-        this.markFieldsTouched(['student_no', 'full_name', 'course', 'year_level', 'section', 'email']);
+        this.markFieldsTouched(['student_no', 'full_name', 'school_campus', 'course', 'year_level', 'section', 'email']);
         this.errorMessage = 'Please complete all academic fields accurately.';
         return;
       }
@@ -386,6 +440,7 @@ export class RegisterPage {
     this.registerForm.patchValue({
       student_no: `SUM2023-0${randomNum}`,
       full_name: 'REINIEL TALPLACIDO',
+      school_campus: 'NEUST - Sumacab Campus',
       course: 'Bachelor of Science in Information Technology with Specialization in Web Systems Technology',
       year_level: 4,
       section: '4-A',
@@ -421,7 +476,10 @@ export class RegisterPage {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const formValues = this.registerForm.value;
+    const formValues = {
+      ...this.registerForm.value,
+      course_section: this.getCanonicalSection(),
+    };
 
     this.authService.register(formValues).subscribe({
       next: (res) => {

@@ -100,6 +100,20 @@
           </p>
         </div>
 
+        <!-- Campus / University Branch Selection -->
+        <div class="form-group">
+          <label class="form-label" for="school_campus">Campus / University Branch <span class="req">*</span></label>
+          <div class="input-shell select-shell" [class.error]="registerForm.get('school_campus')?.touched && registerForm.get('school_campus')?.invalid">
+            <select id="school_campus" formControlName="school_campus" aria-label="Campus / University Branch">
+              <option value="" disabled>Select Campus</option>
+              <option *ngFor="let c of campuses" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <p class="field-hint" *ngIf="registerForm.get('school_campus')?.touched && registerForm.get('school_campus')?.invalid">
+            Campus selection is required.
+          </p>
+        </div>
+
         <!-- Course / Degree Program Selection -->
         <div class="form-group">
           <label class="form-label" for="course">Course / Degree Program <span class="req">*</span></label>
@@ -160,7 +174,10 @@
               <ion-badge class="auto-link-badge">Auto-Assigned</ion-badge>
             </div>
             <h5 class="coord-name">{{ assignedCoordinator.full_name }}</h5>
-            <p class="coord-meta">{{ assignedCoordinator.email }} • Section {{ registerForm.get('section')?.value }}</p>
+            <p class="coord-meta">
+              {{ assignedCoordinator.email }} • Section {{ assignedCoordinator.assigned_section || getCanonicalSection() }}
+              <span *ngIf="assignedCoordinator.department"> ({{ assignedCoordinator.department }})</span>
+            </p>
           </div>
         </div>
 
@@ -339,6 +356,10 @@
           <div class="summary-line">
             <span class="s-label">Student:</span>
             <span class="s-val">{{ registerForm.get('full_name')?.value || '—' }} ({{ registerForm.get('student_no')?.value }})</span>
+          </div>
+          <div class="summary-line">
+            <span class="s-label">Campus:</span>
+            <span class="s-val">{{ registerForm.get('school_campus')?.value || '—' }}</span>
           </div>
           <div class="summary-line">
             <span class="s-label">Program:</span>

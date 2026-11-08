@@ -159,6 +159,66 @@
       </ion-card-content>
     </ion-card>
 
+    <!-- Slide 4: University Campuses & Courses Card -->
+    <ion-card *ngIf="currentSlide === 4" class="feature-card campus-feature-card">
+      <ion-card-header>
+        <div class="card-top-row">
+          <ion-badge color="tertiary">All Campuses</ion-badge>
+          <ion-note>All Colleges & Programs</ion-note>
+        </div>
+        <ion-card-title>Multi-Campus & Cross-Course</ion-card-title>
+        <ion-card-subtitle>Nueva Ecija University of Science and Technology</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Campus Chips Showcase -->
+        <div class="campus-preview-grid">
+          <div class="preview-group-label">
+            <ion-icon name="business-outline"></ion-icon>
+            <span>Supported Campuses</span>
+          </div>
+          <div class="campus-pill-wrap">
+            <span class="c-pill main">Sumacab (Main)</span>
+            <span class="c-pill">Gen. Tinio</span>
+            <span class="c-pill">San Isidro</span>
+            <span class="c-pill">Palayan</span>
+            <span class="c-pill">Atate</span>
+            <span class="c-pill">Gabaldon</span>
+            <span class="c-pill">+3 More</span>
+          </div>
+        </div>
+
+        <div class="campus-preview-divider"></div>
+
+        <!-- Course / Colleges Chips Showcase -->
+        <div class="campus-preview-grid">
+          <div class="preview-group-label">
+            <ion-icon name="school-outline"></ion-icon>
+            <span>Supported Programs</span>
+          </div>
+          <div class="campus-pill-wrap">
+            <span class="c-pill prog">BSIT / CICT</span>
+            <span class="c-pill prog">Engineering</span>
+            <span class="c-pill prog">Education</span>
+            <span class="c-pill prog">Architecture</span>
+            <span class="c-pill prog">Management</span>
+            <span class="c-pill prog">All OJT Curricula</span>
+          </div>
+        </div>
+
+        <ion-list [inset]="true" class="card-list" style="margin-top: 10px;">
+          <ion-item lines="none">
+            <ion-icon name="people-outline" slot="start" color="success"></ion-icon>
+            <ion-label>
+              <h3>Coordinator Auto-Match</h3>
+              <p>Automatic section routing & adviser link</p>
+            </ion-label>
+            <ion-note slot="end" color="success">Connected</ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
     <!-- Slide Headline & Description -->
     <div class="slide-text-block ion-text-center">
       <ion-chip [color]="slides[currentSlide].badgeColor" class="slide-chip">
@@ -207,11 +267,6 @@
         (click)="goToRegister()">
         Register as New Student
       </ion-button>
-
-      <ion-note class="institution-caption">
-        <ion-icon name="school-outline"></ion-icon>
-        <span>NEUST Sumacab Campus • OJT Department</span>
-      </ion-note>
     </div>
   </ion-toolbar>
 </ion-footer>
