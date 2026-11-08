@@ -363,7 +363,7 @@
       </div>
       <div class="mini-details">
         <h4>{{ currentUser?.full_name || 'Juan Dela Cruz' }}</h4>
-        <p>{{ currentUser?.student_id || '2026-0001' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser?.course_section }}</span></p>
+        <p>{{ currentUser?.student_id || '2026-0001' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser.course_section }}</span></p>
       </div>
     </div>
     <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">
