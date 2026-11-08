@@ -38,7 +38,7 @@
           </div>
           <div class="welcome-text">
             <span class="greeting-sub">Academic Supervisor & Coordinator</span>
-            <h2 class="professor-name">{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</h2>
+            <h2 class="professor-name">{{ currentProfessor?.full_name || 'Academic Coordinator' }}</h2>
             <p class="prof-dept">{{ currentProfessor?.department || 'College of Information & Communications Tech' }}</p>
           </div>
         </div>
@@ -56,6 +56,10 @@
         <button class="quick-action-btn primary" (click)="switchSegment('attendance'); setAttendanceMode('weekly')">
           <ion-icon name="calendar-outline"></ion-icon>
           <span>Weekly Timesheet</span>
+        </button>
+        <button class="quick-action-btn" (click)="switchSegment('reports')">
+          <ion-icon name="document-text-outline"></ion-icon>
+          <span>Student Reports</span>
         </button>
         <button class="quick-action-btn" (click)="switchSegment('students')">
           <ion-icon name="people-outline"></ion-icon>
@@ -115,6 +119,33 @@
             <div class="split-col">
               <span class="split-num text-green">{{ stats.completed_tasks }}</span>
               <span class="split-txt">Completed</span>
+            </div>
+          </div>
+        </ion-card>
+
+        <!-- Submitted Reports Metric -->
+        <ion-card class="metric-card full-width" (click)="switchSegment('reports')">
+          <div class="metric-header">
+            <div class="metric-icon-box orange">
+              <ion-icon name="document-text-outline"></ion-icon>
+            </div>
+            <span class="metric-trend" *ngIf="reportStats.submitted > 0">{{ reportStats.submitted }} Pending Review</span>
+            <span class="metric-trend" *ngIf="reportStats.submitted === 0">All Reviewed</span>
+          </div>
+          <div class="metric-tasks-split">
+            <div class="split-col">
+              <span class="split-num">{{ reportStats.total }}</span>
+              <span class="split-txt">Total Reports</span>
+            </div>
+            <div class="split-divider"></div>
+            <div class="split-col">
+              <span class="split-num text-amber">{{ reportStats.submitted }}</span>
+              <span class="split-txt">Needs Review</span>
+            </div>
+            <div class="split-divider"></div>
+            <div class="split-col">
+              <span class="split-num text-green">{{ reportStats.approved }}</span>
+              <span class="split-txt">Approved</span>
             </div>
           </div>
         </ion-card>
@@ -740,6 +771,213 @@
     </section>
 
     <!-- ========================================== -->
+    <!-- TAB: REPORTS (SUBMITTED INTERN REPORTS) -->
+    <!-- ========================================== -->
+    <section *ngIf="selectedSegment === 'reports'" class="tab-pane fade-in coordinator-reports-pane">
+      
+      <!-- 4 Stats Cards Grid -->
+      <div class="report-stats-grid">
+        <div class="stat-pill-card" [class.active-filter]="reportTypeFilter === 'all' && reportStatusFilter === 'all'" (click)="clickReportCardFilter('all')">
+          <div class="stat-top">
+            <span class="stat-num">{{ reportStats.total }}</span>
+            <div class="stat-icon-wrap blue"><ion-icon name="document-text-outline"></ion-icon></div>
+          </div>
+          <span class="stat-label">Total Submitted</span>
+        </div>
+
+        <div class="stat-pill-card" [class.active-filter]="reportTypeFilter === 'Time Log'" (click)="clickReportCardFilter('Time Log')">
+          <div class="stat-top">
+            <span class="stat-num text-teal">{{ reportStats.time_log }}</span>
+            <div class="stat-icon-wrap teal"><ion-icon name="time-outline"></ion-icon></div>
+          </div>
+          <span class="stat-label">DTR Time Logs</span>
+        </div>
+
+        <div class="stat-pill-card" [class.active-filter]="reportTypeFilter === 'Summary'" (click)="clickReportCardFilter('Summary')">
+          <div class="stat-top">
+            <span class="stat-num text-purple">{{ reportStats.summary }}</span>
+            <div class="stat-icon-wrap purple"><ion-icon name="analytics-outline"></ion-icon></div>
+          </div>
+          <span class="stat-label">Summary Reports</span>
+        </div>
+
+        <div class="stat-pill-card pending-card" [class.active-filter]="reportStatusFilter === 'submitted'" (click)="clickReportCardFilter('submitted')">
+          <div class="stat-top">
+            <span class="stat-num text-amber">{{ reportStats.submitted }}</span>
+            <div class="stat-icon-wrap amber"><ion-icon name="alert-circle-outline"></ion-icon></div>
+          </div>
+          <span class="stat-label">Pending Review</span>
+        </div>
+      </div>
+
+      <!-- Filter Controls Bar -->
+      <div class="reports-filter-bar">
+        <!-- Search Input -->
+        <div class="search-input-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <input
+            type="text"
+            [(ngModel)]="reportSearchTerm"
+            (ngModelChange)="applyReportFilters()"
+            placeholder="Search student name, ID, or report title..."
+          />
+          <button *ngIf="reportSearchTerm" (click)="reportSearchTerm = ''; applyReportFilters()" class="clear-search-btn">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </button>
+        </div>
+
+        <!-- Filter Chips Row -->
+        <div class="filters-row">
+          <!-- Status Chips Strip -->
+          <div class="filter-group">
+            <span class="filter-group-label">Status</span>
+            <div class="filter-chips-scroll">
+              <button class="filter-chip" [class.active]="reportStatusFilter === 'all'" (click)="setReportStatusFilter('all')">
+                All
+              </button>
+              <button class="filter-chip pending" [class.active]="reportStatusFilter === 'submitted'" (click)="setReportStatusFilter('submitted')">
+                <span class="chip-dot amber"></span>
+                Pending
+                <span class="chip-counter" *ngIf="reportStats.submitted > 0">{{ reportStats.submitted }}</span>
+              </button>
+              <button class="filter-chip reviewed" [class.active]="reportStatusFilter === 'reviewed'" (click)="setReportStatusFilter('reviewed')">
+                <span class="chip-dot blue"></span>
+                Reviewed
+              </button>
+              <button class="filter-chip approved" [class.active]="reportStatusFilter === 'approved'" (click)="setReportStatusFilter('approved')">
+                <span class="chip-dot green"></span>
+                Approved
+              </button>
+            </div>
+          </div>
+
+          <!-- Type Chips Strip -->
+          <div class="filter-group">
+            <span class="filter-group-label">Type</span>
+            <div class="filter-chips-scroll">
+              <button class="filter-chip" [class.active]="reportTypeFilter === 'all'" (click)="setReportTypeFilter('all')">
+                All
+              </button>
+              <button class="filter-chip" [class.active]="reportTypeFilter === 'Time Log'" (click)="setReportTypeFilter('Time Log')">
+                <ion-icon name="time-outline"></ion-icon>
+                Time Log
+              </button>
+              <button class="filter-chip" [class.active]="reportTypeFilter === 'Summary'" (click)="setReportTypeFilter('Summary')">
+                <ion-icon name="analytics-outline"></ion-icon>
+                Summary
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports List Container -->
+      <div class="reports-list-container">
+        <!-- Loading State -->
+        <div class="reports-loading-state" *ngIf="isLoadingReports">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Loading student submitted reports...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="reports-empty-state" *ngIf="!isLoadingReports && filteredReports.length === 0">
+          <div class="empty-icon-wrap">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <h4>No Submitted Reports Found</h4>
+          <p *ngIf="reportSearchTerm || reportTypeFilter !== 'all' || reportStatusFilter !== 'all'">
+            No reports match your current search and filter criteria.
+          </p>
+          <p *ngIf="!reportSearchTerm && reportTypeFilter === 'all' && reportStatusFilter === 'all'">
+            Interns in Section {{ currentSection }} have not submitted any reports yet. Reports submitted by students will automatically appear here.
+          </p>
+          <button class="empty-reset-btn" (click)="reportSearchTerm = ''; reportTypeFilter = 'all'; reportStatusFilter = 'all'; applyReportFilters()">
+            <ion-icon name="refresh-outline"></ion-icon>
+            <span>Reset Filters</span>
+          </button>
+        </div>
+
+        <!-- Reports Cards -->
+        <div class="reports-cards-list" *ngIf="!isLoadingReports && filteredReports.length > 0">
+          <div class="coordinator-report-card" *ngFor="let r of filteredReports" (click)="openReportModal(r)">
+            
+            <!-- Card Header: Student Avatar, Name, Metadata, & Status Pill -->
+            <div class="report-card-header">
+              <div class="student-info-group">
+                <div class="student-avatar-round">
+                  {{ (r.student_name || 'S').charAt(0) }}
+                </div>
+                <div class="student-text-group">
+                  <h4 class="student-name">{{ r.student_name }}</h4>
+                  <p class="student-meta-line">
+                    <span class="student-no">{{ r.student_no }}</span>
+                    <span class="meta-dot">•</span>
+                    <span class="agency-name">{{ r.student_company || 'Assigned Agency' }}</span>
+                    <span class="meta-dot">•</span>
+                    <span class="section-name">{{ r.course_section || currentSection }}</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Sleek Status Pill -->
+              <div class="report-status-pill" [class.status-submitted]="r.status === 'submitted'" [class.status-reviewed]="r.status === 'reviewed'" [class.status-approved]="r.status === 'approved'">
+                <span class="status-dot"></span>
+                <span class="status-text">{{ r.status === 'submitted' ? 'Needs Review' : (r.status | titlecase) }}</span>
+              </div>
+            </div>
+
+            <!-- Card Body: Document Title & Type -->
+            <div class="report-card-body">
+              <div class="doc-badge-row">
+                <span class="doc-type-tag" [class.type-dtr]="r.report_type === 'Time Log'" [class.type-summary]="r.report_type === 'Summary'">
+                  <ion-icon [name]="r.report_type === 'Time Log' ? 'time' : 'document-text'"></ion-icon>
+                  {{ r.report_type === 'Time Log' ? 'DTR Time Log' : 'Summary Report' }}
+                </span>
+                <span class="doc-submission-date">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  {{ formatFriendlyDate(r.report_date) || (r.report_date | slice:0:10) }}
+                </span>
+              </div>
+
+              <h3 class="report-title">{{ r.report_title }}</h3>
+
+              <!-- Soft Metadata Badges -->
+              <div class="report-stats-strip">
+                <div class="stat-bubble">
+                  <span class="bubble-label">Rendered</span>
+                  <span class="bubble-val text-teal">{{ formatHours(r.total_hours) }}</span>
+                </div>
+                <div class="stat-bubble">
+                  <span class="bubble-label">Logged</span>
+                  <span class="bubble-val">{{ r.total_days }} {{ r.total_days === 1 ? 'Day' : 'Days' }}</span>
+                </div>
+                <div class="stat-bubble" *ngIf="r.status === 'approved' || r.status === 'reviewed'">
+                  <span class="bubble-label">Reviewer</span>
+                  <span class="bubble-val text-reviewer">{{ r.reviewed_by ? (r.reviewed_by.split(' ')[0] + ' ' + (r.reviewed_by.split(' ')[1] || '')) : 'Coordinator' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Footer: Elegant Review Action -->
+            <div class="report-card-footer">
+              <span class="card-hint">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <span>Tap to inspect document</span>
+              </span>
+              <div class="review-action-pill">
+                <span>Review</span>
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
     <!-- TAB 5: PROFILE (ACADEMIC COORDINATOR) -->
     <!-- ========================================== -->
     <section *ngIf="selectedSegment === 'profile'" class="tab-pane fade-in coordinator-profile-pane">
@@ -751,10 +989,10 @@
           </div>
         </div>
 
-        <h1 class="prof-hero-name">{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</h1>
+        <h1 class="prof-hero-name">{{ currentProfessor?.full_name || 'Academic Coordinator' }}</h1>
         <div class="prof-badge-row">
           <span class="prof-role-badge">{{ currentProfessor?.role === 'admin' ? 'Lead Administrator' : 'Academic Coordinator' }}</span>
-          <span class="prof-id-pill">{{ currentProfessor?.employee_id || 'PROF-2026-001' }}</span>
+          <span class="prof-id-pill">{{ currentProfessor?.employee_id || 'FACULTY' }}</span>
         </div>
 
         <div class="prof-hero-meta-row">
@@ -807,17 +1045,17 @@
         <div class="detail-rows-list">
           <div class="detail-item">
             <span class="detail-label">Full Name</span>
-            <span class="detail-val highlight">{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</span>
+            <span class="detail-val highlight">{{ currentProfessor?.full_name || 'Academic Coordinator' }}</span>
           </div>
 
           <div class="detail-item">
             <span class="detail-label">Faculty / Employee ID</span>
-            <span class="detail-val mono">{{ currentProfessor?.employee_id || 'PROF-2026-001' }}</span>
+            <span class="detail-val mono">{{ currentProfessor?.employee_id || 'FACULTY' }}</span>
           </div>
 
           <div class="detail-item">
             <span class="detail-label">Institutional Email</span>
-            <span class="detail-val email">{{ currentProfessor?.email || 'admin@neust.edu.ph' }}</span>
+            <span class="detail-val email">{{ currentProfessor?.email || 'coordinator@neust.edu.ph' }}</span>
           </div>
 
           <div class="detail-item">
@@ -832,7 +1070,7 @@
 
           <div class="detail-item">
             <span class="detail-label">Assigned Sections</span>
-            <span class="detail-val">BSIT 4-A, BSIT 4-B, BSIT 4-C</span>
+            <span class="detail-val">{{ currentProfessor?.assigned_section || currentSection }}</span>
           </div>
         </div>
       </ion-card>
@@ -867,29 +1105,21 @@
         </div>
       </ion-card>
 
-      <!-- 5. Account Security & Password Card -->
+      <!-- 5. Change Password Card -->
       <ion-card class="admin-prof-detail-card security-card">
         <div class="card-title-group">
           <ion-icon name="lock-closed-outline" class="title-icon"></ion-icon>
-          <h2 class="title-text">Account Security & Credentials</h2>
+          <h2 class="title-text">Change Password</h2>
         </div>
 
-        <div class="detail-rows-list">
-          <div class="detail-item">
-            <span class="detail-label">Faculty / Employee ID</span>
-            <span class="detail-val mono">{{ currentProfessor?.employee_id || 'PROF-2026-001' }}</span>
-          </div>
-
-          <div class="security-action-row">
-            <div class="security-info">
-              <span class="detail-label">Portal Password</span>
-              <span class="security-dots">••••••••••••••••</span>
-            </div>
-            <button type="button" class="change-pwd-pill-btn" (click)="openPasswordModal()">
-              <ion-icon name="key-outline"></ion-icon>
-              <span>Change Password</span>
-            </button>
-          </div>
+        <div class="security-card-content">
+          <p class="security-desc">
+            Update your account password regularly to keep your coordinator portal secure.
+          </p>
+          <button type="button" class="change-pwd-btn" (click)="openPasswordModal()">
+            <ion-icon name="key-outline"></ion-icon>
+            <span>Change Password</span>
+          </button>
         </div>
       </ion-card>
 
@@ -898,11 +1128,6 @@
         <button type="button" class="prof-action-btn primary" (click)="switchSegment('students')">
           <ion-icon name="people-outline"></ion-icon>
           <span>View Monitored Interns ({{ students.length }})</span>
-        </button>
-
-        <button type="button" class="prof-action-btn outline" (click)="loadAllData()">
-          <ion-icon name="refresh-outline"></ion-icon>
-          <span>Refresh All Duty Data</span>
         </button>
 
         <button type="button" class="prof-action-btn danger" (click)="logout()">
@@ -999,6 +1224,13 @@
               (click)="studentDossierTab = 'tasks'">
               <ion-icon name="checkbox-outline"></ion-icon>
               <span>Student Tasks ({{ studentDossierTasks.length }})</span>
+            </button>
+            <button 
+              class="dossier-tab-btn" 
+              [class.active]="studentDossierTab === 'reports'" 
+              (click)="studentDossierTab = 'reports'">
+              <ion-icon name="document-text-outline"></ion-icon>
+              <span>Reports ({{ getStudentReportsCount(selectedStudent?.id) }})</span>
             </button>
           </div>
 
@@ -1322,6 +1554,42 @@
             </ng-template>
           </div>
 
+          <!-- Dossier Tab: Submitted Reports -->
+          <div *ngIf="!isLoadingStudentDossier && studentDossierTab === 'reports'" class="dossier-reports-list">
+            <div *ngIf="getReportsForStudent(selectedStudent?.id).length > 0; else noDossierReports">
+              <div class="dossier-report-card" *ngFor="let rep of getReportsForStudent(selectedStudent?.id)" (click)="openReportModal(rep)">
+                <div class="report-item-top">
+                  <div class="report-title-wrap">
+                    <span class="report-type-pill" [class.dtr]="rep.report_type === 'Time Log'" [class.summary]="rep.report_type === 'Summary'">
+                      {{ rep.report_type }}
+                    </span>
+                    <h5 class="report-card-title">{{ rep.report_title }}</h5>
+                  </div>
+                  <span class="report-status-tag" [class]="rep.status">
+                    {{ rep.status === 'submitted' ? 'Needs Review' : (rep.status | titlecase) }}
+                  </span>
+                </div>
+                <div class="report-meta-grid">
+                  <span><strong>Rendered:</strong> {{ formatHours(rep.total_hours) }}</span>
+                  <span><strong>Days:</strong> {{ rep.total_days }} days</span>
+                  <span><strong>Date:</strong> {{ rep.report_date | slice:0:10 }}</span>
+                </div>
+                <div class="report-bottom-action">
+                  <button class="dossier-view-report-btn" (click)="openReportModal(rep); $event.stopPropagation()">
+                    <ion-icon name="eye-outline"></ion-icon>
+                    <span>Inspect Official Sheet</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noDossierReports>
+              <div class="dossier-empty">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <p>No submitted reports found for this intern.</p>
+              </div>
+            </ng-template>
+          </div>
+
         </div>
 
         <!-- Modal Bottom Actions -->
@@ -1534,6 +1802,273 @@
     </ng-template>
   </ion-modal>
 
+  <!-- ========================================== -->
+  <!-- MODAL: COORDINATOR REPORT DOCUMENT VIEWER -->
+  <!-- ========================================== -->
+  <ion-modal [isOpen]="isReportModalOpen" (didDismiss)="closeReportModal()" class="admin-report-view-modal">
+    <ng-template>
+      <div class="report-viewer-container" *ngIf="selectedReport">
+        
+        <!-- Viewer Modal Header -->
+        <div class="viewer-modal-header">
+          <div class="header-left-meta">
+            <div class="modal-icon-pill">
+              <ion-icon [name]="selectedReport.report_type === 'Time Log' ? 'time-outline' : 'analytics-outline'"></ion-icon>
+            </div>
+            <div class="meta-texts">
+              <div class="title-row">
+                <h3>{{ selectedReport.report_title }}</h3>
+                <span class="report-type-badge">{{ selectedReport.report_type }}</span>
+              </div>
+              <p class="subtitle-text">
+                Submitted by <strong>{{ selectedReport.student_name }}</strong> ({{ selectedReport.student_no }}) • {{ selectedReport.course_section }}
+              </p>
+            </div>
+          </div>
+
+          <div class="header-right-actions">
+            <span class="status-indicator-badge" [class.badge-submitted]="selectedReport.status === 'submitted'" [class.badge-reviewed]="selectedReport.status === 'reviewed'" [class.badge-approved]="selectedReport.status === 'approved'">
+              {{ selectedReport.status === 'submitted' ? 'Needs Review' : (selectedReport.status | titlecase) }}
+            </span>
+            <button class="modal-close-circle" (click)="closeReportModal()" aria-label="Close modal">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Document Canvas (Official NEUST Layout) -->
+        <div class="printable-document-scroll">
+          
+          <!-- Official Landscape Document Sheet -->
+          <div class="official-report-sheet">
+            
+            <!-- Student Uploaded Document Alert (if attached) -->
+            <div *ngIf="selectedReport.file_url" class="admin-doc-attachment-banner" style="display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin: 0 0 16px 0;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <ion-icon name="document-attach-outline" style="font-size: 1.6rem; color: #15803d;"></ion-icon>
+                <div>
+                  <strong style="color: #0f172a; font-size: 0.9rem; display: block;">{{ selectedReport.file_name || 'Student Uploaded Document' }}</strong>
+                  <span *ngIf="selectedReport.notes" style="color: #166534; font-size: 0.8rem;">Remarks: {{ selectedReport.notes }}</span>
+                </div>
+              </div>
+              <button type="button" (click)="openAttachedFile(selectedReport.file_url)" style="background: #15803d; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <ion-icon name="open-outline"></ion-icon>
+                <span>View Attachment</span>
+              </button>
+            </div>
+
+            <!-- Document Header -->
+            <div class="doc-header-banner">
+              <div class="header-titles">
+                <span class="univ-kicker">NUEVA ECIJA UNIVERSITY OF SCIENCE AND TECHNOLOGY</span>
+                <h1 class="report-main-heading">{{ selectedReport.report_title }}</h1>
+                <span class="report-sub-tag">
+                  {{ selectedReport.report_type === 'Summary' ? 'Comprehensive Daily Attendance & Task Milestone Accomplishment Record' : 'Official Daily Time Record (DTR) Shift Attendance History' }}
+                </span>
+              </div>
+              <div class="header-meta-stamp">
+                <span class="stamp-lbl">SUBMITTED ON</span>
+                <span class="stamp-date">{{ selectedReport.report_date | slice:0:10 }}</span>
+                <span class="official-stamp-chip" [class.stamp-approved]="selectedReport.status === 'approved'">
+                  {{ selectedReport.status === 'approved' ? 'OFFICIALLY APPROVED' : (selectedReport.status === 'reviewed' ? 'REVIEWED BY COORDINATOR' : 'OFFICIAL SUBMISSION') }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Internship Profile & Placement Credentials Box -->
+            <div class="doc-profile-card">
+              <div class="profile-card-header">
+                <span class="pcard-title">INTERNSHIP PROFILE & PLACEMENT CREDENTIALS</span>
+                <span class="pcard-status-pill">Status: {{ selectedReport.status === 'approved' ? 'Approved' : 'In Progress' }}</span>
+              </div>
+              
+              <div class="profile-grid-3">
+                <div class="pcol">
+                  <span class="plbl">TRAINEE NAME</span>
+                  <span class="pval highlight">{{ selectedReport.student_name }}</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">STUDENT ID NUMBER</span>
+                  <span class="pval mono">{{ selectedReport.student_no }}</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">DEGREE COURSE & SECTION</span>
+                  <span class="pval">{{ selectedReport.course_section }}</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">ASSIGNED COMPANY / AGENCY</span>
+                  <span class="pval">{{ selectedReport.student_company || selectedReport.report_details?.student?.company_name || 'Innovate Tech Solutions Inc.' }}</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">OJT ADVISER / COORDINATOR</span>
+                  <span class="pval">{{ selectedReport.adviser_name || currentProfessor?.full_name || 'Academic Coordinator' }}</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">CAMPUS / BRANCH</span>
+                  <span class="pval">{{ selectedReport.school_campus || 'NEUST Sumacab Campus' }}</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">TOTAL HOURS RENDERED</span>
+                  <span class="pval text-green bold">{{ formatHours(selectedReport.total_hours) }}</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">TOTAL DUTY DAYS</span>
+                  <span class="pval text-blue bold">{{ selectedReport.total_days }} Shift Days</span>
+                </div>
+                <div class="pcol">
+                  <span class="plbl">REVIEWED BY</span>
+                  <span class="pval">{{ selectedReport.reviewed_by || (currentProfessor?.full_name || 'OJT Coordinator') }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 1: Daily Time Record (DTR) History Table -->
+            <div class="doc-section-block">
+              <div class="section-title-strip">
+                <span class="sec-num" *ngIf="selectedReport.report_type === 'Summary'">1.</span>
+                <h3 class="sec-title">Daily Time Record (DTR) History</h3>
+                <span class="sec-badge">{{ selectedReport.report_details?.logs?.length || selectedReport.total_days || 0 }} Shift Logs Recorded</span>
+              </div>
+
+              <div class="doc-table-wrap">
+                <table class="doc-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 15%;">LOG DATE</th>
+                      <th style="width: 20%;">DUTY TIME (IN — OUT)</th>
+                      <th style="width: 14%;">RENDERED</th>
+                      <th style="width: 38%;">ACCOMPLISHED TASKS / ACTIVITIES</th>
+                      <th style="width: 13%;">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let log of (selectedReport.report_details?.logs || [])">
+                      <td class="bold">{{ log.log_date }}</td>
+                      <td>{{ formatTime(log.time_in) }} — {{ log.time_out ? formatTime(log.time_out) : 'Ongoing' }}</td>
+                      <td class="bold text-blue">{{ formatHours(log.total_hours) }}</td>
+                      <td>{{ log.activity_notes || 'Internship duty accomplishments documented.' }}</td>
+                      <td>
+                        <span class="table-chip completed">{{ log.status === 'completed' ? 'Completed' : 'Ongoing' }}</span>
+                      </td>
+                    </tr>
+                    <tr *ngIf="!selectedReport.report_details?.logs || selectedReport.report_details?.logs.length === 0">
+                      <td colspan="5" class="table-empty-cell">
+                        Summary report submitted with <strong>{{ selectedReport.total_days }} recorded shift days</strong> totaling <strong>{{ formatHours(selectedReport.total_hours) }} rendered hours</strong>.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- SECTION 2: Tasks & Deliverables Overview Table (ONLY If Summary Report) -->
+            <div class="doc-section-block" *ngIf="selectedReport.report_type === 'Summary'">
+              <div class="section-title-strip">
+                <span class="sec-num">2.</span>
+                <h3 class="sec-title">Assigned Deliverables & Tasks Accomplishment</h3>
+                <span class="sec-badge">{{ selectedReport.report_details?.tasks?.length || 0 }} Tasks Monitored</span>
+              </div>
+
+              <div class="doc-table-wrap">
+                <table class="doc-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 25%;">TASK TITLE</th>
+                      <th style="width: 45%;">DESCRIPTION / SPECIFIC OBJECTIVES</th>
+                      <th style="width: 15%;">STATUS</th>
+                      <th style="width: 15%;">TARGET DUE DATE</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let t of (selectedReport.report_details?.tasks || [])">
+                      <td class="bold">{{ t.title }}</td>
+                      <td>{{ t.description || 'No specific instructions provided.' }}</td>
+                      <td>
+                        <span class="table-chip" [class.completed]="t.status === 'completed'" [class.pending]="t.status !== 'completed'">
+                          {{ t.status === 'completed' ? 'Completed' : (t.status | titlecase) }}
+                        </span>
+                      </td>
+                      <td>{{ t.deadline ? t.deadline : 'Open' }}</td>
+                    </tr>
+                    <tr *ngIf="!selectedReport.report_details?.tasks || selectedReport.report_details?.tasks.length === 0">
+                      <td colspan="4" class="table-empty-cell">
+                        All internship task milestones recorded and verified for this reporting cycle.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Document Signatures Box -->
+            <div class="doc-signatures-grid">
+              <div class="sig-card">
+                <div class="sig-placeholder-line"></div>
+                <span class="sig-name">{{ selectedReport.student_name }}</span>
+                <span class="sig-role">Student Trainee (Signature over Printed Name)</span>
+              </div>
+
+              <div class="sig-card">
+                <div class="sig-placeholder-line"></div>
+                <span class="sig-name">Industry OJT Supervisor</span>
+                <span class="sig-role">Company Supervisor (Signature over Printed Name)</span>
+              </div>
+
+              <div class="sig-card">
+                <div class="sig-placeholder-line verified-coord"></div>
+                <span class="sig-name bold">{{ selectedReport.reviewed_by || currentProfessor?.full_name || 'Academic Coordinator' }}</span>
+                <span class="sig-role">Academic OJT Coordinator / Department Chair</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Viewer Modal Footer Actions Bar -->
+        <div class="viewer-modal-footer">
+          <div class="footer-left">
+            <button class="btn-print-doc" (click)="printReportDocument()">
+              <ion-icon name="print-outline"></ion-icon>
+              <span>Print / Export PDF</span>
+            </button>
+          </div>
+
+          <div class="footer-right">
+            <button
+              class="btn-review-status"
+              *ngIf="selectedReport.status === 'submitted'"
+              [disabled]="isUpdatingReportStatus"
+              (click)="updateReportStatus('reviewed')"
+            >
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              <span>{{ isUpdatingReportStatus ? 'Updating...' : 'Mark as Reviewed' }}</span>
+            </button>
+
+            <button
+              class="btn-approve-status"
+              *ngIf="selectedReport.status === 'submitted' || selectedReport.status === 'reviewed'"
+              [disabled]="isUpdatingReportStatus"
+              (click)="updateReportStatus('approved')"
+            >
+              <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+              <span>{{ isUpdatingReportStatus ? 'Approving...' : 'Approve Report' }}</span>
+            </button>
+
+            <div class="approved-tag-banner" *ngIf="selectedReport.status === 'approved'">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <span>Officially Approved by {{ selectedReport.reviewed_by || 'Coordinator' }}</span>
+            </div>
+
+            <button class="btn-close-viewer" (click)="closeReportModal()">
+              Close
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
 
 <!-- SIDE DRAWER NAVIGATION -->
@@ -1545,7 +2080,7 @@
         <span>{{ (currentProfessor?.full_name || 'Prof').charAt(0) }}</span>
       </div>
       <div class="mini-details">
-        <h4>{{ currentProfessor?.full_name || 'Prof. Alexander Reyes' }}</h4>
+        <h4>{{ currentProfessor?.full_name || 'Academic Coordinator' }}</h4>
         <p>{{ currentProfessor?.role === 'admin' ? 'Lead Admin' : 'Coordinator' }} • {{ currentSection }}</p>
       </div>
     </div>
@@ -1578,6 +2113,12 @@
       <ion-icon name="checkbox-outline" class="nav-icon"></ion-icon>
       <span class="nav-label">Tasks Management</span>
       <span class="drawer-count-badge" *ngIf="stats.pending_tasks > 0">{{ stats.pending_tasks }}</span>
+    </button>
+
+    <button class="nav-item" [class.active]="selectedSegment === 'reports'" (click)="selectMenuItem('reports')">
+      <ion-icon name="document-text-outline" class="nav-icon"></ion-icon>
+      <span class="nav-label">Student Reports</span>
+      <span class="drawer-count-badge" *ngIf="reportStats.submitted > 0">{{ reportStats.submitted }} Pending</span>
     </button>
 
     <button class="nav-item" [class.active]="selectedSegment === 'profile'" (click)="selectMenuItem('profile')">

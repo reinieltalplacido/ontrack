@@ -45,6 +45,36 @@ export interface MonitoredStudent {
   adviser_name?: string;
 }
 
+export interface CoordinatorReportItem {
+  id: number;
+  user_id: number;
+  student_no: string;
+  student_name: string;
+  course_section: string;
+  school_campus?: string;
+  professor_id?: number | null;
+  adviser_name?: string;
+  adviser_email?: string;
+  report_title: string;
+  report_type: 'Time Log' | 'Summary';
+  report_date: string;
+  total_hours: number;
+  total_days: number;
+  status: 'submitted' | 'reviewed' | 'approved';
+  report_data?: string | null;
+  report_details?: any;
+  reviewed_at?: string | null;
+  reviewed_by?: string | null;
+  created_at?: string;
+  student_company?: string;
+  student_email?: string;
+  required_hours?: number;
+  target_date?: string;
+  file_url?: string;
+  file_name?: string;
+  notes?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -56,11 +86,18 @@ export class AdminService {
   public currentProfessor$ = this.currentProfessorSubject.asObservable();
 
   public get currentProfessorValue(): Professor | null {
+    const stored = this.getStoredProfessor();
+    if (stored) {
+      if (!this.currentProfessorSubject.value || this.currentProfessorSubject.value.id !== stored.id) {
+        this.currentProfessorSubject.next(stored);
+      }
+      return stored;
+    }
     return this.currentProfessorSubject.value;
   }
 
   public isAdminLoggedIn(): boolean {
-    return !!this.currentProfessorSubject.value;
+    return !!this.getStoredProfessor();
   }
 
   login(identifier: string, password: string): Observable<AdminAuthResponse> {
@@ -190,17 +227,62 @@ export class AdminService {
     );
   }
 
+  getSubmittedReports(filters?: {
+    professor_id?: number;
+    section?: string;
+    status?: string;
+    report_type?: string;
+    search?: string;
+  }): Observable<{ success: boolean; count: number; stats?: any; reports: CoordinatorReportItem[] }> {
+    let params = new HttpParams();
+    if (filters?.professor_id) params = params.set('professor_id', filters.professor_id.toString());
+    if (filters?.section) params = params.set('section', filters.section);
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.report_type) params = params.set('report_type', filters.report_type);
+    if (filters?.search) params = params.set('search', filters.search);
+
+    return this.http
+      .get<{ success: boolean; count: number; stats?: any; reports: CoordinatorReportItem[] }>(
+        `${this.apiUrl}/admin/reports/list.php`,
+        { params }
+      )
+      .pipe(catchError(() => of({ success: false, count: 0, reports: [] })));
+  }
+
+  reviewReport(
+    reportId: number,
+    status: 'reviewed' | 'approved' | 'submitted',
+    reviewedBy?: string
+  ): Observable<{ success: boolean; message: string }> {
+    const payload = {
+      report_id: reportId,
+      status: status,
+      reviewed_by: reviewedBy || 'OJT Coordinator',
+    };
+    return this.http
+      .post<{ success: boolean; message: string }>(
+        `${this.apiUrl}/admin/reports/review.php`,
+        payload
+      )
+      .pipe(
+        catchError((err) => {
+          const msg = err?.error?.message || 'Could not update report status.';
+          return of({ success: false, message: msg });
+        })
+      );
+  }
+
   logout(): void {
     localStorage.removeItem(ADMIN_SESSION_KEY);
     this.currentProfessorSubject.next(null);
   }
 
-  private setAdminSession(prof: Professor): void {
+  public setAdminSession(prof: Professor): void {
     localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(prof));
     this.currentProfessorSubject.next(prof);
   }
 
-  private getStoredProfessor(): Professor | null {
+  public getStoredProfessor(): Professor | null {
     try {
       const data = localStorage.getItem(ADMIN_SESSION_KEY);
       return data ? JSON.parse(data) : null;

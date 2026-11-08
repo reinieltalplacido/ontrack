@@ -15,7 +15,8 @@
 
 <ion-content 
   [fullscreen]="true"
-  class="ion-padding"
+  [scrollY]="false"
+  class="ion-padding landing-content"
   (touchstart)="onTouchStart($event)"
   (touchend)="onTouchEnd($event)">
 
@@ -225,7 +226,7 @@
         <ion-label>{{ slides[currentSlide].tag }}</ion-label>
       </ion-chip>
       <h2 class="slide-heading">{{ slides[currentSlide].title }}</h2>
-      <p class="slide-subtext">{{ slides[currentSlide].subtitle }}</p>
+      <p class="slide-subtext" *ngIf="slides[currentSlide].subtitle">{{ slides[currentSlide].subtitle }}</p>
     </div>
 
   </div>

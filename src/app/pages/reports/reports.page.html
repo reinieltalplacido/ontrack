@@ -1,15 +1,10 @@
-<ion-header class="ion-no-border mobile-top-bar">
+<ion-header class="ion-no-border mobile-header">
   <ion-toolbar class="header-toolbar">
-    <div class="header-content">
-      <div class="left-nav-group">
-        <button class="back-btn" (click)="goBack()" aria-label="Go back to Dashboard">
-          <ion-icon name="arrow-back-outline"></ion-icon>
-        </button>
-        <div class="brand-logo-wrap" (click)="selectMenuItem('dashboard')">
-          <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
-        </div>
+    <div class="toolbar-flex-row">
+      <div class="logo-box" (click)="selectMenuItem('dashboard')">
+        <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
       </div>
-      <button class="menu-icon-btn" (click)="openSideMenu()" aria-label="Open student menu">
+      <button class="header-menu-btn" (click)="openSideMenu()" aria-label="Open menu">
         <ion-icon name="menu-outline"></ion-icon>
       </button>
     </div>
@@ -26,19 +21,43 @@
       </div>
     }
 
-    <!-- Page Header (Exact Reference Layout) -->
+    <!-- Page Header with Action Button -->
     <header class="page-header">
-      <h1 class="page-title">Reports</h1>
-      <p class="page-subtitle">Generate, manage, and submit your OJT reports</p>
+      <div class="header-text-group">
+        <h1 class="page-title">Reports</h1>
+        <p class="page-subtitle">Generate, manage, and submit your OJT reports</p>
+      </div>
+      <button class="submit-report-header-btn" (click)="openSubmitModal()">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <span>Submit Report</span>
+      </button>
     </header>
 
-    <!-- Section 1: Generate Reports (Exact Reference Layout) -->
+    <!-- Section 1: Generate Reports -->
     <ion-card class="content-card generate-reports-section">
       <div class="section-title-wrap">
         <ion-icon name="copy-outline" class="title-icon"></ion-icon>
         <div class="title-meta">
           <h2 class="card-heading">Generate Reports</h2>
-          <p class="card-subheading">Select the type of report you want to generate</p>
+          <p class="card-subheading">Generate an official DTR or Accomplishment Summary for any period</p>
+        </div>
+      </div>
+
+      <!-- Scope / Coverage Selection Bar -->
+      <div class="week-picker-box">
+        <div class="week-picker-header">
+          <span class="picker-lbl">
+            <ion-icon name="calendar-outline"></ion-icon>
+            Report Period:
+          </span>
+        </div>
+        <div class="week-select-control">
+          <select [(ngModel)]="selectedWeekKey" (change)="onWeekSelected()">
+            <option value="all">All Logs (Cumulative DTR) • {{ formatHours(stats?.accumulated_hours || 0) }}</option>
+            <option *ngFor="let w of availableWeeks" [value]="w.startDate">
+              {{ w.label }} • {{ formatHours(w.totalHours) }} ({{ w.logsCount }} shifts)
+            </option>
+          </select>
         </div>
       </div>
 
@@ -48,8 +67,8 @@
           <div class="type-icon-circle">
             <ion-icon name="time-outline"></ion-icon>
           </div>
-          <h3 class="type-name">Time Log Report</h3>
-          <p class="type-desc">Detailed record of daily activities and hours completed</p>
+          <h3 class="type-name">Daily Time Record (DTR)</h3>
+          <p class="type-desc">Generate official DTR for {{ selectedWeekKey === 'all' ? 'All Attendance Logs' : selectedWeekLabel }}</p>
         </button>
 
         <!-- 2. Summary Report Card -->
@@ -57,43 +76,92 @@
           <div class="type-icon-circle">
             <ion-icon name="analytics-outline"></ion-icon>
           </div>
-          <h3 class="type-name">Summary Report</h3>
-          <p class="type-desc">Overview of progress, hours completed, and pending tasks</p>
+          <h3 class="type-name">Accomplishment Summary</h3>
+          <p class="type-desc">Progress overview and deliverables for {{ selectedWeekKey === 'all' ? 'All Logs & Tasks' : selectedWeekLabel }}</p>
         </button>
       </div>
     </ion-card>
 
-    <!-- Section 2: My Reports (Exact Reference Layout) -->
-    <ion-card class="content-card my-reports-section">
-      <h2 class="card-heading">My Reports</h2>
+    <!-- Section 2: Separated Reports (Submitted & Generated) -->
+    
+    <!-- Reports Mode Segment Switcher -->
+    <div class="reports-segment-tabs">
+      <button
+        type="button"
+        class="tab-pill"
+        [class.active]="reportTableMode === 'all'"
+        (click)="setTableMode('all')"
+      >
+        <span class="tab-label">All</span>
+        <span class="count-bubble">{{ filteredSubmittedReports.length + filteredGeneratedReports.length }}</span>
+      </button>
 
-      <!-- Filters & Search Toolbar -->
-      <div class="reports-filter-bar">
-        <div class="filter-controls-row">
-          <div class="custom-select-wrap">
-            <select [(ngModel)]="typeFilter" (change)="applyFilters()">
-              <option value="all">All Types</option>
-              <option value="Time Log">Time Log</option>
-              <option value="Summary">Summary</option>
-            </select>
-          </div>
+      <button
+        type="button"
+        class="tab-pill"
+        [class.active]="reportTableMode === 'submitted'"
+        (click)="setTableMode('submitted')"
+      >
+        <ion-icon name="cloud-done-outline"></ion-icon>
+        <span class="tab-label">Submitted</span>
+        <span class="count-bubble submitted">{{ filteredSubmittedReports.length }}</span>
+      </button>
 
-          <div class="custom-select-wrap">
-            <select [(ngModel)]="sortOrder" (change)="applyFilters()">
-              <option value="newest">Date (Newest First)</option>
-              <option value="oldest">Date (Oldest First)</option>
-            </select>
-          </div>
+      <button
+        type="button"
+        class="tab-pill"
+        [class.active]="reportTableMode === 'generated'"
+        (click)="setTableMode('generated')"
+      >
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span class="tab-label">Ready</span>
+        <span class="count-bubble ready">{{ filteredGeneratedReports.length }}</span>
+      </button>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="reports-filter-bar global-filter-bar">
+      <div class="filter-controls-row">
+        <div class="custom-select-wrap">
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="all">All Types</option>
+            <option value="Time Log">Time Log</option>
+            <option value="Summary">Summary</option>
+            <option value="Document">Document</option>
+          </select>
         </div>
 
-        <div class="search-input-box">
-          <input
-            type="text"
-            placeholder="Search reports..."
-            [(ngModel)]="searchQuery"
-            (input)="applyFilters()"
-          />
+        <div class="custom-select-wrap">
+          <select [(ngModel)]="sortOrder" (change)="applyFilters()">
+            <option value="newest">Date (Newest First)</option>
+            <option value="oldest">Date (Oldest First)</option>
+          </select>
         </div>
+      </div>
+
+      <div class="search-input-box">
+        <input
+          type="text"
+          placeholder="Search reports..."
+          [(ngModel)]="searchQuery"
+          (input)="applyFilters()"
+        />
+      </div>
+    </div>
+
+    <!-- TABLE 1: MY SUBMITTED REPORTS -->
+    <ion-card class="content-card my-reports-section submitted-reports-card" *ngIf="reportTableMode === 'all' || reportTableMode === 'submitted'">
+      <div class="table-section-title-wrap">
+        <div class="title-left">
+          <div class="table-icon-pill submitted-pill">
+            <ion-icon name="cloud-done-outline"></ion-icon>
+          </div>
+          <div>
+            <h2 class="card-heading">Submitted Reports</h2>
+            <p class="card-subheading">Reports officially submitted to your Academic Coordinator</p>
+          </div>
+        </div>
+        <span class="table-badge submitted-badge">{{ filteredSubmittedReports.length }} Submitted</span>
       </div>
 
       <!-- Reports Table -->
@@ -105,16 +173,22 @@
           <span class="col-head col-status">Status</span>
         </div>
 
-        @if (filteredReports.length === 0) {
+        @if (filteredSubmittedReports.length === 0) {
           <div class="table-empty-row">
-            <em>No reports found. Generate a report to get started.</em>
+            <ion-icon name="cloud-upload-outline" class="empty-icon"></ion-icon>
+            <p>No submitted reports found.</p>
+            <span>Use the <strong>Submit Report</strong> button above to submit your DTR or upload documents.</span>
           </div>
         } @else {
           <div class="table-body">
-            @for (rep of filteredReports; track rep.id) {
-              <div class="table-data-row" (click)="generateReport(rep.type)">
+            @for (rep of filteredSubmittedReports; track rep.id) {
+              <div class="table-data-row" (click)="openReport(rep)">
                 <div class="col-title">
                   <span class="rep-title">{{ rep.title }}</span>
+                  <span *ngIf="rep.fileUrl" class="file-attach-chip">
+                    <ion-icon name="document-attach-outline"></ion-icon>
+                    <span>{{ rep.fileName || 'Attached Document' }}</span>
+                  </span>
                 </div>
                 <div class="col-type">
                   <span class="type-badge">{{ rep.type }}</span>
@@ -123,7 +197,77 @@
                   <span class="rep-date">{{ formatDate(rep.date) }}</span>
                 </div>
                 <div class="col-status">
-                  <ion-badge color="success" class="status-pill ready">{{ rep.status }}</ion-badge>
+                  <span [class]="'status-pill ' + (rep.status ? rep.status.toLowerCase() : 'submitted')">
+                    {{ rep.status }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </ion-card>
+
+    <!-- TABLE 2: GENERATED REPORTS -->
+    <ion-card class="content-card my-reports-section generated-reports-card" *ngIf="reportTableMode === 'all' || reportTableMode === 'generated'">
+      <div class="table-section-title-wrap">
+        <div class="title-left">
+          <div class="table-icon-pill generated-pill">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <div>
+            <h2 class="card-heading">Generated Reports</h2>
+            <p class="card-subheading">Compiled DTR logs and summaries ready for preview, printing, or submission</p>
+          </div>
+        </div>
+        <span class="table-badge ready-badge">{{ filteredGeneratedReports.length }} Ready</span>
+      </div>
+
+      <!-- Reports Table -->
+      <div class="table-container">
+        <div class="table-header-row">
+          <span class="col-head col-title">Report Title</span>
+          <span class="col-head col-type">Type</span>
+          <span class="col-head col-date">Date</span>
+          <span class="col-head col-status">Status</span>
+          <span class="col-head col-action">Action</span>
+        </div>
+
+        @if (filteredGeneratedReports.length === 0) {
+          <div class="table-empty-row">
+            <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
+            <p>No generated reports available.</p>
+            <span>Select a period above and click <strong>Weekly Time Log (DTR)</strong> or <strong>Weekly Summary Report</strong> to generate one.</span>
+          </div>
+        } @else {
+          <div class="table-body">
+            @for (rep of filteredGeneratedReports; track rep.id) {
+              <div class="table-data-row" (click)="openReport(rep)">
+                <div class="col-title">
+                  <span class="rep-title">{{ rep.title }}</span>
+                  <span class="gen-meta-sub" *ngIf="rep.totalHours">
+                    {{ formatHours(rep.totalHours) }} • {{ rep.totalDays || 0 }} shift(s)
+                  </span>
+                </div>
+                <div class="col-type">
+                  <span class="type-badge">{{ rep.type }}</span>
+                </div>
+                <div class="col-date">
+                  <span class="rep-date">{{ formatDate(rep.date) }}</span>
+                </div>
+                <div class="col-status">
+                  <span class="status-pill ready">
+                    {{ rep.status || 'Ready' }}
+                  </span>
+                </div>
+                <div class="col-action" (click)="$event.stopPropagation()">
+                  <button type="button" class="action-preview-btn" (click)="openReport(rep)">
+                    <ion-icon name="eye-outline"></ion-icon>
+                    <span>View</span>
+                  </button>
+                  <button type="button" class="action-delete-btn" (click)="deleteGeneratedReport(rep, $event)" title="Remove draft">
+                    <ion-icon name="trash-outline"></ion-icon>
+                  </button>
                 </div>
               </div>
             }
@@ -187,7 +331,12 @@
         <div class="preview-header">
           <div class="header-left">
             <ion-icon name="document-text-outline" class="modal-icon"></ion-icon>
-            <h3>{{ activeReportType }} Report</h3>
+            <div class="modal-title-stack">
+              <h3>{{ activeReportTitle || (activeReportType + ' Report') }}</h3>
+              <span class="report-header-badge" [class]="activeReportStatus ? activeReportStatus.toLowerCase() : 'ready'">
+                {{ activeReportStatus === 'Approved' ? 'Approved by Coordinator' : (activeReportStatus === 'Reviewed' ? 'Reviewed by Coordinator' : (activeReportStatus === 'Submitted' ? 'Submitted to Coordinator' : 'Ready for Submission')) }}
+              </span>
+            </div>
           </div>
           <button class="modal-close-btn" (click)="closePreviewModal()" aria-label="Close preview">
             <ion-icon name="close-outline"></ion-icon>
@@ -204,8 +353,8 @@
                 <div class="header-branding">
                   <div class="header-titles">
                     <span class="univ-kicker">NUEVA ECIJA UNIVERSITY OF SCIENCE AND TECHNOLOGY</span>
-                    <h2 class="report-main-heading">OJT Summary Report</h2>
-                    <span class="report-sub-tag">Comprehensive Daily Attendance & Task Milestone Accomplishment Record</span>
+                    <h2 class="report-main-heading">{{ activeReportTitle || 'OJT Summary Report' }}</h2>
+                    <span class="report-sub-tag">{{ activeReportCoverage ? activeReportCoverage + ' • ' : '' }}Daily Attendance & Task Milestone Accomplishment Record</span>
                   </div>
                 </div>
                 <div class="header-meta-stamp">
@@ -234,8 +383,8 @@
                       <strong class="meta-val">{{ currentUser?.company_name || 'Innovate Tech Solutions Inc.' }}</strong>
                     </div>
                     <div class="meta-item">
-                      <span class="meta-label">Completed OJT Hours</span>
-                      <strong class="meta-val text-primary">{{ stats?.accumulated_hours || '0.0' }} hrs</strong>
+                      <span class="meta-label">Hours in this Report</span>
+                      <strong class="meta-val text-primary">{{ formatHours(activeReportTotalHours) }}</strong>
                     </div>
                   </div>
 
@@ -279,7 +428,7 @@
                   <div class="title-left">
                     <h3 class="section-title">1. Daily Time Record (DTR) History</h3>
                   </div>
-                  <span class="section-badge">{{ logs.length }} Shift Logs Recorded</span>
+                  <span class="section-badge">{{ activeReportLogs.length }} Shift Logs Recorded</span>
                 </div>
 
                 <div class="report-table-wrap">
@@ -294,7 +443,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @for (log of logs; track log.log_date) {
+                      @for (log of activeReportLogs; track log.log_date) {
                         <tr>
                           <td><strong>{{ formatDate(log.log_date) }}</strong></td>
                           <td>{{ formatShiftTime(log.time_in, log.time_out) }}</td>
@@ -307,9 +456,9 @@
                           </td>
                         </tr>
                       }
-                      @if (logs.length === 0) {
+                      @if (activeReportLogs.length === 0) {
                         <tr>
-                          <td colspan="5" class="table-empty-cell">No attendance records logged yet.</td>
+                          <td colspan="5" class="table-empty-cell">No attendance records logged for this selected reporting period.</td>
                         </tr>
                       }
                     </tbody>
@@ -394,7 +543,8 @@
               <div class="doc-header">
                 <h4>NUEVA ECIJA UNIVERSITY OF SCIENCE AND TECHNOLOGY</h4>
                 <p>Sumacab Campus, Cabanatuan City</p>
-                <strong class="doc-title">DAILY TIME RECORD (DTR) REPORT</strong>
+                <strong class="doc-title">{{ activeReportTitle || 'DAILY TIME RECORD (DTR) REPORT' }}</strong>
+                <p class="doc-coverage-sub" *ngIf="activeReportCoverage">Coverage: {{ activeReportCoverage }}</p>
               </div>
 
               <!-- Student & Agency Meta -->
@@ -404,7 +554,7 @@
                 <div><strong>Program:</strong> {{ currentUser?.course_section || 'BSIT' }}</div>
                 <div><strong>Assigned Agency:</strong> {{ currentUser?.company_name }}</div>
                 <div><strong>Adviser:</strong> {{ currentUser?.adviser_name }}</div>
-                <div><strong>Target Hours:</strong> {{ currentUser?.required_hours || 500 }} hrs</div>
+                <div><strong>Hours in this Report:</strong> {{ formatHours(activeReportTotalHours) }}</div>
               </div>
 
               <div class="doc-table-wrap">
@@ -419,7 +569,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (log of logs; track log.log_date) {
+                    @for (log of activeReportLogs; track log.log_date) {
                       <tr>
                         <td>{{ formatDate(log.log_date) }}</td>
                         <td>{{ formatTime(log.time_in) }}</td>
@@ -428,10 +578,10 @@
                         <td>{{ log.activity_notes || 'Duty accomplished' }}</td>
                       </tr>
                     }
-                    @if (logs.length === 0) {
+                    @if (activeReportLogs.length === 0) {
                       <tr>
                         <td colspan="5" style="text-align:center; padding: 12px; color: #64748b;">
-                          No past duty records logged yet.
+                          No attendance records logged for this selected week.
                         </td>
                       </tr>
                     }
@@ -454,6 +604,19 @@
           }
         </div>
 
+        <!-- Attached File Preview if report has an uploaded file -->
+        <div *ngIf="activeReportFileUrl" class="attached-file-preview-banner">
+          <ion-icon name="document-attach-outline" class="attach-doc-icon"></ion-icon>
+          <div class="banner-file-info">
+            <strong>{{ activeReportFileName || 'Attached Report Document' }}</strong>
+            <span *ngIf="activeReportNotes">{{ activeReportNotes }}</span>
+          </div>
+          <button type="button" class="open-file-btn" (click)="openAttachedFile(activeReportFileUrl)">
+            <ion-icon name="open-outline"></ion-icon>
+            <span>Open Document</span>
+          </button>
+        </div>
+
         <div class="preview-actions">
           <button class="print-btn" (click)="printReport()">
             <ion-icon name="print-outline"></ion-icon>
@@ -461,6 +624,179 @@
           </button>
           <button class="close-btn" (click)="closePreviewModal()">
             Close
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- SUBMIT REPORT MODAL (UNLIMITED SUBMISSIONS: FILE OR GENERATED REPORT) -->
+  <ion-modal [isOpen]="showSubmitModal" (didDismiss)="closeSubmitModal()" class="submit-report-modal">
+    <ng-template>
+      <div class="submit-modal-container">
+        <!-- Modal Header -->
+        <div class="submit-modal-header">
+          <div class="modal-title-stack">
+            <div class="title-with-icon">
+              <ion-icon name="cloud-upload-outline" class="modal-icon"></ion-icon>
+              <h3>Submit Report to Coordinator</h3>
+            </div>
+            <p class="modal-subtitle">Submit your generated DTR or upload an external report document</p>
+          </div>
+          <button class="modal-close-btn" (click)="closeSubmitModal()" aria-label="Close modal">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <!-- Modal Body Content -->
+        <div class="submit-modal-body">
+          
+          <!-- Source Selection Tabs -->
+          <div class="source-toggle-wrap">
+            <button
+              type="button"
+              class="source-tab-btn"
+              [class.active]="submitSource === 'generated'"
+              (click)="setSubmitSource('generated')"
+            >
+              <ion-icon name="document-text-outline"></ion-icon>
+              <span>Generated Report</span>
+            </button>
+            <button
+              type="button"
+              class="source-tab-btn"
+              [class.active]="submitSource === 'file'"
+              (click)="setSubmitSource('file')"
+            >
+              <ion-icon name="attach-outline"></ion-icon>
+              <span>Upload Document</span>
+            </button>
+          </div>
+
+          <!-- OPTION A: Generated Report Selection -->
+          <div *ngIf="submitSource === 'generated'" class="source-content-box">
+            <label class="field-label">Select Report Template / Type</label>
+            <div class="custom-select-wrap">
+              <select [(ngModel)]="submitSelectedReportType" (change)="onGeneratedTypeChange()">
+                <option value="Time Log">Daily Time Record (DTR) - Cumulative Logs</option>
+                <option value="Summary">OJT Accomplishment Summary Report</option>
+                <optgroup label="My Generated Reports" *ngIf="generatedReports.length > 0">
+                  <option *ngFor="let rep of generatedReports" [value]="rep.title">
+                    {{ rep.title }}
+                  </option>
+                </optgroup>
+                <optgroup label="Weekly DTR Options" *ngIf="availableWeeks.length > 0">
+                  <option *ngFor="let w of availableWeeks" [value]="'DTR - ' + w.label">
+                    DTR - {{ w.label }} ({{ formatHours(w.totalHours) }})
+                  </option>
+                </optgroup>
+              </select>
+            </div>
+
+            <!-- Stats Preview of selected generated report -->
+            <div class="generated-preview-card">
+              <div class="preview-stat-row">
+                <div class="stat-cell">
+                  <span class="stat-lbl">Accumulated Hours</span>
+                  <strong class="stat-val text-primary">{{ formatHours(getSubmitHours()) }}</strong>
+                </div>
+                <div class="stat-cell">
+                  <span class="stat-lbl">Total Days / Shifts</span>
+                  <strong class="stat-val">{{ getSubmitDays() }} Days</strong>
+                </div>
+                <div class="stat-cell">
+                  <span class="stat-lbl">Format</span>
+                  <strong class="stat-val text-primary">System Generated</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OPTION B: File Upload -->
+          <div *ngIf="submitSource === 'file'" class="source-content-box">
+            <label class="field-label">Upload Report File (PDF, DOC, DOCX, or Image)</label>
+            
+            <div class="file-drop-zone" *ngIf="!submitFileName" (click)="fileInput.click()">
+              <input
+                #fileInput
+                type="file"
+                style="display: none;"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                (change)="onFileSelected($event)"
+              />
+              <ion-icon name="cloud-upload-outline" class="upload-icon"></ion-icon>
+              <span class="drop-text">Tap to select or take a photo of your report</span>
+              <span class="drop-hint">Supports PDF, Word (.docx), Excel, or Image (Max 15MB)</span>
+            </div>
+
+            <!-- Selected File Badge -->
+            <div class="selected-file-card" *ngIf="submitFileName">
+              <div class="file-info-left">
+                <ion-icon [name]="isImageFile(submitFileName) ? 'image-outline' : 'document-attach-outline'" class="file-type-icon"></ion-icon>
+                <div class="file-text-meta">
+                  <strong class="file-name-text">{{ submitFileName }}</strong>
+                  <span class="file-size-text">{{ submitFileSize }}</span>
+                </div>
+              </div>
+              <button type="button" class="file-remove-btn" (click)="removeSelectedFile()" aria-label="Remove file">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="form-fields-group">
+            <div class="form-field">
+              <label class="field-label">Report Title *</label>
+              <input
+                type="text"
+                class="custom-input"
+                [(ngModel)]="submitReportTitle"
+                placeholder="e.g. DTR Time Log - Week 1 or Midterm Accomplishment Report"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Period / Coverage</label>
+              <input
+                type="text"
+                class="custom-input"
+                [(ngModel)]="submitReportPeriod"
+                placeholder="e.g. Complete Training Period or Nov 2 - Nov 8, 2026"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Remarks / Notes for Coordinator (Optional)</label>
+              <textarea
+                class="custom-textarea"
+                rows="3"
+                [(ngModel)]="submitReportNotes"
+                placeholder="Add any accomplishments, notes, or remarks for your coordinator..."
+              ></textarea>
+            </div>
+
+            <!-- Assigned Coordinator Display -->
+            <div class="coordinator-info-pill">
+              <ion-icon name="person-outline"></ion-icon>
+              <span>Submitting to: <strong>{{ currentUser?.adviser_name || 'Prof. Alexander Reyes' }}</strong> ({{ currentUser?.adviser_email || 'admin@neust.edu.ph' }})</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="submit-modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeSubmitModal()">Cancel</button>
+          <button
+            type="button"
+            class="btn-submit"
+            [disabled]="isSubmittingReport || !submitReportTitle.trim() || (submitSource === 'file' && !submitFileData)"
+            (click)="submitReportNow()"
+          >
+            <ion-spinner *ngIf="isSubmittingReport" name="crescent"></ion-spinner>
+            <ion-icon *ngIf="!isSubmittingReport" name="paper-plane-outline"></ion-icon>
+            <span>{{ isSubmittingReport ? 'Submitting Report...' : 'Submit to Coordinator' }}</span>
           </button>
         </div>
       </div>

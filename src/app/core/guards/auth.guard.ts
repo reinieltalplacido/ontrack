@@ -13,7 +13,9 @@ export const autoLoginGuard: CanActivateFn = () => {
     if (authService.isAdminLoggedIn()) {
       return router.parseUrl('/admin/dashboard');
     }
-    return router.parseUrl('/home');
+    if (authService.isLoggedIn()) {
+      return router.parseUrl('/home');
+    }
   }
 
   return true;

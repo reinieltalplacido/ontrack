@@ -75,5 +75,9 @@ Thumbs.db
 /blob-report/
 /playwright/.cache/
 
+# Android & Build Artifacts
+*.apk
+*.aab
+
 # Temporary scratch scripts
 scratch/

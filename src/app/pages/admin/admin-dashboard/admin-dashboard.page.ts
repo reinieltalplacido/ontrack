@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -67,8 +67,14 @@ import {
   lockClosedOutline,
   keyOutline,
   eyeOffOutline,
+  printOutline,
+  analyticsOutline,
+  copyOutline,
+  documentAttachOutline,
+  checkmarkDoneOutline,
+  openOutline,
 } from 'ionicons/icons';
-import { AdminService, AdminStats, MonitoredStudent } from '../../../core/services/admin.service';
+import { AdminService, AdminStats, MonitoredStudent, CoordinatorReportItem } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NativeService } from '../../../core/services/native.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -178,7 +184,7 @@ export interface AdminTaskItem {
     IonBadge,
   ],
 })
-export class AdminDashboardPage implements OnInit {
+export class AdminDashboardPage implements OnInit, OnDestroy {
   private adminService = inject(AdminService);
   private authService = inject(AuthService);
   private nativeService = inject(NativeService);
@@ -214,12 +220,31 @@ export class AdminDashboardPage implements OnInit {
   }
 
   // Active Segment
-  selectedSegment: 'overview' | 'students' | 'attendance' | 'tasks' | 'profile' = 'overview';
+  selectedSegment: 'overview' | 'students' | 'attendance' | 'tasks' | 'reports' | 'profile' = 'overview';
 
   // Loading States
   isLoadingStats = true;
   isLoadingStudents = false;
   isLoadingAttendance = false;
+  isLoadingReports = false;
+
+  // Reports Tab State
+  reports: CoordinatorReportItem[] = [];
+  filteredReports: CoordinatorReportItem[] = [];
+  reportSearchTerm = '';
+  reportTypeFilter: 'all' | 'Time Log' | 'Summary' = 'all';
+  reportStatusFilter: 'all' | 'submitted' | 'reviewed' | 'approved' = 'all';
+  selectedReport: CoordinatorReportItem | null = null;
+  isReportModalOpen = false;
+  isUpdatingReportStatus = false;
+  reportStats = {
+    total: 0,
+    time_log: 0,
+    summary: 0,
+    submitted: 0,
+    reviewed: 0,
+    approved: 0,
+  };
 
   // Overview Data
   stats: AdminStats = {
@@ -266,7 +291,7 @@ export class AdminDashboardPage implements OnInit {
   selectedStudent: any = null;
   studentDossierLogs: any[] = [];
   studentDossierTasks: any[] = [];
-  studentDossierTab: 'logs' | 'tasks' = 'logs';
+  studentDossierTab: 'logs' | 'tasks' | 'reports' = 'logs';
   studentDossierViewMode: 'weekly' | 'list' = 'weekly';
   dossierWeekGroups: DossierWeekGroup[] = [];
   isLoadingStudentDossier = false;
@@ -315,14 +340,61 @@ export class AdminDashboardPage implements OnInit {
   showToast = false;
   toastMessage = '';
 
+  // Realtime Sync Handlers for Reports
+  private adminReportsPollTimer: any = null;
+  private adminStorageEventListener = (event: StorageEvent) => {
+    if (event.key === 'ontrack_report_updated') {
+      this.loadReports();
+    }
+  };
+  private adminVisibilityListener = () => {
+    if (document.visibilityState === 'visible') {
+      this.loadReports();
+    }
+  };
+
+  startReportsRealtimeSync() {
+    this.stopReportsRealtimeSync();
+    window.addEventListener('storage', this.adminStorageEventListener);
+    document.addEventListener('visibilitychange', this.adminVisibilityListener);
+
+    // Live 4-second poll for cross-device & APK updates
+    this.adminReportsPollTimer = setInterval(() => {
+      if (this.selectedSegment === 'reports') {
+        this.loadReports();
+      }
+    }, 4000);
+  }
+
+  stopReportsRealtimeSync() {
+    if (this.adminReportsPollTimer) {
+      clearInterval(this.adminReportsPollTimer);
+      this.adminReportsPollTimer = null;
+    }
+    window.removeEventListener('storage', this.adminStorageEventListener);
+    document.removeEventListener('visibilitychange', this.adminVisibilityListener);
+  }
+
   constructor() {
-    addIcons({menuOutline,shieldCheckmarkOutline,calendarOutline,addOutline,peopleOutline,timeOutline,checkboxOutline,chevronForwardOutline,locationOutline,cameraOutline,hourglassOutline,searchOutline,closeOutline,chevronBackOutline,todayOutline,documentTextOutline,eyeOutline,flagOutline,reorderThreeOutline,clipboardOutline,schoolOutline,businessOutline,mailOutline,listOutline,checkmarkCircleOutline,checkmark,time,closeCircleOutline,calendarClearOutline,fingerPrintOutline,checkmarkCircle,personOutline,sendOutline,documentText,downloadOutline,checkmarkDoneCircleOutline,gridOutline,refreshOutline,logOutOutline,filterOutline,alertCircleOutline,sparklesOutline,arrowBackOutline,speedometerOutline,imageOutline,chevronDownOutline,chevronUpOutline,checkmarkOutline,lockClosedOutline,keyOutline,eyeOffOutline});
+    addIcons({menuOutline,shieldCheckmarkOutline,calendarOutline,addOutline,peopleOutline,timeOutline,checkboxOutline,chevronForwardOutline,locationOutline,cameraOutline,hourglassOutline,searchOutline,closeOutline,chevronBackOutline,todayOutline,documentTextOutline,eyeOutline,flagOutline,reorderThreeOutline,clipboardOutline,schoolOutline,businessOutline,mailOutline,listOutline,checkmarkCircleOutline,checkmark,time,closeCircleOutline,calendarClearOutline,fingerPrintOutline,checkmarkCircle,personOutline,sendOutline,documentText,downloadOutline,checkmarkDoneCircleOutline,gridOutline,refreshOutline,logOutOutline,filterOutline,alertCircleOutline,sparklesOutline,arrowBackOutline,speedometerOutline,imageOutline,chevronDownOutline,chevronUpOutline,checkmarkOutline,lockClosedOutline,keyOutline,eyeOffOutline,printOutline,analyticsOutline,copyOutline,documentAttachOutline,checkmarkDoneOutline,openOutline});
   }
 
   ngOnInit() {
     this.checkAuth();
     this.calculateWeek(0);
     this.loadAllData();
+    this.startReportsRealtimeSync();
+  }
+
+  ionViewWillEnter() {
+    this.checkAuth();
+    if (this.currentProfessor) {
+      this.loadAllData();
+    }
+  }
+
+  ngOnDestroy() {
+    this.stopReportsRealtimeSync();
   }
 
 
@@ -503,26 +575,19 @@ export class AdminDashboardPage implements OnInit {
   }
 
   checkAuth() {
-    const prof = this.adminService.currentProfessorValue;
+    const prof = this.adminService.currentProfessorValue || this.adminService.getStoredProfessor();
     if (prof) {
       this.currentProfessor = prof;
       if (prof.assigned_section) {
         this.currentSection = prof.assigned_section;
         this.newTask.section = prof.assigned_section;
       }
-    } else {
-      // Fallback demo professor so user can explore seamlessly
-      this.currentProfessor = {
-        id: 1,
-        employee_id: 'PROF-2026-001',
-        full_name: 'Prof. Alexander Reyes',
-        email: 'admin@neust.edu.ph',
-        department: 'College of Information and Communications Technology',
-        role: 'coordinator',
-        assigned_section: 'BSIT 4-A',
-        contact_number: '+63 917 123 4567',
-      };
+      return;
     }
+
+    // No coordinator session found — do not fabricate another professor
+    this.toastService.showError('Coordinator session expired. Please log in.');
+    this.router.navigate(['/login']);
   }
 
   loadAllData(event?: any) {
@@ -530,6 +595,7 @@ export class AdminDashboardPage implements OnInit {
     this.loadStudents();
     this.loadAttendanceLogs();
     this.loadTasks();
+    this.loadReports();
 
     if (event) {
       setTimeout(() => {
@@ -611,13 +677,13 @@ export class AdminDashboardPage implements OnInit {
     this.cdr.detectChanges();
   }
 
-  selectMenuItem(segment: 'overview' | 'students' | 'attendance' | 'tasks' | 'profile') {
+  selectMenuItem(segment: 'overview' | 'students' | 'attendance' | 'tasks' | 'reports' | 'profile') {
     this.selectedSegment = segment;
     this.closeSideMenu();
     this.switchSegment(segment);
   }
 
-  switchSegment(segment: 'overview' | 'students' | 'attendance' | 'tasks' | 'profile') {
+  switchSegment(segment: 'overview' | 'students' | 'attendance' | 'tasks' | 'reports' | 'profile') {
     this.selectedSegment = segment;
     this.nativeService.triggerHapticFeedback('medium');
     if (segment === 'students' && this.students.length === 0) {
@@ -626,6 +692,8 @@ export class AdminDashboardPage implements OnInit {
       this.loadAttendanceLogs();
     } else if (segment === 'tasks' && this.allTasks.length === 0) {
       this.loadTasks();
+    } else if (segment === 'reports') {
+      this.loadReports();
     }
     this.cdr.detectChanges();
   }
@@ -888,6 +956,18 @@ export class AdminDashboardPage implements OnInit {
     this.isStudentModalOpen = false;
     this.selectedStudent = null;
     this.cdr.detectChanges();
+  }
+
+  getStudentReportsCount(studentId: any): number {
+    if (!studentId) return 0;
+    const sId = Number(studentId);
+    return this.reports.filter((r) => r.user_id === sId).length;
+  }
+
+  getReportsForStudent(studentId: any): CoordinatorReportItem[] {
+    if (!studentId) return [];
+    const sId = Number(studentId);
+    return this.reports.filter((r) => r.user_id === sId);
   }
 
   loadTasks() {
@@ -1178,6 +1258,220 @@ export class AdminDashboardPage implements OnInit {
     });
   }
 
+  // ==========================================
+  // REPORTS METHODS (ACADEMIC COORDINATOR)
+  // ==========================================
+
+  loadReports() {
+    this.isLoadingReports = true;
+    this.adminService
+      .getSubmittedReports({
+        professor_id: this.currentProfessor?.id,
+        section: this.currentSection,
+      })
+      .subscribe({
+        next: (res) => {
+          this.isLoadingReports = false;
+          if (res && res.success && res.reports) {
+            this.reports = res.reports;
+            this.computeReportStats(res.stats);
+            this.applyReportFilters();
+          } else {
+            this.reports = [];
+            this.filteredReports = [];
+            this.computeReportStats();
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isLoadingReports = false;
+          this.reports = [];
+          this.filteredReports = [];
+          this.computeReportStats();
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  computeReportStats(serverStats?: any) {
+    if (serverStats) {
+      const total = Number(serverStats.total ?? serverStats.total_reports ?? this.reports.length);
+      const time_log = Number(serverStats.time_log ?? serverStats.time_log_count ?? this.reports.filter((r) => r.report_type === 'Time Log').length);
+      const summary = Number(serverStats.summary ?? serverStats.summary_count ?? this.reports.filter((r) => r.report_type === 'Summary').length);
+      const submitted = Number(serverStats.submitted ?? serverStats.pending_review ?? this.reports.filter((r) => r.status === 'submitted').length);
+      const reviewed = Number(serverStats.reviewed ?? this.reports.filter((r) => r.status === 'reviewed').length);
+      const approved = Number(serverStats.approved ?? serverStats.approved_count ?? this.reports.filter((r) => r.status === 'approved').length);
+      this.reportStats = { total, time_log, summary, submitted, reviewed, approved };
+    } else {
+      const total = this.reports.length;
+      const time_log = this.reports.filter((r) => r.report_type === 'Time Log').length;
+      const summary = this.reports.filter((r) => r.report_type === 'Summary').length;
+      const submitted = this.reports.filter((r) => r.status === 'submitted').length;
+      const reviewed = this.reports.filter((r) => r.status === 'reviewed').length;
+      const approved = this.reports.filter((r) => r.status === 'approved').length;
+      this.reportStats = { total, time_log, summary, submitted, reviewed, approved };
+    }
+  }
+
+  clickReportCardFilter(cardType: 'all' | 'Time Log' | 'Summary' | 'submitted') {
+    this.nativeService.triggerHapticFeedback('light');
+    if (cardType === 'all') {
+      this.reportTypeFilter = 'all';
+      this.reportStatusFilter = 'all';
+      this.reportSearchTerm = '';
+    } else if (cardType === 'Time Log') {
+      if (this.reportTypeFilter === 'Time Log' && this.reportStatusFilter === 'all') {
+        this.reportTypeFilter = 'all';
+      } else {
+        this.reportTypeFilter = 'Time Log';
+        this.reportStatusFilter = 'all';
+      }
+    } else if (cardType === 'Summary') {
+      if (this.reportTypeFilter === 'Summary' && this.reportStatusFilter === 'all') {
+        this.reportTypeFilter = 'all';
+      } else {
+        this.reportTypeFilter = 'Summary';
+        this.reportStatusFilter = 'all';
+      }
+    } else if (cardType === 'submitted') {
+      if (this.reportStatusFilter === 'submitted' && this.reportTypeFilter === 'all') {
+        this.reportStatusFilter = 'all';
+      } else {
+        this.reportStatusFilter = 'submitted';
+        this.reportTypeFilter = 'all';
+      }
+    }
+    this.applyReportFilters();
+  }
+
+  applyReportFilters() {
+    let list = [...this.reports];
+
+    if (this.reportTypeFilter !== 'all') {
+      list = list.filter((r) => r.report_type === this.reportTypeFilter);
+    }
+
+    if (this.reportStatusFilter !== 'all') {
+      list = list.filter((r) => r.status === this.reportStatusFilter);
+    }
+
+    if (this.reportSearchTerm.trim() !== '') {
+      const q = this.reportSearchTerm.toLowerCase().trim();
+      list = list.filter(
+        (r) =>
+          (r.student_name && r.student_name.toLowerCase().includes(q)) ||
+          (r.student_no && r.student_no.toLowerCase().includes(q)) ||
+          (r.report_title && r.report_title.toLowerCase().includes(q)) ||
+          (r.student_company && r.student_company.toLowerCase().includes(q))
+      );
+    }
+
+    this.filteredReports = list;
+    this.cdr.detectChanges();
+  }
+
+  setReportTypeFilter(type: 'all' | 'Time Log' | 'Summary') {
+    this.reportTypeFilter = type;
+    this.nativeService.triggerHapticFeedback('light');
+    this.applyReportFilters();
+  }
+
+  setReportStatusFilter(status: 'all' | 'submitted' | 'reviewed' | 'approved') {
+    this.reportStatusFilter = status;
+    this.nativeService.triggerHapticFeedback('light');
+    this.applyReportFilters();
+  }
+
+  openReportModal(report: CoordinatorReportItem) {
+    this.selectedReport = { ...report };
+    if (this.selectedReport.report_data && typeof this.selectedReport.report_data === 'string') {
+      try {
+        this.selectedReport.report_details = JSON.parse(this.selectedReport.report_data);
+      } catch (e) {
+        console.warn('Error parsing report data JSON', e);
+      }
+    }
+    this.isReportModalOpen = true;
+    this.nativeService.triggerHapticFeedback('medium');
+    this.cdr.detectChanges();
+  }
+
+  closeReportModal() {
+    this.isReportModalOpen = false;
+    this.selectedReport = null;
+    this.cdr.detectChanges();
+  }
+
+  updateReportStatus(status: 'reviewed' | 'approved') {
+    if (!this.selectedReport?.id) return;
+
+    this.isUpdatingReportStatus = true;
+    const reviewerName = this.currentProfessor?.full_name || 'Academic Coordinator';
+    const nowIso = new Date().toISOString();
+
+    this.adminService
+      .reviewReport(this.selectedReport.id, status, reviewerName)
+      .subscribe({
+        next: (res) => {
+          this.isUpdatingReportStatus = false;
+          if (res.success) {
+            this.nativeService.triggerHapticFeedback('success');
+            const actionLabel = status === 'approved' ? 'approved' : 'marked as reviewed';
+            this.toastService.showSuccess(`Report successfully ${actionLabel}!`);
+
+            // 1. Immediately update selectedReport in the modal (0ms UI update)
+            if (this.selectedReport) {
+              this.selectedReport.status = status;
+              this.selectedReport.reviewed_by = reviewerName;
+              this.selectedReport.reviewed_at = nowIso;
+            }
+
+            // 2. Immediately update the report in background arrays
+            const reportInList = this.reports.find((r) => r.id === this.selectedReport?.id);
+            if (reportInList) {
+              reportInList.status = status;
+              reportInList.reviewed_by = reviewerName;
+              reportInList.reviewed_at = nowIso;
+            }
+            this.computeReportStats();
+            this.applyReportFilters();
+
+            // 3. Instant cross-tab sync to student portal
+            try {
+              localStorage.setItem('ontrack_report_updated', Date.now().toString());
+            } catch (e) {}
+
+            // 4. Force immediate Change Detection for real-time rendering
+            this.cdr.detectChanges();
+
+            // Background reload to sync any additional server fields
+            this.loadReports();
+          } else {
+            this.nativeService.triggerHapticFeedback('warning');
+            this.toastService.showError(res.message || 'Could not update report status.');
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isUpdatingReportStatus = false;
+          this.nativeService.triggerHapticFeedback('warning');
+          this.toastService.showError('Network error updating report status.');
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  printReportDocument() {
+    window.print();
+  }
+
+  openAttachedFile(url?: string) {
+    if (!url) return;
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    const full = url.startsWith('http') ? url : `${base}/${url.replace(/^\/+/, '')}`;
+    window.open(full, '_blank');
+  }
+
   presentToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {
     this.toastMessage = message;
     this.showToast = true;
@@ -1187,12 +1481,15 @@ export class AdminDashboardPage implements OnInit {
   logout() {
     this.closeSideMenu();
     this.adminService.logout();
+    this.authService.logout();
     this.toastService.showInfo('Signed out of Coordinator Portal.');
     this.router.navigate(['/login']);
   }
 
   goToStudentPortal() {
     this.closeSideMenu();
+    this.adminService.logout();
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }

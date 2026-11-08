@@ -1,15 +1,10 @@
-<ion-header class="ion-no-border mobile-top-bar">
+<ion-header class="ion-no-border mobile-header">
   <ion-toolbar class="header-toolbar">
-    <div class="header-content">
-      <div class="left-nav-group">
-        <button class="back-btn" (click)="goBack()" aria-label="Go back to Dashboard">
-          <ion-icon name="arrow-back-outline"></ion-icon>
-        </button>
-        <div class="brand-logo-wrap" (click)="selectMenuItem('dashboard')">
-          <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
-        </div>
+    <div class="toolbar-flex-row">
+      <div class="logo-box" (click)="selectMenuItem('dashboard')">
+        <img src="assets/icon/ontrack-logo.png" alt="OnTrack" class="header-logo" />
       </div>
-      <button class="menu-icon-btn" (click)="openSideMenu()" aria-label="Open student menu">
+      <button class="header-menu-btn" (click)="openSideMenu()" aria-label="Open menu">
         <ion-icon name="menu-outline"></ion-icon>
       </button>
     </div>
@@ -38,9 +33,6 @@
         <p class="page-subtitle">Manage your OJT tasks and deadlines</p>
       </div>
       <div class="header-actions-group">
-        <button class="icon-action-btn" (click)="clearFilters()" aria-label="Reset filters" title="Reset filters">
-          <ion-icon name="refresh-outline"></ion-icon>
-        </button>
         <button class="new-task-btn" (click)="openNewTaskModal()">
           <ion-icon name="add-outline"></ion-icon>
           <span>New Task</span>
@@ -147,12 +139,8 @@
       } @else if (filteredTasks.length === 0) {
         <div class="empty-tasks-card">
           <ion-icon name="checkbox-outline"></ion-icon>
-          <h3>No tasks found</h3>
-          <p>You have no tasks matching the selected filters.</p>
-          <button class="add-first-task-btn" (click)="openNewTaskModal()">
-            <ion-icon name="add-outline"></ion-icon>
-            <span>Create a Task</span>
-          </button>
+          <h3>No tasks for now</h3>
+          <p>{{ tasks.length === 0 ? 'You currently have no tasks assigned.' : 'No tasks match your selected filters.' }}</p>
         </div>
       } @else {
         <div class="tasks-items-wrap">

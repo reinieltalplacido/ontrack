@@ -133,4 +133,33 @@ INSERT INTO `tasks` (`id`, `user_id`, `student_no`, `title`, `description`, `dea
 INSERT INTO `tasks` (`id`, `user_id`, `student_no`, `title`, `description`, `deadline`, `priority`, `status`, `proof_file`, `proof_url`, `verified_at`, `verified_by`, `created_at`) VALUES ('4', '1', '2026-0001', 'REST API Endpoint Integration', 'Connect Angular HttpClient with XAMPP PHP backend and verify CORS response headers.', '2026-11-18', 'high', 'completed', 'api_test_results.png', 'uploads/api_test_results.png', '2026-11-04 18:30:00', 'Prof. Alexander Reyes', '2026-11-04 21:18:47');
 INSERT INTO `tasks` (`id`, `user_id`, `student_no`, `title`, `description`, `deadline`, `priority`, `status`, `proof_file`, `proof_url`, `verified_at`, `verified_by`, `created_at`) VALUES ('5', '2', 'SUM2023-00980', 'Weekly DTR Summary Report', 'Compile rendered hours logs and signed supervisor certificate.', '2026-11-20', 'medium', 'pending', NULL, NULL, NULL, NULL, '2026-11-04 21:18:47');
 
+-- --------------------------------------------------------
+-- Table structure for table `submitted_reports`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `submitted_reports` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `student_no` VARCHAR(50) NOT NULL,
+  `student_name` VARCHAR(150) NOT NULL,
+  `course_section` VARCHAR(100) NOT NULL,
+  `school_campus` VARCHAR(150) DEFAULT 'NEUST - Sumacab Campus',
+  `professor_id` INT UNSIGNED NULL,
+  `adviser_name` VARCHAR(150) NULL,
+  `adviser_email` VARCHAR(100) NULL,
+  `report_title` VARCHAR(200) NOT NULL,
+  `report_type` ENUM('Time Log', 'Summary') NOT NULL DEFAULT 'Time Log',
+  `report_date` DATE NOT NULL,
+  `total_hours` DECIMAL(6,2) DEFAULT 0.00,
+  `total_days` INT DEFAULT 0,
+  `report_data` LONGTEXT NULL,
+  `status` ENUM('submitted', 'reviewed', 'approved') NOT NULL DEFAULT 'submitted',
+  `reviewed_at` DATETIME NULL,
+  `reviewed_by` VARCHAR(150) NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX (`user_id`),
+  INDEX (`student_no`),
+  INDEX (`professor_id`),
+  INDEX (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

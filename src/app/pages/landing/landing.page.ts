@@ -115,8 +115,8 @@ export class LandingPage {
     {
       tag: 'Campuses & Courses',
       badgeColor: 'tertiary',
-      title: 'For All Campuses & Programs',
-      subtitle: 'Supports all NEUST campuses—from Sumacab to satellite branches—and every college program with auto-linked coordinators.',
+      title: 'For All Campuses & Programs of NEUST',
+      subtitle: '',
     },
   ];
 

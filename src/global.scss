@@ -14,6 +14,56 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
+/* =======================================================
+   MOBILE TOP HEADER & SAFE AREA BREATHING ROOM
+   ======================================================= */
+ion-header,
+.mobile-top-bar,
+.mobile-header {
+  padding-top: max(var(--ion-safe-area-top, 0px), env(safe-area-inset-top, 0px));
+  background: #ffffff;
+
+  ion-toolbar,
+  .header-toolbar {
+    --background: #ffffff;
+    --min-height: 64px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .header-content,
+  .toolbar-flex-row {
+    padding: 6px 16px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .header-logo {
+      height: 30px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .back-btn,
+    .menu-icon-btn,
+    .header-menu-btn {
+      min-width: 42px;
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 1.55rem;
+    }
+  }
+}
+
+.top-nav {
+  padding-top: max(var(--ion-safe-area-top, 0px), env(safe-area-inset-top, 0px));
+  margin-top: 8px;
+}
+
 /* Modern Mobile Styling Defaults */
 * {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;

@@ -74,11 +74,10 @@ export class LoginPage {
       serverOutline,
     });
 
-    const savedIdentifier = this.authService.getSavedIdentifier();
     this.loginForm = this.fb.group({
-      email: [savedIdentifier || '2026-0001', [Validators.required]],
-      password: ['Password123!', [Validators.required]],
-      rememberMe: [true],
+      email: ['', [Validators.required]],
+      password: ['', [Validators.required]],
+      rememberMe: [false],
     });
   }
 
@@ -139,10 +138,12 @@ export class LoginPage {
       next: (res) => {
         this.isLoading = false;
         if (res.success) {
+          const isCoord = res.role === 'professor' || !!res.professor;
+          const name = res.professor?.full_name || 'Coordinator';
           this.toastService.showSuccess(
-            res.role === 'professor' || res.professor ? 'Welcome back, Coordinator!' : 'Signed in successfully!'
+            isCoord ? `Welcome back, ${name}!` : 'Signed in successfully!'
           );
-          if (res.role === 'professor' || res.professor) {
+          if (isCoord) {
             this.router.navigate(['/admin/dashboard']);
           } else {
             this.router.navigate(['/home']);
@@ -194,6 +195,9 @@ export class LoginPage {
           handler: (data) => {
             if (data.url && data.url.trim()) {
               let u = data.url.trim().replace(/\/+$/, '');
+              if (!u.includes('/ontrack-api')) {
+                u += '/ontrack-api';
+              }
               if (!u.endsWith('/api')) {
                 u += '/api';
               }

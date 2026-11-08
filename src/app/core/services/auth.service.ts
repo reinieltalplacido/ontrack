@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { User, AuthResponse, Professor } from '../../models/user.model';
+import { AdminService } from './admin.service';
 import { environment } from '../../../environments/environment';
 
 const SESSION_KEY = 'ontrack_user_session';
@@ -15,6 +16,7 @@ const SAVED_IDENTIFIER_KEY = 'ontrack_saved_identifier';
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private adminService = inject(AdminService);
   private apiUrl = environment.apiUrl;
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.getStoredUser());
@@ -51,18 +53,26 @@ export class AuthService {
           }
 
           if (res.role === 'professor' || res.professor) {
-            const prof = res.professor || {
-              id: res.user?.id,
-              employee_id: res.user?.student_id,
-              full_name: res.user?.full_name,
-              email: res.user?.email,
+            const prof: Professor = res.professor || {
+              id: Number(res.user?.id) || 1,
+              employee_id: res.user?.student_id || 'FACULTY',
+              full_name: res.user?.full_name || 'Academic Coordinator',
+              email: res.user?.email || 'coordinator@neust.edu.ph',
               department: 'College of Information and Communications Technology',
               role: 'coordinator',
-              assigned_section: res.user?.course_section || 'BSIT 4-A',
+              assigned_section: res.user?.course_section || 'BSIT 4-E',
             };
-            localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(prof));
-          }
-          if (res.user) {
+            // Clear student session so coordinator is never stored or treated as a student
+            localStorage.removeItem(SESSION_KEY);
+            this.currentUserSubject.next(null);
+
+            // Establish coordinator session immediately
+            this.adminService.setAdminSession(prof);
+          } else if (res.user) {
+            // Student login: clear coordinator session
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            this.adminService.logout();
+
             this.setSession(res.user);
           }
         }
@@ -191,15 +201,11 @@ export class AuthService {
     localStorage.removeItem(ADMIN_SESSION_KEY);
     localStorage.removeItem(KEEP_SIGNED_IN_KEY);
     this.currentUserSubject.next(null);
+    this.adminService.logout();
   }
 
   public isAdminLoggedIn(): boolean {
-    try {
-      const data = localStorage.getItem(ADMIN_SESSION_KEY);
-      return !!data;
-    } catch {
-      return false;
-    }
+    return this.adminService.isAdminLoggedIn();
   }
 
   public isKeepSignedIn(): boolean {
