@@ -35,26 +35,54 @@ try {
     $proofFile   = isset($input['proof_file']) ? trim((string)$input['proof_file']) : ($existing['proof_file'] ?? null);
 
     if (!empty($input['proof_image'])) {
-        $rawImage = $input['proof_image'];
-        if (str_starts_with($rawImage, 'data:image')) {
+        $rawData = $input['proof_image'];
+        $origName = !empty($input['proof_file_name']) ? preg_replace('/[^a-zA-Z0-9_\.-]/', '_', (string)$input['proof_file_name']) : '';
+
+        if (str_starts_with($rawData, 'data:')) {
             $uploadsDir = dirname(__DIR__, 2) . '/uploads/tasks';
             if (!is_dir($uploadsDir)) {
                 @mkdir($uploadsDir, 0777, true);
             }
-            $parts = explode(',', $rawImage, 2);
-            $imgData = base64_decode($parts[1] ?? '');
-            if ($imgData !== false) {
-                $fileName = 'task_proof_' . $taskId . '_' . time() . '.jpg';
-                file_put_contents($uploadsDir . '/' . $fileName, $imgData);
+
+            preg_match('/^data:([^;]+);base64,/', $rawData, $matches);
+            $mime = $matches[1] ?? '';
+            $parts = explode(',', $rawData, 2);
+            $fileData = base64_decode($parts[1] ?? '');
+
+            if ($fileData !== false) {
+                $ext = 'bin';
+                if ($origName && pathinfo($origName, PATHINFO_EXTENSION)) {
+                    $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+                } elseif ($mime) {
+                    $map = [
+                        'image/jpeg' => 'jpg',
+                        'image/jpg'  => 'jpg',
+                        'image/png'  => 'png',
+                        'image/gif'  => 'gif',
+                        'image/webp' => 'webp',
+                        'application/pdf' => 'pdf',
+                        'application/msword' => 'doc',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+                        'application/vnd.ms-excel' => 'xls',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+                        'application/zip' => 'zip',
+                        'application/x-zip-compressed' => 'zip',
+                        'text/plain' => 'txt',
+                    ];
+                    $ext = $map[$mime] ?? 'bin';
+                }
+
+                $fileName = 'task_proof_' . $taskId . '_' . time() . '.' . $ext;
+                file_put_contents($uploadsDir . '/' . $fileName, $fileData);
                 $proofUrl = 'uploads/tasks/' . $fileName;
-                $proofFile = $fileName;
+                $proofFile = $origName !== '' ? $origName : $fileName;
             } else {
-                $proofUrl = $rawImage;
-                $proofFile = 'task_proof_' . $taskId . '.jpg';
+                $proofUrl = $rawData;
+                $proofFile = $origName !== '' ? $origName : ('task_proof_' . $taskId . '.bin');
             }
         } else {
-            $proofUrl = $rawImage;
-            $proofFile = basename($rawImage);
+            $proofUrl = $rawData;
+            $proofFile = $origName !== '' ? $origName : basename($rawData);
         }
     } elseif ($proofUrl && empty($proofFile)) {
         $proofFile = basename($proofUrl);

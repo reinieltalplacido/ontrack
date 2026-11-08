@@ -58,6 +58,11 @@ import {
   arrowUndoOutline,
   chevronDownOutline,
   chevronUpOutline,
+  cloudUploadOutline,
+  documentAttachOutline,
+  openOutline,
+  closeCircleOutline,
+  downloadOutline,
 } from 'ionicons/icons';
 
 @Component({
@@ -108,6 +113,9 @@ export class TasksPage implements OnInit {
   newTaskDeadline = '';
   newTaskPriority: TaskPriority = 'medium';
   isPriorityDropdownOpen = false;
+  newTaskProofData: string | null = null;
+  newTaskProofFileName = '';
+  isNewTaskDoc = false;
 
   // Task Details Modal State
   showTaskDetailModal = false;
@@ -162,6 +170,11 @@ export class TasksPage implements OnInit {
       arrowUndoOutline,
       chevronDownOutline,
       chevronUpOutline,
+      cloudUploadOutline,
+      documentAttachOutline,
+      openOutline,
+      closeCircleOutline,
+      downloadOutline,
     });
   }
 
@@ -413,12 +426,37 @@ export class TasksPage implements OnInit {
     this.selectedTask = null;
   }
 
-  // Camera & Documentation Attachment
+  // Document & Proof helpers
+  isProofDocument(file: string | null | undefined): boolean {
+    if (!file) return false;
+    const clean = file.split('?')[0];
+    const ext = clean.split('.').pop()?.toLowerCase();
+    return ext === 'pdf' || ext === 'doc' || ext === 'docx' || ext === 'xls' || ext === 'xlsx' || ext === 'zip' || ext === 'txt';
+  }
+
+  getTaskProofFilename(task: TaskItem | null | undefined): string {
+    if (!task) return 'Attached Deliverable';
+    if (task.proof_file) return task.proof_file;
+    if (task.proof_url) {
+      const clean = task.proof_url.split('?')[0];
+      const parts = clean.split('/');
+      return parts[parts.length - 1] || 'Attached Deliverable';
+    }
+    return 'Attached Deliverable';
+  }
+
+  openDocument(url: string | null | undefined) {
+    if (!url) return;
+    const fullUrl = this.getProofImageUrl(url);
+    window.open(fullUrl, '_blank');
+  }
+
+  // Camera & Documentation Attachment for Task Detail
   async openCameraForDocumentation(task: TaskItem) {
     try {
       const photo = await this.nativeService.openCameraForTask();
       if (photo) {
-        this.saveTaskDocumentation(task, photo);
+        this.saveTaskDocumentation(task, photo, 'photo_proof_' + Date.now() + '.jpg');
       }
     } catch {
       this.showFeedback('Camera could not be opened. You can attach from files instead.', 'error');
@@ -429,7 +467,7 @@ export class TasksPage implements OnInit {
     try {
       const photo = await this.nativeService.captureTaskProof();
       if (photo) {
-        this.saveTaskDocumentation(task, photo);
+        this.saveTaskDocumentation(task, photo, 'photo_proof_' + Date.now() + '.jpg');
       }
     } catch {
       // Fallback handled via file input
@@ -442,34 +480,39 @@ export class TasksPage implements OnInit {
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = reader.result as string;
-        this.saveTaskDocumentation(task, base64);
+        this.saveTaskDocumentation(task, base64, file.name);
       };
       reader.readAsDataURL(file);
     }
   }
 
-  saveTaskDocumentation(task: TaskItem, photoData: string) {
+  saveTaskDocumentation(task: TaskItem, fileData: string, fileName?: string) {
     this.isSavingProof = true;
     this.cdr.detectChanges();
-    this.taskService.attachTaskProof(task.id, photoData).subscribe({
+    this.taskService.attachTaskProof(task.id, fileData, fileName).subscribe({
       next: (res) => {
         this.isSavingProof = false;
-        const savedUrl = res?.task?.proof_url || photoData;
+        const savedUrl = res?.task?.proof_url || fileData;
+        const savedFile = res?.task?.proof_file || fileName;
         task.proof_url = savedUrl;
+        task.proof_file = savedFile;
         if (this.selectedTask && this.selectedTask.id === task.id) {
           this.selectedTask.proof_url = savedUrl;
+          this.selectedTask.proof_file = savedFile;
         }
         this.nativeService.triggerHapticFeedback('success');
-        this.showFeedback('Documentation photo attached successfully!', 'success');
+        this.showFeedback('Deliverable proof attached successfully!', 'success');
         this.cdr.detectChanges();
       },
       error: () => {
         this.isSavingProof = false;
-        task.proof_url = photoData;
+        task.proof_url = fileData;
+        task.proof_file = fileName;
         if (this.selectedTask && this.selectedTask.id === task.id) {
-          this.selectedTask.proof_url = photoData;
+          this.selectedTask.proof_url = fileData;
+          this.selectedTask.proof_file = fileName;
         }
-        this.showFeedback('Documentation photo saved locally.', 'success');
+        this.showFeedback('Deliverable proof saved locally.', 'success');
         this.cdr.detectChanges();
       },
     });
@@ -478,22 +521,60 @@ export class TasksPage implements OnInit {
   removeDocumentation(task: TaskItem, event?: Event) {
     if (event) event.stopPropagation();
     task.proof_url = null;
+    task.proof_file = null;
     if (this.selectedTask && this.selectedTask.id === task.id) {
       this.selectedTask.proof_url = null;
+      this.selectedTask.proof_file = null;
     }
     this.taskService.updateTaskStatus(task.id, task.status, '').subscribe({
       next: () => {
-        this.showFeedback('Documentation photo removed.', 'success');
+        this.showFeedback('Documentation removed.', 'success');
       },
       error: () => {
-        this.showFeedback('Documentation photo removed.', 'success');
+        this.showFeedback('Documentation removed.', 'success');
       },
     });
   }
 
+  // Camera & File Attachment for NEW Task Form
+  async openCameraForNewTask() {
+    try {
+      const photo = await this.nativeService.openCameraForTask();
+      if (photo) {
+        this.newTaskProofData = photo;
+        this.newTaskProofFileName = 'photo_proof_' + Date.now() + '.jpg';
+        this.isNewTaskDoc = false;
+        this.cdr.detectChanges();
+      }
+    } catch {
+      this.showFeedback('Camera could not be opened.', 'error');
+    }
+  }
+
+  onNewTaskFileSelected(event: any) {
+    const file = event.target?.files?.[0];
+    if (file) {
+      this.newTaskProofFileName = file.name;
+      this.isNewTaskDoc = this.isProofDocument(file.name);
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.newTaskProofData = reader.result as string;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  clearNewTaskProof() {
+    this.newTaskProofData = null;
+    this.newTaskProofFileName = '';
+    this.isNewTaskDoc = false;
+    this.cdr.detectChanges();
+  }
+
   getProofImageUrl(proofUrl?: string | null): string {
     if (!proofUrl) return '';
-    if (proofUrl.startsWith('data:image') || proofUrl.startsWith('http://') || proofUrl.startsWith('https://')) {
+    if (proofUrl.startsWith('data:') || proofUrl.startsWith('http://') || proofUrl.startsWith('https://')) {
       return proofUrl;
     }
     const baseUrl = environment.apiUrl.replace(/\/api$/, '');
@@ -547,6 +628,7 @@ export class TasksPage implements OnInit {
   closeNewTaskModal() {
     this.showNewTaskModal = false;
     this.isPriorityDropdownOpen = false;
+    this.clearNewTaskProof();
     this.cdr.detectChanges();
   }
 
@@ -604,6 +686,8 @@ export class TasksPage implements OnInit {
       description: this.newTaskDescription.trim(),
       deadline: this.newTaskDeadline,
       priority: this.newTaskPriority,
+      proof_image: this.newTaskProofData || undefined,
+      proof_file_name: this.newTaskProofFileName || undefined,
     };
 
     this.taskService.createTask(payload).subscribe({
@@ -617,6 +701,7 @@ export class TasksPage implements OnInit {
           this.newTaskDescription = '';
           this.newTaskDeadline = '';
           this.newTaskPriority = 'medium';
+          this.clearNewTaskProof();
           this.nativeService.triggerHapticFeedback('success');
           this.showFeedback('Task added successfully!', 'success');
         } else {

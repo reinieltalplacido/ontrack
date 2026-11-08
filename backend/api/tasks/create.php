@@ -37,17 +37,68 @@ try {
     $sId = $student ? (int)$student['id'] : ($userId ?? 1);
     $sNo = $student ? $student['student_no'] : ($studentNo !== '' ? $studentNo : '2026-0001');
 
+    $proofUrl = null;
+    $proofFile = null;
+
+    if (!empty($input['proof_image'])) {
+        $rawData = $input['proof_image'];
+        $origName = !empty($input['proof_file_name']) ? preg_replace('/[^a-zA-Z0-9_\.-]/', '_', (string)$input['proof_file_name']) : '';
+
+        if (str_starts_with($rawData, 'data:')) {
+            $uploadsDir = dirname(__DIR__, 2) . '/uploads/tasks';
+            if (!is_dir($uploadsDir)) {
+                @mkdir($uploadsDir, 0777, true);
+            }
+
+            preg_match('/^data:([^;]+);base64,/', $rawData, $matches);
+            $mime = $matches[1] ?? '';
+            $parts = explode(',', $rawData, 2);
+            $fileData = base64_decode($parts[1] ?? '');
+
+            if ($fileData !== false) {
+                $ext = 'bin';
+                if ($origName && pathinfo($origName, PATHINFO_EXTENSION)) {
+                    $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+                } elseif ($mime) {
+                    $map = [
+                        'image/jpeg' => 'jpg',
+                        'image/jpg'  => 'jpg',
+                        'image/png'  => 'png',
+                        'image/gif'  => 'gif',
+                        'image/webp' => 'webp',
+                        'application/pdf' => 'pdf',
+                        'application/msword' => 'doc',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+                        'application/vnd.ms-excel' => 'xls',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+                        'application/zip' => 'zip',
+                        'application/x-zip-compressed' => 'zip',
+                        'text/plain' => 'txt',
+                    ];
+                    $ext = $map[$mime] ?? 'bin';
+                }
+
+                $fileName = 'task_proof_new_' . time() . '_' . mt_rand(100, 999) . '.' . $ext;
+                file_put_contents($uploadsDir . '/' . $fileName, $fileData);
+                $proofUrl = 'uploads/tasks/' . $fileName;
+                $proofFile = $origName !== '' ? $origName : $fileName;
+            }
+        }
+    }
+
     $ins = $pdo->prepare(
-        "INSERT INTO tasks (user_id, student_no, title, description, deadline, priority, status)
-         VALUES (:uid, :sno, :title, :desc, :deadline, :priority, 'pending')"
+        "INSERT INTO tasks (user_id, student_no, title, description, deadline, priority, status, proof_url, proof_file)
+         VALUES (:uid, :sno, :title, :desc, :deadline, :priority, 'pending', :proof_url, :proof_file)"
     );
     $ins->execute([
-        'uid'      => $sId,
-        'sno'      => $sNo,
-        'title'    => $title,
-        'desc'     => $description !== '' ? $description : null,
-        'deadline' => $deadline,
-        'priority' => $priority,
+        'uid'        => $sId,
+        'sno'        => $sNo,
+        'title'      => $title,
+        'desc'       => $description !== '' ? $description : null,
+        'deadline'   => $deadline,
+        'priority'   => $priority,
+        'proof_url'  => $proofUrl,
+        'proof_file' => $proofFile,
     ]);
 
     $newId = (int)$pdo->lastInsertId();

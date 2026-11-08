@@ -415,6 +415,48 @@
             </div>
           </div>
 
+          <!-- Attach Deliverable / Proof (Optional) -->
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-text">Attach Deliverable / Proof File <span class="optional">(Optional)</span></span>
+            </label>
+            <div class="new-task-file-box" *ngIf="!newTaskProofData">
+              <div class="file-pick-row">
+                <button type="button" class="btn-pick-camera" (click)="openCameraForNewTask()">
+                  <ion-icon name="camera-outline"></ion-icon>
+                  <span>Take Photo</span>
+                </button>
+                <button type="button" class="btn-pick-file" (click)="newTaskFileInput.click()">
+                  <ion-icon name="cloud-upload-outline"></ion-icon>
+                  <span>Upload File</span>
+                </button>
+              </div>
+              <span class="file-hint-text">Supported: JPG, PNG, PDF, Word, ZIP (Max 15MB)</span>
+            </div>
+
+            <!-- Attached File Preview in New Task Form -->
+            <div class="new-task-attached-preview" *ngIf="newTaskProofData">
+              <div class="preview-item-left">
+                <ion-icon [name]="isNewTaskDoc ? 'document-text-outline' : 'image-outline'"></ion-icon>
+                <div class="preview-item-text">
+                  <span class="p-name">{{ newTaskProofFileName || 'Attached Deliverable' }}</span>
+                  <span class="p-status">Ready to attach upon creation</span>
+                </div>
+              </div>
+              <button type="button" class="btn-remove-new-proof" (click)="clearNewTaskProof()" aria-label="Remove attached file">
+                <ion-icon name="close-circle-outline"></ion-icon>
+              </button>
+            </div>
+
+            <input
+              type="file"
+              #newTaskFileInput
+              accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.zip,.txt"
+              style="display: none;"
+              (change)="onNewTaskFileSelected($event)"
+            />
+          </div>
+
           <!-- Action Buttons -->
           <div class="modal-actions-col">
             <button
@@ -493,17 +535,18 @@
           <div class="detail-section documentation-box">
             <div class="doc-box-header">
               <div class="doc-box-title">
-                <ion-icon name="camera-outline"></ion-icon>
-                <span>Photo Documentation / Proof</span>
+                <ion-icon name="document-attach-outline"></ion-icon>
+                <span>Proof & Deliverable Documentation</span>
               </div>
               <span class="doc-count-pill" [class.has-file]="!!selectedTask.proof_url">
-                {{ selectedTask.proof_url ? '1 Photo Attached' : 'No Photo' }}
+                {{ selectedTask.proof_url ? (isProofDocument(selectedTask.proof_file || selectedTask.proof_url) ? '1 Document Attached' : '1 Photo Attached') : 'No Deliverable' }}
               </span>
             </div>
 
-            <!-- If proof photo exists -->
+            <!-- If proof photo or document exists -->
             <div class="doc-preview-card" *ngIf="selectedTask.proof_url">
-              <div class="preview-img-shell" (click)="viewFullImage(getProofImageUrl(selectedTask.proof_url))">
+              <!-- When it's an Image -->
+              <div class="preview-img-shell" *ngIf="!isProofDocument(selectedTask.proof_file || selectedTask.proof_url)" (click)="viewFullImage(getProofImageUrl(selectedTask.proof_url))">
                 <img [src]="getProofImageUrl(selectedTask.proof_url)" alt="Attached Documentation" class="doc-img" />
                 <div class="expand-badge">
                   <ion-icon name="expand-outline"></ion-icon>
@@ -511,14 +554,29 @@
                 </div>
               </div>
 
+              <!-- When it's a Document (PDF, Word, Excel, ZIP, etc.) -->
+              <div class="doc-file-shell" *ngIf="isProofDocument(selectedTask.proof_file || selectedTask.proof_url)">
+                <div class="file-icon-box">
+                  <ion-icon name="document-text-outline"></ion-icon>
+                </div>
+                <div class="file-details-box">
+                  <span class="file-name-text">{{ getTaskProofFilename(selectedTask) }}</span>
+                  <span class="file-type-pill">Document Deliverable</span>
+                </div>
+                <button type="button" class="file-open-btn" (click)="openDocument(selectedTask.proof_url)">
+                  <ion-icon name="open-outline"></ion-icon>
+                  <span>Open File</span>
+                </button>
+              </div>
+
               <div class="doc-actions-toolbar">
                 <button type="button" class="btn-retake-camera" (click)="openCameraForDocumentation(selectedTask)">
                   <ion-icon name="camera-outline"></ion-icon>
-                  <span>Retake Photo</span>
+                  <span>Take Photo</span>
                 </button>
                 <button type="button" class="btn-replace-gallery" (click)="fileInputDetail.click()">
-                  <ion-icon name="image-outline"></ion-icon>
-                  <span>Choose File</span>
+                  <ion-icon name="cloud-upload-outline"></ion-icon>
+                  <span>Upload File</span>
                 </button>
                 <button type="button" class="btn-delete-doc" (click)="removeDocumentation(selectedTask, $event)" title="Delete proof">
                   <ion-icon name="trash-outline"></ion-icon>
@@ -526,31 +584,31 @@
               </div>
             </div>
 
-            <!-- If no proof photo yet -->
+            <!-- If no proof yet -->
             <div class="empty-doc-upload-box" *ngIf="!selectedTask.proof_url">
               <div class="upload-icon-circle">
-                <ion-icon name="camera-outline"></ion-icon>
+                <ion-icon name="cloud-upload-outline"></ion-icon>
               </div>
-              <p class="upload-title">Capture or Attach Proof of Work</p>
-              <p class="upload-sub">Take a photo using your camera or choose an image file for task accomplishment documentation.</p>
+              <p class="upload-title">Capture or Upload Deliverable</p>
+              <p class="upload-sub">Take a photo using your camera or upload files (Images, PDF, Word, Spreadsheets, ZIP) as proof of accomplishment.</p>
 
               <div class="upload-buttons-group">
                 <button type="button" class="btn-open-camera" (click)="openCameraForDocumentation(selectedTask)">
                   <ion-icon name="camera-outline"></ion-icon>
-                  <span>Open Camera</span>
+                  <span>Take Photo</span>
                 </button>
                 <button type="button" class="btn-choose-file" (click)="fileInputDetail.click()">
-                  <ion-icon name="attach-outline"></ion-icon>
-                  <span>Attach from Files</span>
+                  <ion-icon name="cloud-upload-outline"></ion-icon>
+                  <span>Upload File</span>
                 </button>
               </div>
             </div>
 
-            <!-- Hidden file input for web fallback -->
+            <!-- Hidden file input for web fallback (all files) -->
             <input 
               type="file" 
               #fileInputDetail 
-              accept="image/*" 
+              accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.zip,.txt" 
               style="display: none;" 
               (change)="onFileSelected($event, selectedTask)" 
             />

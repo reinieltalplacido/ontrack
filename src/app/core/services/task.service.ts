@@ -24,6 +24,8 @@ export class TaskService {
     description?: string;
     deadline?: string;
     priority?: string;
+    proof_image?: string;
+    proof_file_name?: string;
   }): Observable<{ success: boolean; message: string; task?: TaskItem }> {
     return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
       `${this.apiUrl}/tasks/create.php`,
@@ -34,11 +36,15 @@ export class TaskService {
   updateTaskStatus(
     taskId: number,
     status: 'pending' | 'in_progress' | 'completed',
-    proofImage?: string | null
+    proofImage?: string | null,
+    proofFileName?: string | null
   ): Observable<{ success: boolean; message: string; task?: TaskItem }> {
     const payload: any = { task_id: taskId, status };
     if (proofImage) {
       payload.proof_image = proofImage;
+    }
+    if (proofFileName) {
+      payload.proof_file_name = proofFileName;
     }
     return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
       `${this.apiUrl}/tasks/update.php`,
@@ -48,11 +54,16 @@ export class TaskService {
 
   attachTaskProof(
     taskId: number,
-    proofImage: string
+    proofImage: string,
+    proofFileName?: string
   ): Observable<{ success: boolean; message: string; task?: TaskItem }> {
+    const payload: any = { task_id: taskId, proof_image: proofImage };
+    if (proofFileName) {
+      payload.proof_file_name = proofFileName;
+    }
     return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
       `${this.apiUrl}/tasks/update.php`,
-      { task_id: taskId, proof_image: proofImage }
+      payload
     );
   }
 
