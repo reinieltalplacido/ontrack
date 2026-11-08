@@ -137,6 +137,7 @@ export class ReportsPage implements OnInit {
     this.isSideMenuOpen = false;
     this.currentUser = this.authService.currentUserValue || this.currentUser;
     this.loadData();
+    this.cdr.detectChanges();
   }
 
   ngOnInit() {
@@ -222,6 +223,7 @@ export class ReportsPage implements OnInit {
   generateReport(type: 'Time Log' | 'Summary') {
     this.isGenerating = true;
     this.activeReportType = type;
+    this.cdr.detectChanges();
 
     setTimeout(() => {
       this.isGenerating = false;
@@ -246,11 +248,13 @@ export class ReportsPage implements OnInit {
       }
 
       this.showFeedback(`${type} Report generated successfully!`, 'success');
+      this.cdr.detectChanges();
     }, 400);
   }
 
   closePreviewModal() {
     this.showPreviewModal = false;
+    this.cdr.detectChanges();
   }
 
   printReport() {
@@ -276,6 +280,7 @@ export class ReportsPage implements OnInit {
     }
 
     this.filteredReports = list;
+    this.cdr.detectChanges();
   }
 
   goBack() {
@@ -285,10 +290,12 @@ export class ReportsPage implements OnInit {
   // Side Drawer navigation
   openSideMenu() {
     this.isSideMenuOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeSideMenu() {
     this.isSideMenuOpen = false;
+    this.cdr.detectChanges();
   }
 
   selectMenuItem(item: string) {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import {
   IonSpinner,
   IonCard,
   IonBadge,
+  IonModal,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -36,6 +37,10 @@ import {
   createOutline,
   locationOutline,
   callOutline,
+  keyOutline,
+  eyeOutline,
+  eyeOffOutline,
+  informationCircleOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { AttendanceService } from '../../core/services/attendance.service';
@@ -60,6 +65,7 @@ import { formatHours } from '../../core/utils/format.util';
     IonSpinner,
     IonCard,
     IonBadge,
+    IonModal,
   ],
 })
 export class ProfilePage implements OnInit {
@@ -68,6 +74,7 @@ export class ProfilePage implements OnInit {
   private nativeService = inject(NativeService);
   private router = inject(Router);
   private toastService = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
 
   currentUser: User | null = null;
   stats: DashboardStats | null = null;
@@ -75,6 +82,52 @@ export class ProfilePage implements OnInit {
   isLoading = false;
   isSaving = false;
   isEditMode = false;
+
+  get remainingHours(): number {
+    if (this.stats && typeof this.stats.remaining_hours === 'number' && this.stats.remaining_hours > 0) {
+      return this.stats.remaining_hours;
+    }
+    const req = this.currentUser?.required_hours || 500;
+    const acc = this.stats?.accumulated_hours || 0;
+    return Math.max(0, req - acc);
+  }
+
+  get completionPercent(): number {
+    if (this.stats && typeof this.stats.completion_percent === 'number') {
+      return this.stats.completion_percent;
+    }
+    const req = this.currentUser?.required_hours || 500;
+    const acc = this.stats?.accumulated_hours || 0;
+    if (req <= 0) return 0;
+    return Math.min(100, Math.round((acc / req) * 100));
+  }
+
+  /**
+   * Current local date in YYYY-MM-DD format
+   */
+  get todayStr(): string {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  /**
+   * If start_date is today or in the past, OJT has already started -> locked and cannot be edited.
+   */
+  get isStartDateLocked(): boolean {
+    const sDate = this.currentUser?.start_date;
+    if (!sDate) return false;
+    return sDate <= this.todayStr;
+  }
+
+  /**
+   * Minimum selectable start date when editing (future dates only, no backdates in the past).
+   */
+  get minStartDate(): string {
+    return this.todayStr;
+  }
 
   // Form Fields
   fullName = '';
@@ -125,7 +178,95 @@ export class ProfilePage implements OnInit {
       createOutline,
       locationOutline,
       callOutline,
+      keyOutline,
+      eyeOutline,
+      eyeOffOutline,
+      informationCircleOutline,
     });
+  }
+
+  // Change Password Modal State
+  isPasswordModalOpen = false;
+  currentPasswordInput = '';
+  newPasswordInput = '';
+  confirmPasswordInput = '';
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+  isChangingPassword = false;
+  passwordError = '';
+
+  openPasswordModal() {
+    this.isPasswordModalOpen = true;
+    this.currentPasswordInput = '';
+    this.newPasswordInput = '';
+    this.confirmPasswordInput = '';
+    this.passwordError = '';
+    this.showCurrentPassword = false;
+    this.showNewPassword = false;
+    this.showConfirmPassword = false;
+    this.cdr.detectChanges();
+  }
+
+  closePasswordModal() {
+    this.isPasswordModalOpen = false;
+    this.passwordError = '';
+    this.cdr.detectChanges();
+  }
+
+  submitChangePassword() {
+    this.passwordError = '';
+
+    if (!this.newPasswordInput.trim()) {
+      this.passwordError = 'Please enter a new password.';
+      return;
+    }
+
+    if (this.newPasswordInput.trim().length < 6) {
+      this.passwordError = 'New password must be at least 6 characters.';
+      return;
+    }
+
+    if (this.newPasswordInput !== this.confirmPasswordInput) {
+      this.passwordError = 'New password and confirm password do not match.';
+      return;
+    }
+
+    if (!this.currentUser?.id) {
+      this.passwordError = 'Student session not found. Please sign in again.';
+      return;
+    }
+
+    this.isChangingPassword = true;
+    this.cdr.detectChanges();
+    this.authService
+      .changePassword({
+        user_id: this.currentUser.id,
+        role: 'student',
+        current_password: this.currentPasswordInput,
+        new_password: this.newPasswordInput.trim(),
+        confirm_password: this.confirmPasswordInput.trim(),
+      })
+      .subscribe({
+        next: (res) => {
+          this.isChangingPassword = false;
+          if (res.success) {
+            this.closePasswordModal();
+            this.toastService.showSuccess('Password updated successfully!');
+            this.showFeedback('Your password has been changed successfully.', 'success');
+          } else {
+            this.passwordError = res.message || 'Unable to update password.';
+            this.toastService.showError(this.passwordError);
+          }
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isChangingPassword = false;
+          this.passwordError = err?.error?.message || 'Server error while updating password.';
+          this.toastService.showError(this.passwordError);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   ionViewWillEnter() {
@@ -134,6 +275,7 @@ export class ProfilePage implements OnInit {
     this.currentUser = this.authService.currentUserValue || this.currentUser;
     this.populateForm();
     this.loadStats();
+    this.cdr.detectChanges();
   }
 
   ngOnInit() {
@@ -184,11 +326,13 @@ export class ProfilePage implements OnInit {
     if (!this.isEditMode) {
       this.populateForm();
     }
+    this.cdr.detectChanges();
   }
 
   cancelEdit() {
     this.populateForm();
     this.isEditMode = false;
+    this.cdr.detectChanges();
   }
 
   loadStats() {
@@ -196,8 +340,11 @@ export class ProfilePage implements OnInit {
     this.attendanceService.getDashboardStats(this.currentUser.id).subscribe({
       next: (stats) => {
         if (stats) this.stats = stats;
+        this.cdr.detectChanges();
       },
-      error: () => {},
+      error: () => {
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -208,7 +355,25 @@ export class ProfilePage implements OnInit {
       return;
     }
 
+    // Start Date Constraints
+    if (this.isStartDateLocked && this.startDate !== this.currentUser.start_date) {
+      this.showFeedback('OJT has already started. The start date is locked and cannot be changed.', 'error');
+      this.startDate = this.currentUser.start_date || this.startDate;
+      return;
+    }
+
+    if (!this.isStartDateLocked && this.startDate && this.startDate < this.todayStr) {
+      this.showFeedback('Start date cannot be set in the past. Only today or future dates are allowed.', 'error');
+      return;
+    }
+
+    if (this.targetDate && this.startDate && this.targetDate < this.startDate) {
+      this.showFeedback('Target end date cannot be earlier than the start date.', 'error');
+      return;
+    }
+
     this.isSaving = true;
+    this.cdr.detectChanges();
 
     const payload: any = {
       user_id: this.currentUser.id,
@@ -243,10 +408,12 @@ export class ProfilePage implements OnInit {
         } else {
           this.showFeedback(res.message || 'Could not update profile.', 'error');
         }
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isSaving = false;
         this.showFeedback('Unable to connect to server.', 'error');
+        this.cdr.detectChanges();
       },
     });
   }
@@ -258,10 +425,12 @@ export class ProfilePage implements OnInit {
   // Side Drawer navigation
   openSideMenu() {
     this.isSideMenuOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeSideMenu() {
     this.isSideMenuOpen = false;
+    this.cdr.detectChanges();
   }
 
   selectMenuItem(item: string) {
@@ -308,8 +477,10 @@ export class ProfilePage implements OnInit {
     this.feedbackMessage = msg;
     this.feedbackType = type;
     this.toastService.show(msg, type);
+    this.cdr.detectChanges();
     setTimeout(() => {
       this.feedbackMessage = '';
+      this.cdr.detectChanges();
     }, 3500);
   }
 }

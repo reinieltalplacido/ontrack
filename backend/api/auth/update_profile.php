@@ -42,8 +42,38 @@ try {
     $trainerName    = trim((string)($body['trainer_name'] ?? ($current['trainer_name'] ?? '')));
     $adviserName    = trim((string)($body['adviser_name'] ?? $current['adviser_name']));
     $adviserEmail   = trim((string)($body['adviser_email'] ?? $current['adviser_email']));
-    $startDate      = !empty($body['start_date']) ? $body['start_date'] : ($current['start_date'] ?? null);
-    $targetDate     = !empty($body['target_date']) ? $body['target_date'] : $current['target_date'];
+
+    // Start Date Constraints
+    $today = date('Y-m-d');
+    $existingStartDate = !empty($current['start_date']) ? trim((string)$current['start_date']) : null;
+    $newStartDate = !empty($body['start_date']) ? trim((string)$body['start_date']) : $existingStartDate;
+
+    if (!empty($existingStartDate) && $existingStartDate <= $today) {
+        // OJT has already started -> locked and cannot be changed
+        $startDate = $existingStartDate;
+    } else {
+        // OJT has not started yet -> can be edited to today or future (no backdating)
+        if (!empty($newStartDate)) {
+            if ($newStartDate < $today) {
+                respond(400, [
+                    'success' => false,
+                    'message' => 'Start date cannot be set in the past. Only today or future dates are allowed.'
+                ]);
+            }
+            $startDate = $newStartDate;
+        } else {
+            $startDate = $existingStartDate;
+        }
+    }
+
+    $targetDate     = !empty($body['target_date']) ? trim((string)$body['target_date']) : $current['target_date'];
+    if (!empty($startDate) && !empty($targetDate) && $targetDate < $startDate) {
+        respond(400, [
+            'success' => false,
+            'message' => 'Target end date cannot be earlier than the start date.'
+        ]);
+    }
+
     $requiredHours  = isset($body['required_hours']) ? intval($body['required_hours']) : intval($current['required_hours']);
 
     $passwordSql = '';

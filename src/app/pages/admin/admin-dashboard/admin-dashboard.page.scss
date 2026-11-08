@@ -4336,3 +4336,255 @@
     }
   }
 }
+
+/* Security Card & Change Password Styles */
+.security-card {
+  .security-action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+    gap: 12px;
+
+    .security-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .detail-label {
+        font-size: 0.76rem;
+        color: #64748b;
+        font-weight: 600;
+      }
+
+      .security-dots {
+        font-size: 1rem;
+        letter-spacing: 2px;
+        color: #334155;
+        font-weight: 700;
+      }
+    }
+
+    .change-pwd-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      ion-icon {
+        font-size: 0.95rem;
+      }
+
+      &:hover, &:active {
+        background: #dbeafe;
+      }
+    }
+  }
+}
+
+/* Shared Change Password Modal */
+ion-modal.change-password-modal {
+  --background: rgba(15, 23, 42, 0.45);
+  --width: 92%;
+  --max-width: 440px;
+  --height: auto;
+  --border-radius: 18px;
+
+  &::part(content) {
+    border-radius: 18px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.25);
+  }
+
+  .modal-wrapper {
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 20px 22px 14px;
+      border-bottom: 1px solid #f1f5f9;
+
+      .modal-title-box {
+        .modal-kicker {
+          font-size: 0.72rem;
+          font-weight: 800;
+          color: #547792;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: block;
+          margin-bottom: 3px;
+        }
+
+        .modal-title {
+          font-size: 1.25rem;
+          font-weight: 850;
+          color: #0f172a;
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+      }
+
+      .modal-close-btn {
+        background: #f1f5f9;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        color: #64748b;
+        cursor: pointer;
+
+        &:active {
+          background: #e2e8f0;
+        }
+      }
+    }
+
+    .modal-body {
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+
+      .pwd-modal-banner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        padding: 9px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+
+        ion-icon {
+          font-size: 1.1rem;
+          flex-shrink: 0;
+        }
+      }
+
+      .pwd-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        .pwd-label {
+          font-size: 0.78rem;
+          font-weight: 700;
+          color: #334155;
+        }
+
+        .pwd-input-wrapper {
+          display: flex;
+          align-items: center;
+          position: relative;
+          background: #f8fafc;
+          border: 1.5px solid #cbd5e1;
+          border-radius: 10px;
+          transition: all 0.2s ease;
+
+          &:focus-within {
+            border-color: #547792;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(84, 119, 146, 0.15);
+          }
+
+          .pwd-field {
+            width: 100%;
+            height: 42px;
+            padding: 0 38px 0 12px;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 0.88rem;
+            color: #0f172a;
+          }
+
+          .pwd-toggle-btn {
+            position: absolute;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 4px;
+          }
+        }
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px 20px;
+      border-top: 1px solid #f1f5f9;
+
+      .modal-cancel-btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.86rem;
+        font-weight: 700;
+        padding: 9px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+
+        &:active {
+          background: #e2e8f0;
+        }
+      }
+
+      .modal-submit-btn {
+        background: #547792;
+        border: none;
+        color: #ffffff;
+        font-size: 0.86rem;
+        font-weight: 750;
+        padding: 9px 20px;
+        border-radius: 9px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 6px rgba(84, 119, 146, 0.25);
+
+        ion-spinner {
+          width: 18px;
+          height: 18px;
+        }
+
+        &:active {
+          opacity: 0.9;
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}

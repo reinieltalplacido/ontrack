@@ -368,7 +368,7 @@
         <div class="weekly-metrics-strip">
           <div class="weekly-metric-box">
             <span class="m-val">{{ formatHours(weeklyTotalHours) }}</span>
-            <span class="m-lbl">Rendered This Week</span>
+            <span class="m-lbl">Completed This Week</span>
           </div>
           <div class="weekly-metric-box">
             <span class="m-val text-green">{{ weeklyTotalShifts }}</span>
@@ -444,7 +444,7 @@
                 <div class="insp-times-row">
                   <span>In: <strong>{{ formatTime(item.activeSelectedDay.timeIn) }}</strong></span>
                   <span *ngIf="item.activeSelectedDay.timeOut">Out: <strong>{{ formatTime(item.activeSelectedDay.timeOut) }}</strong></span>
-                  <span class="hrs-tag">{{ formatHours(item.activeSelectedDay.totalHours) }} rendered</span>
+                  <span class="hrs-tag">{{ formatHours(item.activeSelectedDay.totalHours) }} completed</span>
                 </div>
 
                 <div class="insp-location" *ngIf="item.activeSelectedDay.locationName">
@@ -867,7 +867,33 @@
         </div>
       </ion-card>
 
-      <!-- 5. Profile Actions -->
+      <!-- 5. Account Security & Password Card -->
+      <ion-card class="admin-prof-detail-card security-card">
+        <div class="card-title-group">
+          <ion-icon name="lock-closed-outline" class="title-icon"></ion-icon>
+          <h2 class="title-text">Account Security & Credentials</h2>
+        </div>
+
+        <div class="detail-rows-list">
+          <div class="detail-item">
+            <span class="detail-label">Faculty / Employee ID</span>
+            <span class="detail-val mono">{{ currentProfessor?.employee_id || 'PROF-2026-001' }}</span>
+          </div>
+
+          <div class="security-action-row">
+            <div class="security-info">
+              <span class="detail-label">Portal Password</span>
+              <span class="security-dots">••••••••••••••••</span>
+            </div>
+            <button type="button" class="change-pwd-pill-btn" (click)="openPasswordModal()">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Change Password</span>
+            </button>
+          </div>
+        </div>
+      </ion-card>
+
+      <!-- 6. Profile Actions -->
       <div class="admin-prof-actions-wrap">
         <button type="button" class="prof-action-btn primary" (click)="switchSegment('students')">
           <ion-icon name="people-outline"></ion-icon>
@@ -934,7 +960,7 @@
             <div class="dossier-stats-grid">
               <div class="dossier-stat">
                 <span class="val">{{ formatHours(selectedStudent.accumulated_hours) }}</span>
-                <span class="lbl">Rendered</span>
+                <span class="lbl">Completed</span>
               </div>
               <div class="dossier-stat">
                 <span class="val text-amber">{{ formatHours(selectedStudent.remaining_hours) }}</span>
@@ -942,7 +968,7 @@
               </div>
               <div class="dossier-stat">
                 <span class="val text-green">{{ selectedStudent.completion_percent }}%</span>
-                <span class="lbl">Completed</span>
+                <span class="lbl">Progress</span>
               </div>
               <div class="dossier-stat">
                 <span class="val">{{ selectedStudent.days_logged || studentDossierLogs.length }}</span>
@@ -1058,7 +1084,7 @@
                         </div>
                         <div class="inspector-header-right">
                           <span class="day-status-badge" [class.badge-completed]="sDay.hasDuty && sDay.status === 'completed'" [class.badge-ongoing]="sDay.status === 'ongoing'" [class.badge-none]="!sDay.hasDuty">
-                            {{ sDay.hasDuty ? (sDay.status === 'ongoing' ? 'Ongoing Shift' : (formatHours(sDay.log?.total_hours) + ' rendered')) : 'No Attendance' }}
+                            {{ sDay.hasDuty ? (sDay.status === 'ongoing' ? 'Ongoing Shift' : (formatHours(sDay.log?.total_hours) + ' completed')) : 'No Attendance' }}
                           </span>
                           <button class="clear-day-btn" (click)="clearDossierSelectedDay(week)" title="View all logs for this week">
                             <ion-icon name="close-circle-outline"></ion-icon>
@@ -1422,6 +1448,87 @@
 
         <div class="modal-footer" *ngIf="selectedTaskProof">
           <button class="modal-btn secondary" (click)="closeTaskProofModal()">Close</button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CHANGE PASSWORD (COORDINATOR) -->
+  <!-- ========================================== -->
+  <ion-modal [isOpen]="isPasswordModalOpen" (didDismiss)="closePasswordModal()" class="change-password-modal">
+    <ng-template>
+      <div class="modal-wrapper">
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="modal-kicker">Security Settings</span>
+            <h3 class="modal-title">Change Password</h3>
+          </div>
+          <button class="modal-close-btn" (click)="closePasswordModal()" aria-label="Close">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="pwd-modal-banner" *ngIf="passwordError">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ passwordError }}</span>
+          </div>
+
+          <div class="pwd-input-group">
+            <label class="pwd-label">Current Password</label>
+            <div class="pwd-input-wrapper">
+              <input
+                [type]="showCurrentPassword ? 'text' : 'password'"
+                [(ngModel)]="currentPasswordInput"
+                placeholder="Enter current password"
+                class="pwd-field"
+              />
+              <button type="button" class="pwd-toggle-btn" (click)="showCurrentPassword = !showCurrentPassword">
+                <ion-icon [name]="showCurrentPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="pwd-input-group">
+            <label class="pwd-label">New Password (min. 6 characters)</label>
+            <div class="pwd-input-wrapper">
+              <input
+                [type]="showNewPassword ? 'text' : 'password'"
+                [(ngModel)]="newPasswordInput"
+                placeholder="Enter new password"
+                class="pwd-field"
+              />
+              <button type="button" class="pwd-toggle-btn" (click)="showNewPassword = !showNewPassword">
+                <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="pwd-input-group">
+            <label class="pwd-label">Confirm New Password</label>
+            <div class="pwd-input-wrapper">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                [(ngModel)]="confirmPasswordInput"
+                placeholder="Re-enter new password"
+                class="pwd-field"
+              />
+              <button type="button" class="pwd-toggle-btn" (click)="showConfirmPassword = !showConfirmPassword">
+                <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="modal-cancel-btn" (click)="closePasswordModal()" [disabled]="isChangingPassword">
+            Cancel
+          </button>
+          <button type="button" class="modal-submit-btn" (click)="submitChangePassword()" [disabled]="isChangingPassword">
+            <ion-spinner *ngIf="isChangingPassword" name="crescent"></ion-spinner>
+            <span *ngIf="!isChangingPassword">Update Password</span>
+          </button>
         </div>
       </div>
     </ng-template>

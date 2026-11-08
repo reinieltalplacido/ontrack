@@ -64,8 +64,12 @@ import {
   time,
   checkmarkCircle,
   documentText,
+  lockClosedOutline,
+  keyOutline,
+  eyeOffOutline,
 } from 'ionicons/icons';
 import { AdminService, AdminStats, MonitoredStudent } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { NativeService } from '../../../core/services/native.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Professor } from '../../../models/user.model';
@@ -176,6 +180,7 @@ export interface AdminTaskItem {
 })
 export class AdminDashboardPage implements OnInit {
   private adminService = inject(AdminService);
+  private authService = inject(AuthService);
   private nativeService = inject(NativeService);
   private toastService = inject(ToastService);
   private router = inject(Router);
@@ -295,12 +300,23 @@ export class AdminDashboardPage implements OnInit {
   previewPhotoTitle = '';
   previewPhotoSubtitle = '';
 
+  // Password Change Modal
+  isPasswordModalOpen = false;
+  currentPasswordInput = '';
+  newPasswordInput = '';
+  confirmPasswordInput = '';
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+  isChangingPassword = false;
+  passwordError = '';
+
   // Toast
   showToast = false;
   toastMessage = '';
 
   constructor() {
-    addIcons({menuOutline,shieldCheckmarkOutline,calendarOutline,addOutline,peopleOutline,timeOutline,checkboxOutline,chevronForwardOutline,locationOutline,cameraOutline,hourglassOutline,searchOutline,closeOutline,chevronBackOutline,todayOutline,documentTextOutline,eyeOutline,flagOutline,reorderThreeOutline,clipboardOutline,schoolOutline,businessOutline,mailOutline,listOutline,checkmarkCircleOutline,checkmark,time,closeCircleOutline,calendarClearOutline,fingerPrintOutline,checkmarkCircle,personOutline,sendOutline,documentText,downloadOutline,checkmarkDoneCircleOutline,gridOutline,refreshOutline,logOutOutline,filterOutline,alertCircleOutline,sparklesOutline,arrowBackOutline,speedometerOutline,imageOutline,chevronDownOutline,chevronUpOutline,checkmarkOutline,});
+    addIcons({menuOutline,shieldCheckmarkOutline,calendarOutline,addOutline,peopleOutline,timeOutline,checkboxOutline,chevronForwardOutline,locationOutline,cameraOutline,hourglassOutline,searchOutline,closeOutline,chevronBackOutline,todayOutline,documentTextOutline,eyeOutline,flagOutline,reorderThreeOutline,clipboardOutline,schoolOutline,businessOutline,mailOutline,listOutline,checkmarkCircleOutline,checkmark,time,closeCircleOutline,calendarClearOutline,fingerPrintOutline,checkmarkCircle,personOutline,sendOutline,documentText,downloadOutline,checkmarkDoneCircleOutline,gridOutline,refreshOutline,logOutOutline,filterOutline,alertCircleOutline,sparklesOutline,arrowBackOutline,speedometerOutline,imageOutline,chevronDownOutline,chevronUpOutline,checkmarkOutline,lockClosedOutline,keyOutline,eyeOffOutline});
   }
 
   ngOnInit() {
@@ -842,6 +858,7 @@ export class AdminDashboardPage implements OnInit {
     this.studentDossierTasks = [];
     this.studentDossierTab = 'logs';
     this.studentDossierViewMode = 'weekly';
+    this.cdr.detectChanges();
 
     const sId = Number(student.id);
     this.adminService.getStudentDetail(sId).subscribe({
@@ -870,6 +887,7 @@ export class AdminDashboardPage implements OnInit {
   closeStudentDossier() {
     this.isStudentModalOpen = false;
     this.selectedStudent = null;
+    this.cdr.detectChanges();
   }
 
   loadTasks() {
@@ -1016,10 +1034,12 @@ export class AdminDashboardPage implements OnInit {
     this.newTask.deadline = d.toISOString().split('T')[0];
 
     this.isAssignModalOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeAssignTaskModal() {
     this.isAssignModalOpen = false;
+    this.cdr.detectChanges();
   }
 
   submitAssignTask() {
@@ -1034,6 +1054,7 @@ export class AdminDashboardPage implements OnInit {
     }
 
     this.isSubmittingTask = true;
+    this.cdr.detectChanges();
     this.adminService
       .assignTask({
         title: this.newTask.title.trim(),
@@ -1074,11 +1095,13 @@ export class AdminDashboardPage implements OnInit {
     this.previewPhotoTitle = title;
     this.previewPhotoSubtitle = subtitle;
     this.isPhotoModalOpen = true;
+    this.cdr.detectChanges();
   }
 
   closePhotoPreview() {
     this.isPhotoModalOpen = false;
     this.previewPhotoUrl = null;
+    this.cdr.detectChanges();
   }
 
   getPhotoUrl(path: string | null | undefined): string | null {
@@ -1090,6 +1113,69 @@ export class AdminDashboardPage implements OnInit {
     const prefix = clean.startsWith('uploads/') ? '' : 'uploads/tasks/';
     const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
     return `${baseUrl}/${prefix}${clean}`;
+  }
+
+  // Change Password Modal Controls
+  openPasswordModal() {
+    this.currentPasswordInput = '';
+    this.newPasswordInput = '';
+    this.confirmPasswordInput = '';
+    this.showCurrentPassword = false;
+    this.showNewPassword = false;
+    this.showConfirmPassword = false;
+    this.passwordError = '';
+    this.isPasswordModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closePasswordModal() {
+    this.isPasswordModalOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  submitChangePassword() {
+    this.passwordError = '';
+    if (!this.newPasswordInput || !this.confirmPasswordInput) {
+      this.passwordError = 'Please fill in all password fields.';
+      return;
+    }
+    if (this.newPasswordInput.length < 6) {
+      this.passwordError = 'New password must be at least 6 characters long.';
+      return;
+    }
+    if (this.newPasswordInput !== this.confirmPasswordInput) {
+      this.passwordError = 'New passwords do not match.';
+      return;
+    }
+    if (!this.currentProfessor?.id) {
+      this.passwordError = 'User session error. Please log in again.';
+      return;
+    }
+
+    this.isChangingPassword = true;
+    this.authService.changePassword({
+      user_id: this.currentProfessor.id,
+      role: 'professor',
+      current_password: this.currentPasswordInput,
+      new_password: this.newPasswordInput,
+      confirm_password: this.confirmPasswordInput
+    }).subscribe({
+      next: (res) => {
+        this.isChangingPassword = false;
+        if (res.success) {
+          this.toastService.showSuccess(res.message || 'Password updated successfully!');
+          this.closePasswordModal();
+        } else {
+          this.passwordError = res.message || 'Failed to change password.';
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isChangingPassword = false;
+        this.passwordError = err.error?.message || 'Error communicating with server.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   presentToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {

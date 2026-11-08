@@ -164,6 +164,7 @@ export class LoginPage {
 
   forgotPassword() {
     this.showForgotAlert = true;
+    this.cdr.detectChanges();
   }
 
   async configureServerUrl() {

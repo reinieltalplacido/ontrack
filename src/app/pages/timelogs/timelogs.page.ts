@@ -117,6 +117,7 @@ export class TimeLogsPage implements OnInit {
     this.currentUser = this.authService.currentUserValue || this.currentUser;
     this.loadCachedLogs();
     this.loadLogs();
+    this.cdr.detectChanges();
   }
 
   ngOnInit() {
@@ -253,6 +254,7 @@ export class TimeLogsPage implements OnInit {
     }
 
     this.filteredLogs = result;
+    this.cdr.detectChanges();
   }
 
   goBack() {
@@ -262,10 +264,12 @@ export class TimeLogsPage implements OnInit {
   // Side Drawer navigation
   openSideMenu() {
     this.isSideMenuOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeSideMenu() {
     this.isSideMenuOpen = false;
+    this.cdr.detectChanges();
   }
 
   selectMenuItem(item: string) {

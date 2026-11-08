@@ -249,6 +249,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.activeMenu = 'dashboard';
     this.isSideMenuOpen = false;
     this.currentUser = this.authService.currentUserValue || this.currentUser;
+    this.loadDashboardData();
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy() {
@@ -289,10 +291,12 @@ export class HomePage implements OnInit, OnDestroy {
         }
         this.isLoading = false;
         if (event) event.target.complete();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         if (event) event.target.complete();
+        this.cdr.detectChanges();
       },
     });
 
@@ -302,8 +306,11 @@ export class HomePage implements OnInit, OnDestroy {
         if (res && res.logs) {
           this.recentLogs = this.consolidateLogsByDate(res.logs).slice(0, 5);
         }
+        this.cdr.detectChanges();
       },
-      error: () => {},
+      error: () => {
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -405,11 +412,13 @@ export class HomePage implements OnInit, OnDestroy {
 
   closeClockInModal() {
     this.showClockInModal = false;
+    this.cdr.detectChanges();
   }
 
   submitClockIn() {
     if (!this.currentUser) return;
     this.isSubmittingClockIn = true;
+    this.cdr.detectChanges();
 
     const payload = {
       user_id: this.currentUser.id,
@@ -430,11 +439,13 @@ export class HomePage implements OnInit, OnDestroy {
         } else {
           this.showFeedback(res.message || 'Could not record time in.', 'error');
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isSubmittingClockIn = false;
         const msg = err?.error?.message || 'Unable to connect to server. Please try again.';
         this.showFeedback(msg, 'error');
+        this.cdr.detectChanges();
       },
     });
   }
@@ -443,10 +454,12 @@ export class HomePage implements OnInit, OnDestroy {
     this.activityNotes = '';
     this.updateRealtimeClock();
     this.showClockOutModal = true;
+    this.cdr.detectChanges();
   }
 
   closeClockOutModal() {
     this.showClockOutModal = false;
+    this.cdr.detectChanges();
   }
 
   submitClockOut() {
@@ -469,7 +482,7 @@ export class HomePage implements OnInit, OnDestroy {
 
           if (res.success) {
             this.nativeService.triggerHapticFeedback('success');
-            const hours = res.rendered_today ? ` (${this.formatHours(res.rendered_today)} rendered)` : '';
+            const hours = res.rendered_today ? ` (${this.formatHours(res.rendered_today)} completed)` : '';
             this.showFeedback(`Time-Out Recorded Successfully!${hours}`, 'success');
             this.loadDashboardData();
           } else {
@@ -535,10 +548,12 @@ export class HomePage implements OnInit, OnDestroy {
 
   openSideMenu() {
     this.isSideMenuOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeSideMenu() {
     this.isSideMenuOpen = false;
+    this.cdr.detectChanges();
   }
 
   selectMenuItem(item: string) {

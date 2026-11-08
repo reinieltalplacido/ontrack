@@ -158,6 +158,26 @@ export class AuthService {
     );
   }
 
+  /**
+   * Change account password (student or coordinator)
+   */
+  changePassword(payload: {
+    user_id: number;
+    role?: string;
+    current_password?: string;
+    new_password: string;
+    confirm_password?: string;
+  }): Observable<{ success: boolean; message: string }> {
+    return this.http
+      .post<{ success: boolean; message: string }>(`${this.apiUrl}/auth/change_password.php`, payload)
+      .pipe(
+        catchError((err) => {
+          const msg = err?.error?.message || 'Unable to update password. Please check your network connection.';
+          return of({ success: false, message: msg });
+        })
+      );
+  }
+
   updateSessionUser(updatedUser: Partial<User>): void {
     const current = this.currentUserValue;
     if (current) {

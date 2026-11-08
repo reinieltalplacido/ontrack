@@ -170,6 +170,7 @@ export class TasksPage implements OnInit {
     this.isSideMenuOpen = false;
     this.currentUser = this.authService.currentUserValue || this.currentUser;
     this.loadTasks();
+    this.cdr.detectChanges();
   }
 
   ngOnInit() {
@@ -504,11 +505,13 @@ export class TasksPage implements OnInit {
     if (!url) return;
     this.previewImageUrl = url;
     this.isImageModalOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeImageModal() {
     this.isImageModalOpen = false;
     this.previewImageUrl = '';
+    this.cdr.detectChanges();
   }
 
   // Delete task
@@ -636,10 +639,12 @@ export class TasksPage implements OnInit {
   // Side Drawer navigation
   openSideMenu() {
     this.isSideMenuOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeSideMenu() {
     this.isSideMenuOpen = false;
+    this.cdr.detectChanges();
   }
 
   selectMenuItem(item: string) {

@@ -56,26 +56,34 @@
     <!-- OJT Hour Progress Snapshot Card -->
     <ion-card class="progress-snapshot-card">
       <div class="snapshot-header">
-        <span class="snapshot-title">Training Hours Progress</span>
-        <ion-badge color="success" class="snapshot-pct">{{ stats?.completion_percent || 0 }}%</ion-badge>
+        <div class="snapshot-title-group">
+          <ion-icon name="time-outline" class="snapshot-icon"></ion-icon>
+          <span class="snapshot-title">Training Hours Progress</span>
+        </div>
+        <div class="snapshot-pct-badge" [class.completed]="completionPercent >= 100">
+          <span class="pct-dot"></span>
+          <span class="pct-value">{{ completionPercent }}%</span>
+        </div>
       </div>
 
       <div class="progress-bar-track">
-        <div class="progress-bar-fill" [style.width.%]="stats?.completion_percent || 0"></div>
+        <div class="progress-bar-fill" [style.width.%]="completionPercent"></div>
       </div>
 
       <div class="snapshot-grid">
-        <div class="snapshot-col">
-          <span class="snapshot-label">Rendered</span>
+        <div class="snapshot-col completed-col">
+          <span class="snapshot-label">Completed</span>
           <strong class="snapshot-val">{{ formatHours(stats?.accumulated_hours) }}</strong>
         </div>
-        <div class="snapshot-col">
+        <div class="snapshot-divider"></div>
+        <div class="snapshot-col required-col">
           <span class="snapshot-label">Required</span>
           <strong class="snapshot-val">{{ currentUser?.required_hours || 0 }} hrs</strong>
         </div>
-        <div class="snapshot-col">
+        <div class="snapshot-divider"></div>
+        <div class="snapshot-col remaining-col">
           <span class="snapshot-label">Remaining</span>
-          <strong class="snapshot-val">{{ formatHours(stats?.remaining_hours) }}</strong>
+          <strong class="snapshot-val">{{ formatHours(remainingHours) }}</strong>
         </div>
       </div>
     </ion-card>
@@ -157,7 +165,14 @@
 
             <div class="detail-item-grid-2">
               <div class="detail-item">
-                <span class="detail-label">Start Date of OJT</span>
+                <div class="detail-label-row">
+                  <span class="detail-label">Start Date of OJT</span>
+                  @if (isStartDateLocked) {
+                    <span class="status-pill-started">
+                      <ion-icon name="lock-closed-outline"></ion-icon> Started
+                    </span>
+                  }
+                </div>
                 <span class="detail-val">{{ formatDate(currentUser?.start_date) }}</span>
               </div>
               <div class="detail-item">
@@ -170,6 +185,26 @@
               <span class="detail-label">Required Total Hours</span>
               <span class="detail-val hours-pill">{{ currentUser?.required_hours || 0 }} hrs</span>
             </div>
+          </div>
+        </ion-card>
+
+        <!-- 3. Change Password Card -->
+        <ion-card class="display-section-card security-card">
+          <div class="section-card-header">
+            <div class="section-title-wrap">
+              <ion-icon name="lock-closed-outline" class="sec-icon"></ion-icon>
+              <h2 class="sec-title">Change Password</h2>
+            </div>
+          </div>
+
+          <div class="security-card-content">
+            <p class="security-desc">
+              Update your account password regularly to keep your portal access and attendance logs secure.
+            </p>
+            <button type="button" class="change-pwd-btn" (click)="openPasswordModal()">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Change Password</span>
+            </button>
           </div>
         </ion-card>
 
@@ -280,18 +315,52 @@
           </div>
 
           <div class="form-row-2">
-            <div class="form-field">
-              <label class="field-label">Start Date of OJT</label>
-              <div class="custom-input-box">
-                <input type="date" [(ngModel)]="startDate" name="startDate" />
+            <div class="form-field" [class.field-locked]="isStartDateLocked">
+              <div class="field-label-row">
+                <label class="field-label">Start Date of OJT</label>
+                @if (isStartDateLocked) {
+                  <span class="lock-tag">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    Started (Locked)
+                  </span>
+                }
               </div>
+              <div class="custom-input-box" [class.input-locked]="isStartDateLocked">
+                <input 
+                  type="date" 
+                  [(ngModel)]="startDate" 
+                  name="startDate"
+                  [disabled]="isStartDateLocked"
+                  [min]="minStartDate"
+                />
+              </div>
+              @if (isStartDateLocked) {
+                <span class="field-help-text locked-tip">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  OJT started on {{ formatDate(currentUser?.start_date) }}. Past/current start dates cannot be changed.
+                </span>
+              } @else {
+                <span class="field-help-text">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  Must be today or future (no backdates).
+                </span>
+              }
             </div>
 
             <div class="form-field">
               <label class="field-label">Target End Date</label>
               <div class="custom-input-box">
-                <input type="date" [(ngModel)]="targetDate" name="targetDate" />
+                <input 
+                  type="date" 
+                  [(ngModel)]="targetDate" 
+                  name="targetDate"
+                  [min]="startDate || minStartDate"
+                />
               </div>
+              <span class="field-help-text">
+                <ion-icon name="calendar-outline"></ion-icon>
+                Estimated finish date.
+              </span>
             </div>
           </div>
 
@@ -404,3 +473,84 @@
     <span class="app-version-tag">OnTrack v1.0 • OJT Attendance</span>
   </div>
 </aside>
+
+<!-- ========================================== -->
+<!-- MODAL: CHANGE PASSWORD -->
+<!-- ========================================== -->
+<ion-modal [isOpen]="isPasswordModalOpen" (didDismiss)="closePasswordModal()" class="change-password-modal">
+  <ng-template>
+    <div class="modal-wrapper">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="modal-kicker">Security Settings</span>
+          <h3 class="modal-title">Change Password</h3>
+        </div>
+        <button class="modal-close-btn" (click)="closePasswordModal()" aria-label="Close">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="pwd-modal-banner" *ngIf="passwordError">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <span>{{ passwordError }}</span>
+        </div>
+
+        <div class="pwd-input-group">
+          <label class="pwd-label">Current Password</label>
+          <div class="pwd-input-wrapper">
+            <input
+              [type]="showCurrentPassword ? 'text' : 'password'"
+              [(ngModel)]="currentPasswordInput"
+              placeholder="Enter current password"
+              class="pwd-field"
+            />
+            <button type="button" class="pwd-toggle-btn" (click)="showCurrentPassword = !showCurrentPassword">
+              <ion-icon [name]="showCurrentPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="pwd-input-group">
+          <label class="pwd-label">New Password (min. 6 characters)</label>
+          <div class="pwd-input-wrapper">
+            <input
+              [type]="showNewPassword ? 'text' : 'password'"
+              [(ngModel)]="newPasswordInput"
+              placeholder="Enter new password"
+              class="pwd-field"
+            />
+            <button type="button" class="pwd-toggle-btn" (click)="showNewPassword = !showNewPassword">
+              <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="pwd-input-group">
+          <label class="pwd-label">Confirm New Password</label>
+          <div class="pwd-input-wrapper">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              [(ngModel)]="confirmPasswordInput"
+              placeholder="Re-enter new password"
+              class="pwd-field"
+            />
+            <button type="button" class="pwd-toggle-btn" (click)="showConfirmPassword = !showConfirmPassword">
+              <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel-btn" (click)="closePasswordModal()" [disabled]="isChangingPassword">
+          Cancel
+        </button>
+        <button type="button" class="modal-submit-btn" (click)="submitChangePassword()" [disabled]="isChangingPassword">
+          <ion-spinner *ngIf="isChangingPassword" name="crescent"></ion-spinner>
+          <span *ngIf="!isChangingPassword">Update Password</span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

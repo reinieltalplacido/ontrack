@@ -369,6 +369,7 @@ export class RegisterPage {
       if (!this.isStep1Valid()) {
         this.markFieldsTouched(['student_no', 'full_name', 'school_campus', 'course', 'year_level', 'section', 'email']);
         this.errorMessage = 'Please complete all academic fields accurately.';
+        this.cdr.detectChanges();
         return;
       }
       this.currentStep = 2;
@@ -376,10 +377,12 @@ export class RegisterPage {
       if (!this.isStep2Valid()) {
         this.markFieldsTouched(['company_name', 'company_address', 'trainer_name', 'adviser_name', 'start_date', 'required_hours', 'target_date']);
         this.errorMessage = 'Please specify all company, trainer, and OJT schedule details.';
+        this.cdr.detectChanges();
         return;
       }
       this.currentStep = 3;
     }
+    this.cdr.detectChanges();
   }
 
   prevStep() {
@@ -389,23 +392,28 @@ export class RegisterPage {
     } else {
       this.router.navigate(['/login']);
     }
+    this.cdr.detectChanges();
   }
 
   togglePassword() {
     this.showPassword = !this.showPassword;
+    this.cdr.detectChanges();
   }
 
   toggleConfirmPassword() {
     this.showConfirmPassword = !this.showConfirmPassword;
+    this.cdr.detectChanges();
   }
 
   openCalendar(field: 'start_date' | 'target_date' = 'target_date') {
     this.activeDateField = field;
     this.isCalendarOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeCalendar() {
     this.isCalendarOpen = false;
+    this.cdr.detectChanges();
   }
 
   onDateSelected(event: any) {
@@ -416,6 +424,7 @@ export class RegisterPage {
       this.registerForm.patchValue({ [this.activeDateField]: dateOnly });
     }
     this.closeCalendar();
+    this.cdr.detectChanges();
   }
 
   getFormattedDate(dateStr: string): string {
@@ -480,6 +489,7 @@ export class RegisterPage {
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     const formValues = {
       ...this.registerForm.value,

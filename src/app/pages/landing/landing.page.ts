@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -81,6 +81,7 @@ interface SlideItem {
 export class LandingPage {
   private router = inject(Router);
   private nativeService = inject(NativeService);
+  private cdr = inject(ChangeDetectorRef);
 
   currentSlide = 0;
   private touchStartX = 0;
@@ -97,7 +98,7 @@ export class LandingPage {
       tag: 'Progress',
       badgeColor: 'success',
       title: 'Automated Hour Computation',
-      subtitle: 'Rendered hours calculate automatically each day toward your 486-hour requirement.',
+      subtitle: 'Completed hours calculate automatically each day toward your 486-hour requirement.',
     },
     {
       tag: 'Reports',
@@ -144,6 +145,7 @@ export class LandingPage {
     if (this.currentSlide < this.slides.length - 1) {
       this.currentSlide++;
       this.nativeService.triggerHapticFeedback('medium');
+      this.cdr.detectChanges();
     } else {
       this.goToLogin();
     }
@@ -153,6 +155,7 @@ export class LandingPage {
     if (index !== this.currentSlide) {
       this.currentSlide = index;
       this.nativeService.triggerHapticFeedback('medium');
+      this.cdr.detectChanges();
     }
   }
 
@@ -176,9 +179,11 @@ export class LandingPage {
     if (diff < -40 && this.currentSlide < this.slides.length - 1) {
       this.currentSlide++;
       this.nativeService.triggerHapticFeedback('medium');
+      this.cdr.detectChanges();
     } else if (diff > 40 && this.currentSlide > 0) {
       this.currentSlide--;
       this.nativeService.triggerHapticFeedback('medium');
+      this.cdr.detectChanges();
     }
   }
 }
