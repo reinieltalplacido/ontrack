@@ -788,6 +788,7 @@
 
 .chips-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
 
@@ -4977,6 +4978,7 @@ ion-modal.change-password-modal {
 
       input {
         flex: 1;
+        min-width: 0;
         border: none;
         background: transparent;
         font-size: 0.88rem;
@@ -5007,18 +5009,12 @@ ion-modal.change-password-modal {
       gap: 8px;
       width: 100%;
 
-      @media (min-width: 640px) {
-        flex-direction: row;
-        align-items: center;
-        gap: 16px;
-      }
-
       .filter-group {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 8px;
         width: 100%;
-        overflow: hidden;
+        min-width: 0;
 
         .filter-group-label {
           font-size: 0.72rem;
@@ -5027,21 +5023,29 @@ ion-modal.change-password-modal {
           text-transform: uppercase;
           letter-spacing: 0.05em;
           min-width: 44px;
+          min-height: 30px;
+          display: inline-flex;
+          align-items: center;
           flex-shrink: 0;
+
+          @media (max-width: 480px) {
+            min-width: 40px;
+            font-size: 0.68rem;
+          }
         }
 
         .filter-chips-scroll {
           display: flex;
           align-items: center;
+          flex-wrap: wrap;
           gap: 6px;
-          overflow-x: auto;
-          flex-wrap: nowrap;
-          scrollbar-width: none;
-          -webkit-overflow-scrolling: touch;
+          flex: 1;
+          min-width: 0;
+          overflow: visible;
           padding: 2px 0;
 
-          &::-webkit-scrollbar {
-            display: none;
+          @media (max-width: 480px) {
+            gap: 5px;
           }
         }
 
@@ -5060,6 +5064,12 @@ ion-modal.change-password-modal {
           display: inline-flex;
           align-items: center;
           gap: 5px;
+
+          @media (max-width: 480px) {
+            padding: 5px 9px;
+            font-size: 0.72rem;
+            gap: 4px;
+          }
 
           ion-icon {
             font-size: 0.85rem;

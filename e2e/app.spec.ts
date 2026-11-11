@@ -29,6 +29,17 @@ const TEST_STUDENT = {
   required_hours: 500,
 };
 
+const TEST_COORDINATOR = {
+  id: 5,
+  employee_id: 'PROF-2026-005',
+  full_name: 'Prof. Angelito Cunanan Jr.',
+  email: 'angelito.cunanan@neust.edu.ph',
+  department: 'College of Information and Communications Technology',
+  campus: 'NEUST - Sumacab Campus',
+  role: 'coordinator',
+  assigned_section: 'BSIT 4-E',
+};
+
 interface MockApiState {
   isClockedIn: boolean;
   clockInPayloads: Array<{ latitude: number | null; longitude: number | null; location_name?: string }>;
@@ -120,11 +131,67 @@ async function setupMockBackend(page: Page): Promise<MockApiState> {
     }
 
     if (path.endsWith('/auth/login.php')) {
+      const creds = request.postDataJSON() as { email?: string };
+      if (creds?.email?.toLowerCase() === TEST_COORDINATOR.email) {
+        return json({
+          success: true,
+          role: 'professor',
+          token: 'mock-coord-token',
+          professor: TEST_COORDINATOR,
+        });
+      }
       return json({
         success: true,
         role: 'student',
         token: 'mock-session-token',
         user: TEST_STUDENT,
+      });
+    }
+
+    if (path.endsWith('/admin/dashboard/stats.php')) {
+      return json({
+        success: true,
+        stats: {
+          total_students: 0,
+          active_on_duty: 0,
+          completed_duty_today: 0,
+          total_hours_rendered: 0,
+          total_required_hours: 0,
+          overall_percent: 0,
+          total_tasks: 0,
+          pending_tasks: 0,
+          completed_tasks: 0,
+          today_date: new Date().toISOString().split('T')[0],
+        },
+        recent_activities: [],
+      });
+    }
+
+    if (path.endsWith('/admin/students/list.php')) {
+      return json({ success: true, count: 0, students: [] });
+    }
+
+    if (path.endsWith('/admin/attendance/list.php')) {
+      return json({ success: true, count: 0, logs: [] });
+    }
+
+    if (path.endsWith('/admin/tasks/list.php')) {
+      return json({ success: true, count: 0, tasks: [] });
+    }
+
+    if (path.endsWith('/admin/reports/list.php')) {
+      return json({
+        success: true,
+        count: 0,
+        stats: {
+          total: 0,
+          time_log: 0,
+          summary: 0,
+          submitted: 2,
+          reviewed: 0,
+          approved: 0,
+        },
+        reports: [],
       });
     }
 
@@ -349,7 +416,10 @@ test.describe('OnTrack Student Core User Flow', () => {
     await signInAsStudent(page);
 
     // Open Clock-In Modal while GPS is denied
-    await page.locator('app-home').getByRole('button', { name: /Time In \(GPS\)/i }).click();
+    await page
+      .locator('app-home')
+      .getByRole('button', { name: /Time In \(GPS\)/i })
+      .click();
 
     const warningBanner = page.locator('.gps-warning-banner');
     await expect(warningBanner).toBeVisible();
@@ -417,5 +487,44 @@ test.describe('OnTrack Student Core User Flow', () => {
     await expect(page.locator('.change-password-modal h3')).toHaveText('Change Password');
     await expect(page.getByPlaceholder('Enter current password')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Update Password' })).toBeVisible();
+  });
+
+  test('renders Coordinator Reports filter chips without right-edge clipping on mobile viewports', async ({ page }) => {
+    await setupMockBackend(page);
+    await page.setViewportSize({ width: 375, height: 812 });
+
+    await page.goto('/login');
+    const loginPage = page.locator('app-login');
+    await loginPage.locator('#email').fill(TEST_COORDINATOR.email);
+    await loginPage.locator('#password').fill('Secret123!');
+    await loginPage.getByRole('button', { name: /Sign In/i }).click();
+
+    await expect(page).toHaveURL(/\/admin\/dashboard$/);
+    const adminPage = page.locator('app-admin-dashboard');
+    await adminPage
+      .locator('.quick-actions-bar')
+      .getByRole('button', { name: /Student Reports/i })
+      .click();
+
+    const filterBar = adminPage.locator('.reports-filter-bar');
+    const approvedChip = filterBar.locator('.filter-chip.approved');
+    await expect(approvedChip).toBeVisible();
+
+    const barBox = await filterBar.boundingBox();
+    expect(barBox).not.toBeNull();
+
+    const chips = filterBar.locator('.filter-chip');
+    const chipCount = await chips.count();
+    expect(chipCount).toBe(7);
+
+    for (let i = 0; i < chipCount; i++) {
+      const chipBox = await chips.nth(i).boundingBox();
+      expect(chipBox).not.toBeNull();
+      expect(chipBox!.x).toBeGreaterThanOrEqual(barBox!.x);
+      expect(chipBox!.x + chipBox!.width).toBeLessThanOrEqual(barBox!.x + barBox!.width);
+    }
+
+    await approvedChip.click();
+    await expect(approvedChip).toHaveClass(/active/);
   });
 });
