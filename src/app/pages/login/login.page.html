@@ -46,10 +46,7 @@
 
       <!-- Password Field -->
       <div class="input-group">
-        <div class="label-row">
-          <label class="input-label" for="password">Password</label>
-          <button type="button" class="forgot-link" (click)="forgotPassword()">Forgot?</button>
-        </div>
+        <label class="input-label" for="password">Password</label>
         <div class="custom-input-box" [class.has-error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
           <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
           <input 
@@ -101,16 +98,4 @@
     </div>
 
   </div>
-
-
-  <!-- Forgot Password Alert -->
-  <ion-alert
-    [isOpen]="showForgotAlert"
-    header="Reset Password"
-    subHeader="Account Recovery"
-    message="A password reset link will be sent to your registered institutional email address."
-    [buttons]="['OK']"
-    (didDismiss)="showForgotAlert = false">
-  </ion-alert>
-
 </ion-content>

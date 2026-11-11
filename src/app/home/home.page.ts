@@ -47,6 +47,7 @@ import {
   personOutline,
   timerOutline,
   calendarClearOutline,
+  chevronDownCircleOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../core/services/auth.service';
 import { AttendanceService } from '../core/services/attendance.service';
@@ -156,6 +157,7 @@ export class HomePage implements OnInit, OnDestroy {
   isGettingLocation = false;
   currentCoords: { latitude: number; longitude: number } | null = null;
   locationName = 'Office / Duty Workplace';
+  locationWarning = '';
   isSubmittingClockIn = false;
 
   // Time Out modal state
@@ -193,6 +195,7 @@ export class HomePage implements OnInit, OnDestroy {
       personOutline,
       timerOutline,
       calendarClearOutline,
+      chevronDownCircleOutline,
     });
   }
 
@@ -322,55 +325,64 @@ export class HomePage implements OnInit, OnDestroy {
 
   openClockInModal() {
     this.showClockInModal = true;
+    this.locationWarning = '';
     this.updateRealtimeClock();
 
-    if (this.nativeService.hasCachedLocation) {
-      this.locationName = this.nativeService.lastKnownLocationName!;
+    if (this.nativeService.hasCachedLocation && this.nativeService.lastKnownLocationName) {
+      this.locationName = this.nativeService.lastKnownLocationName;
       this.currentCoords = this.nativeService.lastKnownCoords;
       this.isGettingLocation = false;
-    } else {
-      this.locationName = this.currentUser?.company_name || 'Assigned Duty Workplace';
-      this.isGettingLocation = true;
+      this.cdr.detectChanges();
+      return;
     }
 
-    this.nativeService.getCurrentPosition().then(async (pos) => {
-      this.currentCoords = {
-        latitude: pos.latitude,
-        longitude: pos.longitude,
-      };
-
-      const readablePlace = await this.nativeService.reverseGeocode(pos.latitude, pos.longitude);
-      if (readablePlace) {
-        this.locationName = readablePlace;
-      }
-      this.isGettingLocation = false;
-      this.cdr.detectChanges();
-    }).catch(() => {
-      this.isGettingLocation = false;
-      this.cdr.detectChanges();
-    });
+    this.locationName = this.currentUser?.company_name || 'Assigned Duty Workplace';
+    void this.resolveWorkplaceLocation(false);
   }
 
   refreshLocation() {
+    void this.resolveWorkplaceLocation(true);
+  }
+
+  private async resolveWorkplaceLocation(isManualRefresh: boolean) {
     this.isGettingLocation = true;
+    this.locationWarning = '';
     this.cdr.detectChanges();
 
-    this.nativeService.getCurrentPosition().then(async (pos) => {
-      this.currentCoords = {
-        latitude: pos.latitude,
-        longitude: pos.longitude,
-      };
-      const readablePlace = await this.nativeService.reverseGeocode(pos.latitude, pos.longitude);
-      if (readablePlace) {
-        this.locationName = readablePlace;
+    try {
+      const pos = await this.nativeService.getCurrentPosition(isManualRefresh);
+      if (pos) {
+        this.currentCoords = {
+          latitude: pos.latitude,
+          longitude: pos.longitude,
+        };
+        this.locationWarning = '';
+
+        const readablePlace = await this.nativeService.reverseGeocode(pos.latitude, pos.longitude);
+        if (readablePlace) {
+          this.locationName = readablePlace;
+        }
+        if (isManualRefresh) {
+          this.nativeService.triggerHapticFeedback('medium');
+        }
+      } else {
+        this.currentCoords = null;
+        this.locationName = `${this.currentUser?.company_name || 'Assigned Duty Workplace'} (GPS Unavailable)`;
+        this.locationWarning =
+          this.nativeService.lastLocationError ||
+          'Live GPS location could not be acquired. Please enable Location Services and tap Refresh.';
+        this.toastService.showError(this.locationWarning);
       }
+    } catch {
+      this.currentCoords = null;
+      this.locationName = `${this.currentUser?.company_name || 'Assigned Duty Workplace'} (GPS Unavailable)`;
+      this.locationWarning =
+        'Live GPS location could not be acquired. Please enable Location Services and tap Refresh.';
+      this.toastService.showError(this.locationWarning);
+    } finally {
       this.isGettingLocation = false;
-      this.nativeService.triggerHapticFeedback('medium');
       this.cdr.detectChanges();
-    }).catch(() => {
-      this.isGettingLocation = false;
-      this.cdr.detectChanges();
-    });
+    }
   }
 
   closeClockInModal() {

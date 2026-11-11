@@ -57,23 +57,61 @@ If you need to point the app to a custom/local API server during development:
 
 ### Prerequisites
 
-- **Node.js & npm**
+- **Node.js & npm** (LTS recommended for Ionic/Angular CLI tooling)
 - **Ionic CLI** (`npm install -g @ionic/cli`)
-- **Android Studio / Android SDK & JDK** (only required if rebuilding the Android APK locally)
+- **Android Studio / Android SDK & JDK** (required for running on an emulator/device or rebuilding `ontrack.apk`)
+- **XAMPP (Apache + MySQL)** *(Optional — only needed if running your own local copy of the backend API instead of the hosted server)*
 
-### 1. Install Dependencies
+### 1. Clone the Project
+
+```bash
+git clone https://github.com/reinieltalplacido/ontrack.git
+cd ontrack
+```
+
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Run the App Locally
+### 3. Configure the Backend API
+
+- **Hosted API (Default):** No local PHP or MySQL setup is required — the app points to the live server (`https://ontrack-api.x10.network/ontrack-api/api`) by default.
+- **Optional Local XAMPP Backend:**
+  1. Clone the backend repository [`reinieltalplacido/ontrack-api`](https://github.com/reinieltalplacido/ontrack-api) into `C:/xampp/htdocs/ontrack-api`.
+  2. Start **Apache** and **MySQL** in XAMPP, then import the database SQL schema via **phpMyAdmin** (`http://localhost/phpmyadmin`).
+  3. If the app cannot reach the default host or you want to target your LAN XAMPP server (`http://<YOUR_LOCAL_IP>/ontrack-api/api`), attempt login to trigger the failed-request prompt and configure your custom API base URL there (or update `src/environments/environment.ts`).
+
+### 4. Run the App Locally in Browser
 
 ```bash
 ionic serve
 ```
 
-_(You can also run `npm start` if `@ionic/cli` is not installed globally.)_
+_(Runs on `http://localhost:4200`. You can also run `npm start` if `@ionic/cli` is not installed globally.)_
+
+### 5. Run on Android (Emulator or Physical Device)
+
+```bash
+ionic build
+npx cap sync android
+npx cap open android
+```
+
+From Android Studio, select an emulator or USB-debugging Android device and click **Run**. Grant **Camera** and **Location (GPS)** permissions when prompted for attendance verification.
+
+### 6. First-Time Account Setup
+
+1. Launch the app and tap **Log In**.
+2. Tap **Create Student Account** to complete the 3-step student registration wizard (Academic Details, Company & Coordinator Assignment, and Password) — or sign in using an existing student/coordinator account.
+
+### 7. Automated Tests
+
+```bash
+npm run test:unit   # Vitest unit tests (services, utilities, and dashboard GPS/goal logic)
+npm run test:e2e    # Playwright Mobile Chrome E2E tests (main student user flow with mocked API/GPS)
+```
 
 ---
 
@@ -92,6 +130,34 @@ _(You can also run `npm start` if `@ionic/cli` is not installed globally.)_
    ```powershell
    Copy-Item .\android\app\build\outputs\apk\debug\app-debug.apk .\ontrack.apk -Force
    ```
+
+---
+
+## Testing, Known Limitations & Suggested Improvements
+
+### Main User Flow Coverage
+
+- **Unit & Integration Logic (`npm run test:unit`)**: Verifies [`NativeService`](src/app/core/services/native.service.ts) live GPS acquisition, browser fallback, caching, and explicit `null` + error-state reporting on denial (with no hardcoded fallback coordinates); [`HomePage`](src/app/home/home.page.ts) Time-In GPS failure warning vs. live GPS resolution and past target-date validation; [`format.util.ts`](src/app/core/utils/format.util.ts) duration/time helpers; and root `AppComponent` initialization.
+- **Mobile End-to-End Flow (`npm run test:e2e`)**: Exercises Landing -> Login (without broken password-reset links) -> Registration wizard validation and coordinator auto-lookup -> Dashboard Time-In GPS denial banner and recovery on **Refresh** -> Task creation -> Time Logs, clean empty Reports state, and Profile **Change Password** modal using deterministic mocked API and geolocation responses.
+
+### Identified Limitations & Usability Issues
+
+1. **Requires active internet for attendance and task submissions:** Write operations (Time-In, Time-Out, Task creation, Report submission) submit directly to the REST API without an offline sync queue, so trainees in zero-signal job sites cannot queue logs offline.
+2. **GPS denial or indoor signal loss omits coordinates on Time-In:** When live GPS cannot be acquired, Time-In now alerts the trainee explicitly and marks the location as `(GPS Unavailable)` instead of storing fake default coordinates, meaning location verification depends on granting OS permission and having GPS fix.
+3. **No self-service forgot-password recovery:** Password changes work cleanly for signed-in users under **Profile -> Change Password**, but locked-out trainees cannot currently reset a forgotten password via email without coordinator/admin database assistance.
+
+### Suggested Improvements
+
+1. **Offline Queue & Auto-Sync:** Cache pending Time-In/Time-Out and task updates locally using Capacitor storage and flush them automatically once connectivity is restored.
+2. **Workplace Geofence Check:** Compare live Time-In coordinates against registered company coordinates so supervisors see an in-zone/out-of-zone indicator automatically.
+3. **Verified OTP Password Reset:** Add an email verification/OTP reset endpoint to `ontrack-api` so students can securely recover forgotten passwords without coordinator intervention.
+
+---
+
+## Evaluation Accounts
+
+- **Student Account:** `reinieltalplacido529@gmail.com` _(password provided separately in submission notes)_
+- **Academic Coordinator (`BSIT 4-E` — Prof. Angelito Cunanan Jr.):** `angelito.cunanan@neust.edu.ph` or Employee ID `PROF-2026-005` _(password provided separately in submission notes)_
 
 ---
 

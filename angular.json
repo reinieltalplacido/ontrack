@@ -96,7 +96,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "buildTarget": "::development",
-            "runnerConfig": "vitest.config.mts",
+            "runnerConfig": false,
             "setupFiles": ["src/test-setup.ts"],
             "tsConfig": "tsconfig.spec.json"
           }

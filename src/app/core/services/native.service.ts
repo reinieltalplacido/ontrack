@@ -14,10 +14,12 @@ export interface GeoResult {
 export class NativeService {
   private cachedCoords: GeoResult | null = null;
   private cachedLocationName: string | null = null;
+  private lastCoordsTime = 0;
   private lastGeocodeTime = 0;
+  public lastLocationError: string | null = null;
 
   get hasCachedLocation(): boolean {
-    return !!this.cachedCoords && !!this.cachedLocationName;
+    return !!this.cachedCoords && Date.now() - this.lastCoordsTime < 60000;
   }
 
   get lastKnownLocationName(): string | null {
@@ -25,15 +27,27 @@ export class NativeService {
   }
 
   get lastKnownCoords(): GeoResult | null {
-    return this.cachedCoords;
+    return this.hasCachedLocation ? this.cachedCoords : null;
+  }
+
+  private describeGeoError(err: any): string {
+    const code = err?.code;
+    const msg = String(err?.message || '').toLowerCase();
+    if (code === 1 || msg.includes('denied') || msg.includes('permission')) {
+      return 'Location permission denied. Enable GPS permission and tap Refresh.';
+    }
+    if (code === 3 || msg.includes('timeout') || msg.includes('timed out')) {
+      return 'Live GPS lookup timed out. Enable Location Services and tap Refresh.';
+    }
+    return 'Live GPS location could not be acquired. Please enable Location Services and tap Refresh.';
   }
 
   /**
-   * Fast GPS coordinates lookup with caching and aggressive timeout
+   * Fast GPS coordinates lookup with explicit failure reporting (no fake coordinate fallback)
    */
-  async getCurrentPosition(): Promise<GeoResult> {
-    // Return cached coordinates if less than 60 seconds old
-    if (this.cachedCoords && Date.now() - this.lastGeocodeTime < 60000) {
+  async getCurrentPosition(forceRefresh = false): Promise<GeoResult | null> {
+    if (!forceRefresh && this.hasCachedLocation && this.cachedCoords) {
+      this.lastLocationError = null;
       return this.cachedCoords;
     }
 
@@ -57,18 +71,25 @@ export class NativeService {
       };
 
       this.cachedCoords = result;
+      this.lastCoordsTime = Date.now();
+      this.lastLocationError = null;
       return result;
-    } catch {
+    } catch (capErr) {
       // Fallback to HTML5 Geolocation API with fast 3-second timeout
       return new Promise((resolve) => {
-        if (!navigator.geolocation) {
-          const fallback = this.cachedCoords || { latitude: 15.4855, longitude: 120.9701 };
-          resolve(fallback);
+        if (typeof navigator === 'undefined' || !navigator.geolocation) {
+          this.cachedCoords = null;
+          this.lastCoordsTime = 0;
+          this.lastLocationError = this.describeGeoError(capErr);
+          resolve(null);
           return;
         }
 
         const timer = setTimeout(() => {
-          resolve(this.cachedCoords || { latitude: 15.4855, longitude: 120.9701 });
+          this.cachedCoords = null;
+          this.lastCoordsTime = 0;
+          this.lastLocationError = this.describeGeoError({ code: 3, message: 'timeout' });
+          resolve(null);
         }, 3000);
 
         navigator.geolocation.getCurrentPosition(
@@ -80,11 +101,16 @@ export class NativeService {
               accuracy: pos.coords.accuracy,
             };
             this.cachedCoords = res;
+            this.lastCoordsTime = Date.now();
+            this.lastLocationError = null;
             resolve(res);
           },
-          () => {
+          (webErr) => {
             clearTimeout(timer);
-            resolve(this.cachedCoords || { latitude: 15.4855, longitude: 120.9701 });
+            this.cachedCoords = null;
+            this.lastCoordsTime = 0;
+            this.lastLocationError = this.describeGeoError(webErr);
+            resolve(null);
           },
           { enableHighAccuracy: false, timeout: 3000, maximumAge: 60000 }
         );

@@ -7,7 +7,6 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
-  IonAlert,
   AlertController,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -42,7 +41,6 @@ import { environment } from '../../../environments/environment';
     IonButton,
     IonIcon,
     IonSpinner,
-    IonAlert,
   ],
 })
 export class LoginPage {
@@ -57,7 +55,6 @@ export class LoginPage {
   showPassword = false;
   isLoading = false;
   errorMessage = '';
-  showForgotAlert = false;
 
   constructor() {
     addIcons({
@@ -129,11 +126,6 @@ export class LoginPage {
         this.cdr.detectChanges();
       },
     });
-  }
-
-  forgotPassword() {
-    this.showForgotAlert = true;
-    this.cdr.detectChanges();
   }
 
   async configureServerUrl() {

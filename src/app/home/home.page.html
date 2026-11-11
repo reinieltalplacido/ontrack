@@ -271,6 +271,9 @@
             <div class="modal-item-text">
               <span class="item-label">Workplace Location</span>
               <strong class="item-val">{{ locationName }}</strong>
+              @if (currentCoords) {
+                <span class="item-desc">GPS Verified</span>
+              }
             </div>
             @if (isGettingLocation) {
               <ion-spinner name="dots"></ion-spinner>
@@ -280,6 +283,13 @@
               </button>
             }
           </div>
+
+          @if (locationWarning) {
+            <div class="gps-warning-banner" role="alert">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <span>{{ locationWarning }}</span>
+            </div>
+          }
         </div>
       </ion-content>
 
