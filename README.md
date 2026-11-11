@@ -27,6 +27,7 @@ You can download the installable Android APK directly from Google Drive or use t
 The APK connects to the live hosted API (`https://ontrack-api.x10.network/ontrack-api/api`) by default, so no local server setup is required to use the app.
 
 If you need to point the app to a custom/local API server during development:
+
 1. Open the **Login** screen and attempt to sign in (or tap the **OnTrack** logo at the top).
 2. If the login fails or cannot reach the server, tap the error banner (**"Tap to configure server IP for mobile APK"**).
 3. Enter your custom/local API base URL (e.g., `http://<YOUR_LOCAL_IP>/ontrack-api/api`) and tap **Save**, or choose **Reset Default** to return to the live API.
@@ -60,7 +61,7 @@ If you need to point the app to a custom/local API server during development:
 - **Node.js & npm** (LTS recommended for Ionic/Angular CLI tooling)
 - **Ionic CLI** (`npm install -g @ionic/cli`)
 - **Android Studio / Android SDK & JDK** (required for running on an emulator/device or rebuilding `ontrack.apk`)
-- **XAMPP (Apache + MySQL)** *(Optional — only needed if running your own local copy of the backend API instead of the hosted server)*
+- **XAMPP (Apache + MySQL)** _(Optional — only needed if running your own local copy of the backend API instead of the hosted server)_
 
 ### 1. Clone the Project
 
@@ -133,31 +134,10 @@ npm run test:e2e    # Playwright Mobile Chrome E2E tests (main student user flow
 
 ---
 
-## Testing, Known Limitations & Suggested Improvements
-
-### Main User Flow Coverage
-
-- **Unit & Integration Logic (`npm run test:unit`)**: Verifies [`NativeService`](src/app/core/services/native.service.ts) live GPS acquisition, browser fallback, caching, and explicit `null` + error-state reporting on denial (with no hardcoded fallback coordinates); [`HomePage`](src/app/home/home.page.ts) Time-In GPS failure warning vs. live GPS resolution and past target-date validation; [`format.util.ts`](src/app/core/utils/format.util.ts) duration/time helpers; and root `AppComponent` initialization.
-- **Mobile End-to-End Flow (`npm run test:e2e`)**: Exercises Landing -> Login (without broken password-reset links) -> Registration wizard validation and coordinator auto-lookup -> Dashboard Time-In GPS denial banner and recovery on **Refresh** -> Task creation -> Time Logs, clean empty Reports state, and Profile **Change Password** modal using deterministic mocked API and geolocation responses.
-
-### Identified Limitations & Usability Issues
-
-1. **Requires active internet for attendance and task submissions:** Write operations (Time-In, Time-Out, Task creation, Report submission) submit directly to the REST API without an offline sync queue, so trainees in zero-signal job sites cannot queue logs offline.
-2. **GPS denial or indoor signal loss omits coordinates on Time-In:** When live GPS cannot be acquired, Time-In now alerts the trainee explicitly and marks the location as `(GPS Unavailable)` instead of storing fake default coordinates, meaning location verification depends on granting OS permission and having GPS fix.
-3. **No self-service forgot-password recovery:** Password changes work cleanly for signed-in users under **Profile -> Change Password**, but locked-out trainees cannot currently reset a forgotten password via email without coordinator/admin database assistance.
-
-### Suggested Improvements
-
-1. **Offline Queue & Auto-Sync:** Cache pending Time-In/Time-Out and task updates locally using Capacitor storage and flush them automatically once connectivity is restored.
-2. **Workplace Geofence Check:** Compare live Time-In coordinates against registered company coordinates so supervisors see an in-zone/out-of-zone indicator automatically.
-3. **Verified OTP Password Reset:** Add an email verification/OTP reset endpoint to `ontrack-api` so students can securely recover forgotten passwords without coordinator intervention.
-
----
-
 ## Evaluation Accounts
 
-- **Student Account:** `reinieltalplacido529@gmail.com` _(password provided separately in submission notes)_
-- **Academic Coordinator (`BSIT 4-E` — Prof. Angelito Cunanan Jr.):** `angelito.cunanan@neust.edu.ph` or Employee ID `PROF-2026-005` _(password provided separately in submission notes)_
+- **Student Account:** `reinieltalplacido529@gmail.com` _(password: Reiniel@22)_
+- **Academic Coordinator (`BSIT 4-E` — Prof. Angelito Cunanan Jr.):** `angelito.cunanan@neust.edu.ph` or Employee ID `PROF-2026-005` _(password: Password123!)_
 
 ---
 
@@ -167,4 +147,3 @@ npm run test:e2e    # Playwright Mobile Chrome E2E tests (main student user flow
 - Jorald Allen M. Sevilla
 - Reiniel Anjelo T. Talplacido
 - Mark Lennard L. Torres
-
