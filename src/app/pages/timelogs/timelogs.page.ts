@@ -18,12 +18,8 @@ import {
   timeOutline,
   calendarOutline,
   locationOutline,
-  cameraOutline,
-  checkmarkCircleOutline,
-  hourglassOutline,
   documentTextOutline,
   searchOutline,
-  filterOutline,
   menuOutline,
   closeOutline,
   gridOutline,
@@ -31,17 +27,13 @@ import {
   copyOutline,
   personOutline,
   logOutOutline,
-  chevronForwardOutline,
-  arrowDownOutline,
-  arrowBackOutline,
-  shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AttendanceLog } from '../../models/attendance.model';
 import { User } from '../../models/user.model';
-import { formatHours, formatTime } from '../../core/utils/format.util';
+import { formatDate, formatHours, formatTime } from '../../core/utils/format.util';
 
 @Component({
   selector: 'app-timelogs',
@@ -91,12 +83,8 @@ export class TimeLogsPage implements OnInit {
       timeOutline,
       calendarOutline,
       locationOutline,
-      cameraOutline,
-      checkmarkCircleOutline,
-      hourglassOutline,
       documentTextOutline,
       searchOutline,
-      filterOutline,
       menuOutline,
       closeOutline,
       gridOutline,
@@ -104,10 +92,6 @@ export class TimeLogsPage implements OnInit {
       copyOutline,
       personOutline,
       logOutOutline,
-      chevronForwardOutline,
-      arrowDownOutline,
-      arrowBackOutline,
-      shieldCheckmarkOutline,
     });
   }
 
@@ -123,14 +107,8 @@ export class TimeLogsPage implements OnInit {
   ngOnInit() {
     this.currentUser = this.authService.currentUserValue;
     if (!this.currentUser) {
-      this.currentUser = {
-        id: 1,
-        student_id: 'SUM2023-00980',
-        full_name: 'Reiniel Talplacido',
-        email: 'reiniel@student.neust.edu.ph',
-        company_name: 'Project SOLO',
-        required_hours: 500,
-      };
+      this.router.navigate(['/login']);
+      return;
     }
     this.loadCachedLogs();
   }
@@ -257,10 +235,6 @@ export class TimeLogsPage implements OnInit {
     this.cdr.detectChanges();
   }
 
-  goBack() {
-    this.router.navigate(['/home']);
-  }
-
   // Side Drawer navigation
   openSideMenu() {
     this.isSideMenuOpen = true;
@@ -296,20 +270,7 @@ export class TimeLogsPage implements OnInit {
   }
 
   formatDate(dateStr?: string | null): string {
-    if (!dateStr) return 'N/A';
-    try {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        const d = new Date(year, month, day);
-        return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-      }
-      return dateStr;
-    } catch {
-      return dateStr;
-    }
+    return formatDate(dateStr, 'N/A', '2-digit');
   }
 
   formatTime(timeStr?: string | null): string {

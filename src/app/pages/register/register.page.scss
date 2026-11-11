@@ -432,16 +432,24 @@
   .summary-line {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
     font-size: 0.82rem;
-    padding: 4px 0;
+    padding: 5px 0;
 
     .s-label {
       color: #64748b;
+      flex-shrink: 0;
     }
 
     .s-val {
       font-weight: 600;
       color: #1e293b;
+      flex: 1;
+      min-width: 0;
+      text-align: right;
+      line-height: 1.35;
+      overflow-wrap: break-word;
 
       &.highlight {
         color: #10b981;

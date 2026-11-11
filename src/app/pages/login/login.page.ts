@@ -18,14 +18,16 @@ import {
   eyeOffOutline,
   arrowBackOutline,
   logInOutline,
-  sparklesOutline,
   alertCircleOutline,
-  shieldCheckmarkOutline,
-  personOutline,
-  serverOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import {
+  DEFAULT_API_URL,
+  getCustomApiUrl,
+  resetCustomApiUrl,
+  saveCustomApiUrl,
+} from '../../core/utils/api-url.util';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -55,8 +57,6 @@ export class LoginPage {
   showPassword = false;
   isLoading = false;
   errorMessage = '';
-  showToast = false;
-  toastMessage = '';
   showForgotAlert = false;
 
   constructor() {
@@ -67,11 +67,7 @@ export class LoginPage {
       eyeOffOutline,
       arrowBackOutline,
       logInOutline,
-      sparklesOutline,
       alertCircleOutline,
-      shieldCheckmarkOutline,
-      personOutline,
-      serverOutline,
     });
 
     this.loginForm = this.fb.group({
@@ -91,34 +87,6 @@ export class LoginPage {
 
   goToRegister() {
     this.router.navigate(['/register']);
-  }
-
-  fillDemoStudent() {
-    this.loginForm.patchValue({
-      email: '2026-0001',
-      password: 'Password123!',
-    });
-    this.errorMessage = '';
-    this.toastMessage = 'Student demo credentials loaded!';
-    this.showToast = true;
-    this.toastService.showInfo('Student demo credentials loaded!');
-    this.cdr.detectChanges();
-  }
-
-  fillDemoCoordinator() {
-    this.loginForm.patchValue({
-      email: 'admin@neust.edu.ph',
-      password: 'AdminPassword123!',
-    });
-    this.errorMessage = '';
-    this.toastMessage = 'Coordinator demo credentials loaded!';
-    this.showToast = true;
-    this.toastService.showInfo('Coordinator demo credentials loaded!');
-    this.cdr.detectChanges();
-  }
-
-  fillDemoCredentials() {
-    this.fillDemoStudent();
   }
 
   onSubmit() {
@@ -169,15 +137,15 @@ export class LoginPage {
   }
 
   async configureServerUrl() {
-    const currentUrl = localStorage.getItem('ontrack_api_url') || environment.apiUrl;
+    const currentUrl = getCustomApiUrl() || environment.apiUrl;
     const alert = await this.alertCtrl.create({
       header: 'Backend Server URL',
-      subHeader: 'For APK testing on your mobile phone, set your PC\'s Wi-Fi IP (e.g. http://192.168.1.9/ontrack-api/api)',
+      subHeader: 'Live API is active by default. Only override this for local testing.',
       inputs: [
         {
           name: 'url',
           type: 'url',
-          placeholder: 'http://192.168.1.9/ontrack-api/api',
+          placeholder: DEFAULT_API_URL,
           value: currentUrl,
         },
       ],
@@ -186,22 +154,15 @@ export class LoginPage {
           text: 'Reset Default',
           role: 'cancel',
           handler: () => {
-            localStorage.removeItem('ontrack_api_url');
-            this.toastService.showInfo('Reset to default: http://localhost/ontrack-api/api');
+            resetCustomApiUrl();
+            this.toastService.showInfo(`Reset to default: ${DEFAULT_API_URL}`);
           },
         },
         {
           text: 'Save',
           handler: (data) => {
             if (data.url && data.url.trim()) {
-              let u = data.url.trim().replace(/\/+$/, '');
-              if (!u.includes('/ontrack-api')) {
-                u += '/ontrack-api';
-              }
-              if (!u.endsWith('/api')) {
-                u += '/api';
-              }
-              localStorage.setItem('ontrack_api_url', u);
+              const u = saveCustomApiUrl(data.url);
               this.toastService.showSuccess('Server connected to: ' + u);
               this.errorMessage = '';
               this.cdr.detectChanges();

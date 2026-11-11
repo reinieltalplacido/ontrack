@@ -77,7 +77,11 @@ Thumbs.db
 
 # Android & Build Artifacts
 *.apk
+!/ontrack.apk
 *.aab
+
+# Backend
+/backend/
 
 # Temporary scratch scripts
 scratch/

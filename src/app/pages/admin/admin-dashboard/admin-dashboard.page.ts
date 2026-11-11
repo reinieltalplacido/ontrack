@@ -24,8 +24,6 @@ import {
   checkmarkCircleOutline,
   hourglassOutline,
   searchOutline,
-  filterOutline,
-  addOutline,
   closeOutline,
   refreshOutline,
   logOutOutline,
@@ -40,12 +38,7 @@ import {
   alertCircleOutline,
   chevronForwardOutline,
   eyeOutline,
-  sparklesOutline,
-  arrowBackOutline,
-  flagOutline,
-  speedometerOutline,
   imageOutline,
-  sendOutline,
   menuOutline,
   chevronBackOutline,
   chevronDownOutline,
@@ -71,7 +64,6 @@ import {
   analyticsOutline,
   copyOutline,
   documentAttachOutline,
-  checkmarkDoneOutline,
   openOutline,
 } from 'ionicons/icons';
 import { AdminService, AdminStats, MonitoredStudent, CoordinatorReportItem } from '../../../core/services/admin.service';
@@ -79,8 +71,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NativeService } from '../../../core/services/native.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Professor } from '../../../models/user.model';
-import { environment } from '../../../../environments/environment';
-import { formatHours, formatTime, formatShiftTime } from '../../../core/utils/format.util';
+import { formatHours, formatTime, formatShiftTime, resolveUploadUrl } from '../../../core/utils/format.util';
 
 export interface AdminAttendanceLog {
   id: number;
@@ -212,13 +203,6 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
   ];
   isSideMenuOpen = false;
 
-  onSectionChange(newSection: string) {
-    this.currentSection = newSection;
-    this.newTask.section = newSection;
-    this.toastService.showInfo(`Viewing Section ${newSection}`);
-    this.loadAllData();
-  }
-
   // Active Segment
   selectedSegment: 'overview' | 'students' | 'attendance' | 'tasks' | 'reports' | 'profile' = 'overview';
 
@@ -306,19 +290,6 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
   selectedTaskProof: any = null;
   isVerifyingTask = false;
 
-  // Assign Task Modal
-  isAssignModalOpen = false;
-  isSubmittingTask = false;
-  newTask = {
-    target_type: 'section' as 'section' | 'student',
-    user_id: undefined as number | undefined,
-    section: 'BSIT 4-A',
-    title: '',
-    description: '',
-    priority: 'medium' as 'low' | 'medium' | 'high',
-    deadline: '',
-  };
-
   // Photo Preview Modal
   isPhotoModalOpen = false;
   previewPhotoUrl: string | null = null;
@@ -335,10 +306,6 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
   showConfirmPassword = false;
   isChangingPassword = false;
   passwordError = '';
-
-  // Toast
-  showToast = false;
-  toastMessage = '';
 
   // Realtime Sync Handlers for Reports
   private adminReportsPollTimer: any = null;
@@ -376,7 +343,7 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
   }
 
   constructor() {
-    addIcons({menuOutline,shieldCheckmarkOutline,calendarOutline,addOutline,peopleOutline,timeOutline,checkboxOutline,chevronForwardOutline,locationOutline,cameraOutline,hourglassOutline,searchOutline,closeOutline,chevronBackOutline,todayOutline,documentTextOutline,eyeOutline,flagOutline,reorderThreeOutline,clipboardOutline,schoolOutline,businessOutline,mailOutline,listOutline,checkmarkCircleOutline,checkmark,time,closeCircleOutline,calendarClearOutline,fingerPrintOutline,checkmarkCircle,personOutline,sendOutline,documentText,downloadOutline,checkmarkDoneCircleOutline,gridOutline,refreshOutline,logOutOutline,filterOutline,alertCircleOutline,sparklesOutline,arrowBackOutline,speedometerOutline,imageOutline,chevronDownOutline,chevronUpOutline,checkmarkOutline,lockClosedOutline,keyOutline,eyeOffOutline,printOutline,analyticsOutline,copyOutline,documentAttachOutline,checkmarkDoneOutline,openOutline});
+    addIcons({menuOutline,shieldCheckmarkOutline,calendarOutline,peopleOutline,timeOutline,checkboxOutline,chevronForwardOutline,locationOutline,cameraOutline,hourglassOutline,searchOutline,closeOutline,chevronBackOutline,todayOutline,documentTextOutline,eyeOutline,reorderThreeOutline,clipboardOutline,schoolOutline,businessOutline,mailOutline,listOutline,checkmarkCircleOutline,checkmark,time,closeCircleOutline,calendarClearOutline,fingerPrintOutline,checkmarkCircle,personOutline,documentText,downloadOutline,checkmarkDoneCircleOutline,gridOutline,refreshOutline,logOutOutline,alertCircleOutline,imageOutline,chevronDownOutline,chevronUpOutline,checkmarkOutline,lockClosedOutline,keyOutline,eyeOffOutline,printOutline,analyticsOutline,copyOutline,documentAttachOutline,openOutline});
   }
 
   ngOnInit() {
@@ -580,7 +547,6 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
       this.currentProfessor = prof;
       if (prof.assigned_section) {
         this.currentSection = prof.assigned_section;
-        this.newTask.section = prof.assigned_section;
       }
       return;
     }
@@ -1093,81 +1059,6 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
     return ext === 'pdf' || ext === 'doc' || ext === 'docx' || ext === 'xls' || ext === 'xlsx';
   }
 
-  // Assign Task Modal
-  openAssignTaskModal(student?: MonitoredStudent) {
-    if (student) {
-      this.newTask.target_type = 'student';
-      this.newTask.user_id = student.id;
-    } else {
-      this.newTask.target_type = 'section';
-      this.newTask.section = this.currentSection;
-      this.newTask.user_id = undefined;
-    }
-
-    this.newTask.title = '';
-    this.newTask.description = '';
-    this.newTask.priority = 'medium';
-
-    // Default deadline 7 days ahead
-    const d = new Date();
-    d.setDate(d.getDate() + 7);
-    this.newTask.deadline = d.toISOString().split('T')[0];
-
-    this.isAssignModalOpen = true;
-    this.cdr.detectChanges();
-  }
-
-  closeAssignTaskModal() {
-    this.isAssignModalOpen = false;
-    this.cdr.detectChanges();
-  }
-
-  submitAssignTask() {
-    if (!this.newTask.title.trim()) {
-      this.presentToast('Please provide a task title.', 'warning');
-      return;
-    }
-
-    if (this.newTask.target_type === 'student' && !this.newTask.user_id) {
-      this.presentToast('Please select a student.', 'warning');
-      return;
-    }
-
-    this.isSubmittingTask = true;
-    this.cdr.detectChanges();
-    this.adminService
-      .assignTask({
-        title: this.newTask.title.trim(),
-        description: this.newTask.description.trim() || undefined,
-        priority: this.newTask.priority,
-        deadline: this.newTask.deadline || undefined,
-        target_type: this.newTask.target_type,
-        user_id: this.newTask.target_type === 'student' ? this.newTask.user_id : undefined,
-        section: this.newTask.target_type === 'section' ? this.newTask.section : undefined,
-        professor_id: this.currentProfessor?.id,
-      })
-      .subscribe({
-        next: (res) => {
-          this.isSubmittingTask = false;
-          if (res.success) {
-            this.nativeService.triggerHapticFeedback('success');
-            this.presentToast(res.message || 'Task successfully assigned!', 'success');
-            this.closeAssignTaskModal();
-            this.loadDashboardStats();
-            this.loadStudents();
-          } else {
-            this.presentToast(res.message || 'Failed to assign task.', 'error');
-          }
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.isSubmittingTask = false;
-          this.presentToast('Server error while assigning task.', 'error');
-          this.cdr.detectChanges();
-        },
-      });
-  }
-
   // Photo Preview Modal
   openPhotoPreview(photoUrl: string | null | undefined, title: string, subtitle: string) {
     if (!photoUrl) return;
@@ -1185,14 +1076,7 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
   }
 
   getPhotoUrl(path: string | null | undefined): string | null {
-    if (!path) return null;
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
-      return path;
-    }
-    const clean = path.replace(/^\/+/, '');
-    const prefix = clean.startsWith('uploads/') ? '' : 'uploads/tasks/';
-    const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
-    return `${baseUrl}/${prefix}${clean}`;
+    return path ? resolveUploadUrl(path, 'uploads/tasks/') : null;
   }
 
   // Change Password Modal Controls
@@ -1439,7 +1323,9 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
             // 3. Instant cross-tab sync to student portal
             try {
               localStorage.setItem('ontrack_report_updated', Date.now().toString());
-            } catch (e) {}
+            } catch {
+              // Ignore storage quota errors
+            }
 
             // 4. Force immediate Change Detection for real-time rendering
             this.cdr.detectChanges();
@@ -1472,9 +1358,7 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
   }
 
   getAttachmentFullUrl(url?: string): string {
-    if (!url) return '';
-    const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    return url.startsWith('http') ? url : `${base}/${url.replace(/^\/+/, '')}`;
+    return resolveUploadUrl(url);
   }
 
   isImageFile(url?: string): boolean {
@@ -1484,8 +1368,6 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
   }
 
   presentToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {
-    this.toastMessage = message;
-    this.showToast = true;
     this.toastService.show(message, type);
   }
 
@@ -1494,13 +1376,6 @@ export class AdminDashboardPage implements OnInit, OnDestroy {
     this.adminService.logout();
     this.authService.logout();
     this.toastService.showInfo('Signed out of Coordinator Portal.');
-    this.router.navigate(['/login']);
-  }
-
-  goToStudentPortal() {
-    this.closeSideMenu();
-    this.adminService.logout();
-    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }

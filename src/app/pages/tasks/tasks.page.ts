@@ -22,11 +22,10 @@ import { NativeService } from '../../core/services/native.service';
 import { ToastService } from '../../core/services/toast.service';
 import { TaskItem, TaskPriority, TaskStatus } from '../../models/task.model';
 import { User } from '../../models/user.model';
-import { environment } from '../../../environments/environment';
+import { formatDate, resolveUploadUrl } from '../../core/utils/format.util';
 import {
   addOutline,
   searchOutline,
-  filterOutline,
   calendarOutline,
   trashOutline,
   checkboxOutline,
@@ -42,9 +41,6 @@ import {
   logOutOutline,
   refreshOutline,
   checkmarkOutline,
-  flagOutline,
-  swapVerticalOutline,
-  arrowBackOutline,
   cameraOutline,
   imageOutline,
   playOutline,
@@ -52,9 +48,7 @@ import {
   attachOutline,
   documentTextOutline,
   checkmarkDoneOutline,
-  chevronForwardOutline,
   expandOutline,
-  shieldCheckmarkOutline,
   arrowUndoOutline,
   chevronDownOutline,
   chevronUpOutline,
@@ -62,7 +56,6 @@ import {
   documentAttachOutline,
   openOutline,
   closeCircleOutline,
-  downloadOutline,
 } from 'ionicons/icons';
 
 @Component({
@@ -138,7 +131,6 @@ export class TasksPage implements OnInit {
     addIcons({
       addOutline,
       searchOutline,
-      filterOutline,
       calendarOutline,
       trashOutline,
       checkboxOutline,
@@ -154,9 +146,6 @@ export class TasksPage implements OnInit {
       logOutOutline,
       refreshOutline,
       checkmarkOutline,
-      flagOutline,
-      swapVerticalOutline,
-      arrowBackOutline,
       cameraOutline,
       imageOutline,
       playOutline,
@@ -164,9 +153,7 @@ export class TasksPage implements OnInit {
       attachOutline,
       documentTextOutline,
       checkmarkDoneOutline,
-      chevronForwardOutline,
       expandOutline,
-      shieldCheckmarkOutline,
       arrowUndoOutline,
       chevronDownOutline,
       chevronUpOutline,
@@ -174,7 +161,6 @@ export class TasksPage implements OnInit {
       documentAttachOutline,
       openOutline,
       closeCircleOutline,
-      downloadOutline,
     });
   }
 
@@ -189,14 +175,8 @@ export class TasksPage implements OnInit {
   ngOnInit() {
     this.currentUser = this.authService.currentUserValue;
     if (!this.currentUser) {
-      this.currentUser = {
-        id: 1,
-        student_id: 'SUM2023-00980',
-        full_name: 'Reiniel Talplacido',
-        email: 'reiniel@student.neust.edu.ph',
-        company_name: 'Project SOLO',
-        required_hours: 500,
-      };
+      this.router.navigate(['/login']);
+      return;
     }
     this.loadTasks();
   }
@@ -463,17 +443,6 @@ export class TasksPage implements OnInit {
     }
   }
 
-  async attachDocumentation(task: TaskItem) {
-    try {
-      const photo = await this.nativeService.captureTaskProof();
-      if (photo) {
-        this.saveTaskDocumentation(task, photo, 'photo_proof_' + Date.now() + '.jpg');
-      }
-    } catch {
-      // Fallback handled via file input
-    }
-  }
-
   onFileSelected(event: any, task: TaskItem) {
     const file = event.target?.files?.[0];
     if (file) {
@@ -573,12 +542,7 @@ export class TasksPage implements OnInit {
   }
 
   getProofImageUrl(proofUrl?: string | null): string {
-    if (!proofUrl) return '';
-    if (proofUrl.startsWith('data:') || proofUrl.startsWith('http://') || proofUrl.startsWith('https://')) {
-      return proofUrl;
-    }
-    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
-    return `${baseUrl}/${proofUrl}`;
+    return resolveUploadUrl(proofUrl);
   }
 
   viewFullImage(url: string, event?: Event) {
@@ -717,10 +681,6 @@ export class TasksPage implements OnInit {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/home']);
-  }
-
   // Side Drawer navigation
   openSideMenu() {
     this.isSideMenuOpen = true;
@@ -755,20 +715,7 @@ export class TasksPage implements OnInit {
   }
 
   formatDate(dateStr?: string | null): string {
-    if (!dateStr) return 'No due date';
-    try {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        const d = new Date(year, month, day);
-        return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-      }
-      return dateStr;
-    } catch {
-      return dateStr;
-    }
+    return formatDate(dateStr, 'No due date', '2-digit');
   }
 
   showFeedback(msg: string, type: 'success' | 'error') {

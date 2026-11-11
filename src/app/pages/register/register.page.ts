@@ -16,15 +16,11 @@ import {
   arrowBackOutline,
   arrowForwardOutline,
   checkmarkCircleOutline,
-  personOutline,
   businessOutline,
   shieldCheckmarkOutline,
-  lockClosedOutline,
   eyeOutline,
   eyeOffOutline,
   schoolOutline,
-  timeOutline,
-  sparklesOutline,
   alertCircleOutline,
   calendarOutline,
   personCircleOutline,
@@ -32,6 +28,7 @@ import {
 } from 'ionicons/icons';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { getTodayLocalIso } from '../../core/utils/format.util';
 
 export interface CollegeProgramGroup {
   college: string;
@@ -69,8 +66,6 @@ export class RegisterPage {
   showConfirmPassword = false;
   isLoading = false;
   errorMessage = '';
-  showToast = false;
-  toastMessage = '';
   isCalendarOpen = false;
   activeDateField: 'start_date' | 'target_date' = 'target_date';
 
@@ -176,20 +171,18 @@ export class RegisterPage {
       arrowBackOutline,
       arrowForwardOutline,
       checkmarkCircleOutline,
-      personOutline,
       businessOutline,
       shieldCheckmarkOutline,
-      lockClosedOutline,
       eyeOutline,
       eyeOffOutline,
       schoolOutline,
-      timeOutline,
-      sparklesOutline,
       alertCircleOutline,
       calendarOutline,
       personCircleOutline,
       chevronDownOutline,
     });
+
+    const todayIso = getTodayLocalIso();
 
     this.registerForm = this.fb.group({
       // Step 1: Academic & Personal
@@ -207,9 +200,9 @@ export class RegisterPage {
       trainer_name: ['', [Validators.required]],
       adviser_name: ['', [Validators.required]],
       adviser_email: ['', [Validators.email]],
-      start_date: ['2026-08-15', [Validators.required]],
+      start_date: [todayIso, [Validators.required]],
       required_hours: [0, [Validators.required, Validators.min(0)]],
-      target_date: ['2026-12-15', [Validators.required]],
+      target_date: ['', [Validators.required]],
 
       // Step 3: Account Security
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -353,7 +346,36 @@ export class RegisterPage {
 
   isStep2Valid(): boolean {
     const s2 = ['company_name', 'company_address', 'trainer_name', 'adviser_name', 'start_date', 'required_hours', 'target_date'];
-    return s2.every((field) => this.registerForm.get(field)?.valid);
+    const controlsValid = s2.every((field) => this.registerForm.get(field)?.valid);
+    return controlsValid && !this.isStartDateInvalid && !this.isTargetDateInvalid;
+  }
+
+  get minStartDate(): string {
+    return getTodayLocalIso();
+  }
+
+  get minTargetDate(): string {
+    const start = this.registerForm?.get('start_date')?.value;
+    const today = this.minStartDate;
+    return start && start > today ? start : today;
+  }
+
+  get calendarValue(): string | undefined {
+    const val = this.registerForm?.get(this.activeDateField)?.value;
+    const min = this.activeDateField === 'start_date' ? this.minStartDate : this.minTargetDate;
+    return val && val >= min ? val : undefined;
+  }
+
+  get isStartDateInvalid(): boolean {
+    const start = this.registerForm?.get('start_date')?.value;
+    return !start || start < this.minStartDate;
+  }
+
+  get isTargetDateInvalid(): boolean {
+    const start = this.registerForm?.get('start_date')?.value;
+    const target = this.registerForm?.get('target_date')?.value;
+    if (!target || target < this.minStartDate) return true;
+    return !!(start && target < start);
   }
 
   isStep3Valid(): boolean {
@@ -376,7 +398,12 @@ export class RegisterPage {
     } else if (this.currentStep === 2) {
       if (!this.isStep2Valid()) {
         this.markFieldsTouched(['company_name', 'company_address', 'trainer_name', 'adviser_name', 'start_date', 'required_hours', 'target_date']);
-        this.errorMessage = 'Please specify all company, trainer, and OJT schedule details.';
+        if (this.isStartDateInvalid || this.isTargetDateInvalid) {
+          this.errorMessage = 'Start date cannot be in the past, and target end date must be on or after the start date.';
+          this.toastService.showError(this.errorMessage);
+        } else {
+          this.errorMessage = 'Please specify all company, trainer, and OJT schedule details.';
+        }
         this.cdr.detectChanges();
         return;
       }
@@ -417,11 +444,31 @@ export class RegisterPage {
   }
 
   onDateSelected(event: any) {
-    const selectedVal = event.detail.value;
+    const selectedVal = event.detail?.value;
     if (selectedVal) {
       // Extract YYYY-MM-DD
       const dateOnly = selectedVal.split('T')[0];
-      this.registerForm.patchValue({ [this.activeDateField]: dateOnly });
+      if (this.activeDateField === 'start_date') {
+        if (dateOnly < this.minStartDate) {
+          this.toastService.showError('Start date cannot be in the past.');
+          this.closeCalendar();
+          return;
+        }
+        this.registerForm.patchValue({ start_date: dateOnly });
+        const curTarget = this.registerForm.get('target_date')?.value;
+        if (curTarget && curTarget < dateOnly) {
+          this.registerForm.patchValue({ target_date: dateOnly });
+          this.toastService.showInfo('Target end date adjusted to match the new start date.');
+        }
+      } else {
+        if (dateOnly < this.minTargetDate) {
+          this.toastService.showError('Target end date cannot be in the past or earlier than the start date.');
+          this.closeCalendar();
+          return;
+        }
+        this.registerForm.patchValue({ target_date: dateOnly });
+      }
+      this.registerForm.get(this.activeDateField)?.markAsTouched();
     }
     this.closeCalendar();
     this.cdr.detectChanges();
@@ -449,32 +496,6 @@ export class RegisterPage {
     fields.forEach((f) => this.registerForm.get(f)?.markAsTouched());
   }
 
-  fillSampleOjtData() {
-    const randomNum = Math.floor(100 + Math.random() * 900);
-    this.registerForm.patchValue({
-      student_no: `SUM2023-0${randomNum}`,
-      full_name: 'REINIEL TALPLACIDO',
-      school_campus: 'NEUST - Sumacab Campus',
-      course: 'Bachelor of Science in Information Technology with Specialization in Web Systems Technology',
-      year_level: 4,
-      section: '4-A',
-      email: `reiniel.talplacido${randomNum}@neust.edu.ph`,
-      company_name: 'Innovatech Systems Hub',
-      company_address: 'Maharlika Highway, Cabanatuan City, Nueva Ecija',
-      trainer_name: 'Engr. Michael Santos',
-      adviser_name: 'Prof. Alexander Reyes',
-      adviser_email: 'admin@neust.edu.ph',
-      start_date: '2026-08-15',
-      required_hours: 0,
-      target_date: '2026-12-15',
-      password: 'Password123!',
-      confirm_password: 'Password123!',
-    });
-    this.toastMessage = 'Sample student & OJT details filled!';
-    this.showToast = true;
-    this.toastService.showInfo('Sample student & OJT details filled!');
-  }
-
   onSubmit() {
     if (!this.isStep3Valid()) {
       this.markFieldsTouched(['password', 'confirm_password']);
@@ -500,16 +521,12 @@ export class RegisterPage {
       next: (res) => {
         this.isLoading = false;
         if (res.success) {
-          this.toastMessage = 'Account created successfully!';
-          this.showToast = true;
           this.toastService.showSuccess('Account registered successfully! Welcome to OnTrack.');
           setTimeout(() => {
             this.router.navigate(['/home']);
           }, 800);
         } else {
           this.errorMessage = res.message || 'Registration failed. Please check your information.';
-          this.toastMessage = this.errorMessage;
-          this.showToast = true;
           this.toastService.showError(this.errorMessage);
         }
         this.cdr.detectChanges();
@@ -517,8 +534,6 @@ export class RegisterPage {
       error: (err) => {
         this.isLoading = false;
         this.errorMessage = err?.error?.message || 'Unable to register account. Please check your connection.';
-        this.toastMessage = this.errorMessage;
-        this.showToast = true;
         this.toastService.showError(this.errorMessage);
         this.cdr.detectChanges();
       },

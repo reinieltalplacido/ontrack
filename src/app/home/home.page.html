@@ -30,16 +30,16 @@
     <header class="welcome-header-card">
       <div class="welcome-profile-row">
         <div class="student-avatar-wrap">
-          <span class="avatar-letter">{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
+          <span class="avatar-letter">{{ (currentUser?.full_name || 'S').charAt(0) }}</span>
           <span class="online-indicator"></span>
         </div>
         <div class="welcome-meta">
           <span class="greeting-eyebrow">Welcome back,</span>
-          <h1 class="welcome-title">{{ currentUser?.full_name || 'Intern Student' }}</h1>
+          <h1 class="welcome-title">{{ currentUser?.full_name || 'Student' }}</h1>
           <p class="welcome-subtitle">
-            <span class="dept-badge">{{ currentUser?.course_section || 'BSIT 4-A' }}</span>
+            <span class="dept-badge">{{ currentUser?.course_section || 'Not set' }}</span>
             <span class="id-separator">•</span>
-            <span class="id-text">{{ currentUser?.student_id || '2026-0001' }}</span>
+            <span class="id-text">{{ currentUser?.student_id || '—' }}</span>
           </p>
         </div>
       </div>
@@ -391,7 +391,7 @@
             <div class="input-field-group">
               <label class="input-label">Target Completion Date</label>
               <div class="input-box">
-                <ion-input type="date" [(ngModel)]="editTargetDate"></ion-input>
+                <ion-input type="date" [(ngModel)]="editTargetDate" [min]="minTargetDate"></ion-input>
               </div>
             </div>
           </div>
@@ -415,11 +415,11 @@
   <div class="drawer-header">
     <div class="student-mini-profile">
       <div class="mini-avatar">
-        <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
+        <span>{{ (currentUser?.full_name || 'S').charAt(0) }}</span>
       </div>
       <div class="mini-details">
-        <h4>{{ currentUser?.full_name || 'Intern Student' }}</h4>
-        <p>{{ currentUser?.student_id || 'Student' }} • {{ currentUser?.course_section || 'BSIT' }}</p>
+        <h4>{{ currentUser?.full_name || 'Student' }}</h4>
+        <p>{{ currentUser?.student_id || '—' }} • {{ currentUser?.course_section || 'Not set' }}</p>
       </div>
     </div>
     <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">

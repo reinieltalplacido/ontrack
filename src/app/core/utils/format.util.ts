@@ -1,6 +1,8 @@
 /**
- * Utility functions for formatting durations, hours, and times across the OnTrack application.
+ * Utility functions for formatting durations, dates, and URLs across the OnTrack application.
  */
+
+import { environment } from '../../../environments/environment';
 
 /**
  * Formats an hours value for user display.
@@ -61,4 +63,49 @@ export function formatShiftTime(timeIn?: string | null, timeOut?: string | null)
   const outStr = formatTime(timeOut);
   return `${inStr} — ${outStr}`;
 }
+
+export function formatDate(
+  dateStr?: string | null,
+  fallback = 'N/A',
+  day: '2-digit' | 'numeric' = '2-digit'
+): string {
+  if (!dateStr) return fallback;
+  try {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const dayNum = parseInt(parts[2], 10);
+      const d = new Date(year, month, dayNum);
+      return d.toLocaleDateString('en-US', { month: 'short', day, year: 'numeric' });
+    }
+    return dateStr;
+  } catch {
+    return dateStr;
+  }
+}
+
+export function resolveUploadUrl(
+  path?: string | null,
+  defaultPrefix = ''
+): string {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  const clean = path.replace(/^\/+/, '');
+  const prefix = defaultPrefix && !clean.startsWith('uploads/') ? defaultPrefix : '';
+  const base = environment.apiUrl.replace(/\/api\/?$/, '');
+  return `${base}/${prefix}${clean}`;
+}
+
+export function getTodayLocalIso(): string {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+
 

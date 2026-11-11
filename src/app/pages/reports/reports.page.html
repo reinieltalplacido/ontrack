@@ -237,7 +237,7 @@
           <div class="table-empty-row">
             <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
             <p>No generated reports available.</p>
-            <span>Select a period above and click <strong>Weekly Time Log (DTR)</strong> or <strong>Weekly Summary Report</strong> to generate one.</span>
+            <span>Select a period above and click <strong>Daily Time Record (DTR)</strong> or <strong>Accomplishment Summary</strong> to generate one.</span>
           </div>
         } @else {
           <div class="table-body">
@@ -285,11 +285,11 @@
         <div class="info-row">
           <div class="info-block">
             <span class="info-label">Student Name</span>
-            <strong class="info-value">{{ currentUser?.full_name || 'Reiniel Talplacido' }}</strong>
+            <strong class="info-value">{{ currentUser?.full_name || '—' }}</strong>
           </div>
           <div class="info-block">
             <span class="info-label">Student ID</span>
-            <strong class="info-value">{{ currentUser?.student_id || 'SUM2023-00980' }}</strong>
+            <strong class="info-value">{{ currentUser?.student_id || '—' }}</strong>
           </div>
         </div>
 
@@ -298,11 +298,11 @@
         <div class="info-row">
           <div class="info-block">
             <span class="info-label">Course</span>
-            <strong class="info-value">{{ currentUser?.course_section || 'BSIT' }}</strong>
+            <strong class="info-value">{{ currentUser?.course_section || 'Not specified' }}</strong>
           </div>
           <div class="info-block">
             <span class="info-label">Company</span>
-            <strong class="info-value">{{ currentUser?.company_name || 'Project Solo' }}</strong>
+            <strong class="info-value">{{ currentUser?.company_name || 'Not specified' }}</strong>
           </div>
         </div>
 
@@ -311,12 +311,12 @@
         <div class="info-row">
           <div class="info-block">
             <span class="info-label">OJT Adviser</span>
-            <strong class="info-value">{{ currentUser?.adviser_name || 'Sir gel' }}</strong>
+            <strong class="info-value">{{ currentUser?.adviser_name || 'Not specified' }}</strong>
           </div>
           <div class="info-block">
             <span class="info-label">OJT Period</span>
             <strong class="info-value">
-              {{ formatDate(currentUser?.start_date || '2027-02-03') }} - {{ formatDate(currentUser?.target_date || '2027-05-19') }}
+              {{ formatDate(currentUser?.start_date) }} - {{ formatDate(currentUser?.target_date) }}
             </strong>
           </div>
         </div>
@@ -376,11 +376,11 @@
                   <div class="meta-col">
                     <div class="meta-item">
                       <span class="meta-label">Trainee Name</span>
-                      <strong class="meta-val">{{ currentUser?.full_name || 'Juan Dela Cruz' }}</strong>
+                      <strong class="meta-val">{{ currentUser?.full_name || '—' }}</strong>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">Assigned Company / Agency</span>
-                      <strong class="meta-val">{{ currentUser?.company_name || 'Innovate Tech Solutions Inc.' }}</strong>
+                      <strong class="meta-val">{{ currentUser?.company_name || 'Not specified' }}</strong>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">Hours in this Report</span>
@@ -392,11 +392,11 @@
                   <div class="meta-col">
                     <div class="meta-item">
                       <span class="meta-label">Student ID Number</span>
-                      <strong class="meta-val">{{ currentUser?.student_id || '2026-0001' }}</strong>
+                      <strong class="meta-val">{{ currentUser?.student_id || '—' }}</strong>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">OJT Adviser / Coordinator</span>
-                      <strong class="meta-val">{{ currentUser?.adviser_name || 'Engr. Roberto Gomez' }}</strong>
+                      <strong class="meta-val">{{ currentUser?.adviser_name || 'Not specified' }}</strong>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">Required Total Hours</span>
@@ -408,11 +408,11 @@
                   <div class="meta-col">
                     <div class="meta-item">
                       <span class="meta-label">Degree Course & Section</span>
-                      <strong class="meta-val">{{ currentUser?.course_section || 'BSIT 4-A' }}</strong>
+                      <strong class="meta-val">{{ currentUser?.course_section || 'Not specified' }}</strong>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">Target OJT Period</span>
-                      <strong class="meta-val">{{ formatDate(currentUser?.start_date || '2026-08-15') }} — {{ formatDate(currentUser?.target_date || '2026-12-15') }}</strong>
+                      <strong class="meta-val">{{ formatDate(currentUser?.start_date) }} — {{ formatDate(currentUser?.target_date) }}</strong>
                     </div>
                     <div class="meta-item">
                       <span class="meta-label">Task Milestones Summary</span>
@@ -512,21 +512,21 @@
               <div class="doc-signatures-block">
                 <div class="sig-column">
                   <div class="sig-line"></div>
-                  <strong class="sig-name">{{ currentUser?.full_name || 'Juan Dela Cruz' }}</strong>
+                  <strong class="sig-name">{{ currentUser?.full_name || '—' }}</strong>
                   <span class="sig-role">Student Trainee (Signature over Printed Name)</span>
                   <span class="sig-sub">Date Signed: _______________</span>
                 </div>
 
                 <div class="sig-column">
                   <div class="sig-line"></div>
-                  <strong class="sig-name">{{ currentUser?.company_name || 'Innovate Tech Solutions Inc.' }}</strong>
+                  <strong class="sig-name">{{ currentUser?.company_name || 'Not specified' }}</strong>
                   <span class="sig-role">Immediate Industry Supervisor / Trainer</span>
                   <span class="sig-sub">Date Certified: _______________</span>
                 </div>
 
                 <div class="sig-column">
                   <div class="sig-line"></div>
-                  <strong class="sig-name">{{ currentUser?.adviser_name || 'Engr. Roberto Gomez' }}</strong>
+                  <strong class="sig-name">{{ currentUser?.adviser_name || 'Academic Coordinator' }}</strong>
                   <span class="sig-role">Academic OJT Coordinator / Chair</span>
                   <span class="sig-sub">Date Approved: _______________</span>
                 </div>
@@ -534,7 +534,7 @@
 
               <!-- Formal Document Footer -->
               <div class="report-doc-footer">
-                <span>OnTrack Mobile OJT Monitoring System • Nueva Ecija University of Science and Technology • Academic Year 2026-2027</span>
+                <span>OnTrack Mobile OJT Monitoring System • Nueva Ecija University of Science and Technology</span>
               </div>
             </div>
           } @else {
@@ -551,7 +551,7 @@
               <div class="doc-student-meta">
                 <div><strong>Trainee:</strong> {{ currentUser?.full_name }}</div>
                 <div><strong>Student ID:</strong> {{ currentUser?.student_id }}</div>
-                <div><strong>Program:</strong> {{ currentUser?.course_section || 'BSIT' }}</div>
+                <div><strong>Program:</strong> {{ currentUser?.course_section || 'Not specified' }}</div>
                 <div><strong>Assigned Agency:</strong> {{ currentUser?.company_name }}</div>
                 <div><strong>Adviser:</strong> {{ currentUser?.adviser_name }}</div>
                 <div><strong>Hours in this Report:</strong> {{ formatHours(activeReportTotalHours) }}</div>
@@ -779,7 +779,7 @@
             <!-- Assigned Coordinator Display -->
             <div class="coordinator-info-pill">
               <ion-icon name="person-outline"></ion-icon>
-              <span>Submitting to: <strong>{{ currentUser?.adviser_name || 'Prof. Alexander Reyes' }}</strong> ({{ currentUser?.adviser_email || 'admin@neust.edu.ph' }})</span>
+              <span>Submitting to: <strong>{{ currentUser?.adviser_name || 'Academic Coordinator' }}</strong><ng-container *ngIf="currentUser?.adviser_email"> ({{ currentUser.adviser_email }})</ng-container></span>
             </div>
           </div>
 
@@ -810,11 +810,11 @@
   <div class="drawer-header">
     <div class="student-mini-profile">
       <div class="mini-avatar">
-        <span>{{ (currentUser?.full_name || 'J').charAt(0) }}</span>
+        <span>{{ (currentUser?.full_name || 'S').charAt(0) }}</span>
       </div>
       <div class="mini-details">
-        <h4>{{ currentUser?.full_name || 'Juan Dela Cruz' }}</h4>
-        <p>{{ currentUser?.student_id || '2026-0001' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser.course_section }}</span></p>
+        <h4>{{ currentUser?.full_name || 'Student' }}</h4>
+        <p>{{ currentUser?.student_id || '—' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser.course_section }}</span></p>
       </div>
     </div>
     <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">

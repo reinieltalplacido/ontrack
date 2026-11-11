@@ -68,7 +68,7 @@
               id="student_no"
               type="text" 
               formControlName="student_no" 
-              placeholder="e.g. 2026-0150" 
+              placeholder="e.g. SUM2023-00712" 
             />
           </div>
           <p class="field-hint" *ngIf="registerForm.get('student_no')?.touched && registerForm.get('student_no')?.invalid">
@@ -272,18 +272,24 @@
         <div class="form-row">
           <div class="form-group flex-1">
             <label class="form-label" for="start_date">Start Date of OJT <span class="req">*</span></label>
-            <div class="input-shell date-picker-shell" (click)="openCalendar('start_date')">
+            <div class="input-shell date-picker-shell" [class.error]="registerForm.get('start_date')?.touched && isStartDateInvalid" (click)="openCalendar('start_date')">
               <span class="date-text">{{ getFormattedDate(registerForm.get('start_date')?.value) }}</span>
               <ion-icon name="calendar-outline" class="calendar-btn-icon"></ion-icon>
             </div>
+            <p class="field-hint" *ngIf="registerForm.get('start_date')?.touched && isStartDateInvalid">
+              Start date cannot be in the past.
+            </p>
           </div>
 
           <div class="form-group flex-1">
             <label class="form-label" for="target_date">Target End Date <span class="req">*</span></label>
-            <div class="input-shell date-picker-shell" (click)="openCalendar('target_date')">
+            <div class="input-shell date-picker-shell" [class.error]="registerForm.get('target_date')?.touched && isTargetDateInvalid" (click)="openCalendar('target_date')">
               <span class="date-text">{{ getFormattedDate(registerForm.get('target_date')?.value) }}</span>
               <ion-icon name="calendar-outline" class="calendar-btn-icon"></ion-icon>
             </div>
+            <p class="field-hint" *ngIf="registerForm.get('target_date')?.touched && isTargetDateInvalid">
+              {{ !registerForm.get('target_date')?.value ? 'Target end date is required.' : 'Must be on or after start date and not in the past.' }}
+            </p>
           </div>
         </div>
 
@@ -359,7 +365,11 @@
           </div>
           <div class="summary-line">
             <span class="s-label">Program:</span>
-            <span class="s-val">{{ registerForm.get('course')?.value }} 4-{{ registerForm.get('section')?.value }}</span>
+            <span class="s-val">{{ registerForm.get('course')?.value || '—' }}</span>
+          </div>
+          <div class="summary-line">
+            <span class="s-label">Section:</span>
+            <span class="s-val">{{ getCanonicalSection() }}</span>
           </div>
           <div class="summary-line">
             <span class="s-label">Coordinator:</span>
@@ -442,7 +452,8 @@
         </div>
         <ion-datetime 
           presentation="date"
-          [value]="registerForm.get(activeDateField)?.value || (activeDateField === 'start_date' ? '2026-08-15' : '2026-12-15')"
+          [value]="calendarValue"
+          [min]="activeDateField === 'start_date' ? minStartDate : minTargetDate"
           (ionChange)="onDateSelected($event)"
           class="custom-datetime">
         </ion-datetime>

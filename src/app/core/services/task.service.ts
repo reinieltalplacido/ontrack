@@ -10,7 +10,9 @@ import { environment } from '../../../environments/environment';
 })
 export class TaskService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private get apiUrl(): string {
+    return environment.apiUrl;
+  }
 
   getTasks(userId: number): Observable<TaskItem[]> {
     return this.http

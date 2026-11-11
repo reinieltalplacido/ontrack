@@ -33,9 +33,7 @@ import {
   checkmarkCircleOutline,
   documentTextOutline,
   arrowForwardOutline,
-  checkboxOutline,
   schoolOutline,
-  personAddOutline,
   businessOutline,
   peopleOutline,
 } from 'ionicons/icons';
@@ -129,9 +127,7 @@ export class LandingPage {
       checkmarkCircleOutline,
       documentTextOutline,
       arrowForwardOutline,
-      checkboxOutline,
       schoolOutline,
-      personAddOutline,
       businessOutline,
       peopleOutline,
     });

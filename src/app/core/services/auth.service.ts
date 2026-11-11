@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { User, AuthResponse, Professor } from '../../models/user.model';
 import { AdminService } from './admin.service';
 import { environment } from '../../../environments/environment';
@@ -17,7 +17,9 @@ const SAVED_IDENTIFIER_KEY = 'ontrack_saved_identifier';
 export class AuthService {
   private http = inject(HttpClient);
   private adminService = inject(AdminService);
-  private apiUrl = environment.apiUrl;
+  private get apiUrl(): string {
+    return environment.apiUrl;
+  }
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -57,10 +59,10 @@ export class AuthService {
               id: Number(res.user?.id) || 1,
               employee_id: res.user?.student_id || 'FACULTY',
               full_name: res.user?.full_name || 'Academic Coordinator',
-              email: res.user?.email || 'coordinator@neust.edu.ph',
-              department: 'College of Information and Communications Technology',
+              email: res.user?.email || '',
+              department: '',
               role: 'coordinator',
-              assigned_section: res.user?.course_section || 'BSIT 4-E',
+              assigned_section: res.user?.course_section || '',
             };
             // Clear student session so coordinator is never stored or treated as a student
             localStorage.removeItem(SESSION_KEY);
@@ -107,9 +109,9 @@ export class AuthService {
       company_address: userData.company_address || '',
       trainer_name: userData.trainer_name || '',
       adviser_name: userData.adviser_name,
-      adviser_email: userData.adviser_email || 'adviser@neust.edu.ph',
-      start_date: userData.start_date || '2026-08-15',
-      target_date: userData.target_date || '2026-12-15',
+      adviser_email: userData.adviser_email || '',
+      start_date: userData.start_date || '',
+      target_date: userData.target_date || '',
       required_hours: userData.required_hours !== undefined && userData.required_hours !== null && userData.required_hours !== '' ? Number(userData.required_hours) : 0,
     };
 

@@ -80,7 +80,9 @@ export interface CoordinatorReportItem {
 })
 export class AdminService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private get apiUrl(): string {
+    return environment.apiUrl;
+  }
 
   private currentProfessorSubject = new BehaviorSubject<Professor | null>(this.getStoredProfessor());
   public currentProfessor$ = this.currentProfessorSubject.asObservable();

@@ -10,7 +10,9 @@ import { environment } from '../../../environments/environment';
 })
 export class AttendanceService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private get apiUrl(): string {
+    return environment.apiUrl;
+  }
 
   getDashboardStats(userId: number): Observable<DashboardStats> {
     return this.http

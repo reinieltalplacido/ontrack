@@ -30,31 +30,23 @@ import { addIcons } from 'ionicons';
 import {
   timeOutline,
   locationOutline,
-  cameraOutline,
   checkmarkCircleOutline,
   hourglassOutline,
   calendarOutline,
   createOutline,
   chevronForwardOutline,
   logOutOutline,
-  refreshOutline,
   alertCircleOutline,
   documentTextOutline,
-  personCircleOutline,
   closeOutline,
   businessOutline,
-  sparklesOutline,
   menuOutline,
-  arrowUpOutline,
   stopwatchOutline,
   gridOutline,
   checkboxOutline,
   personOutline,
-  copyOutline,
-  radioButtonOnOutline,
   timerOutline,
   calendarClearOutline,
-  shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../core/services/auth.service';
 import { AttendanceService } from '../core/services/attendance.service';
@@ -62,7 +54,7 @@ import { NativeService } from '../core/services/native.service';
 import { ToastService } from '../core/services/toast.service';
 import { User } from '../models/user.model';
 import { AttendanceLog, DashboardStats } from '../models/attendance.model';
-import { formatHours, formatTime } from '../core/utils/format.util';
+import { formatDate, formatHours, formatTime, getTodayLocalIso } from '../core/utils/format.util';
 
 @Component({
   selector: 'app-home',
@@ -176,9 +168,6 @@ export class HomePage implements OnInit, OnDestroy {
   editRequiredHours = 486;
   editTargetDate = '';
 
-  // Profile menu modal
-  showProfileModal = false;
-
   // Side Drawer Menu state
   isSideMenuOpen = false;
   activeMenu = 'dashboard';
@@ -187,53 +176,35 @@ export class HomePage implements OnInit, OnDestroy {
     addIcons({
       timeOutline,
       locationOutline,
-      cameraOutline,
       checkmarkCircleOutline,
       hourglassOutline,
       calendarOutline,
       createOutline,
       chevronForwardOutline,
       logOutOutline,
-      refreshOutline,
       alertCircleOutline,
       documentTextOutline,
-      personCircleOutline,
       closeOutline,
       businessOutline,
-      sparklesOutline,
       menuOutline,
-      arrowUpOutline,
       stopwatchOutline,
       gridOutline,
       checkboxOutline,
       personOutline,
-      copyOutline,
-      radioButtonOnOutline,
       timerOutline,
       calendarClearOutline,
-  shieldCheckmarkOutline,
     });
   }
 
   ngOnInit() {
     this.currentUser = this.authService.currentUserValue;
     if (!this.currentUser) {
-      this.currentUser = {
-        id: 1,
-        student_id: '2026-0001',
-        full_name: 'Juan Dela Cruz',
-        email: 'juan@student.neust.edu.ph',
-        course_section: 'BSIT 4-A',
-        school_campus: 'NEUST - Sumacab Campus',
-        company_name: 'Innovate Tech Solutions Inc.',
-        adviser_name: 'Engr. Roberto Gomez',
-        required_hours: 486,
-        target_date: '2026-12-15',
-      };
+      this.router.navigate(['/login']);
+      return;
     }
 
     this.editRequiredHours = this.currentUser.required_hours || 486;
-    this.editTargetDate = this.currentUser.target_date || '2026-12-15';
+    this.editTargetDate = this.currentUser.target_date || '';
 
     // Start Live Realtime Clock
     this.updateRealtimeClock();
@@ -349,14 +320,6 @@ export class HomePage implements OnInit, OnDestroy {
     this.loadDashboardData(event);
   }
 
-  onPrimaryDutyAction() {
-    if (this.stats.is_clocked_in) {
-      this.openClockOutModal();
-    } else {
-      this.openClockInModal();
-    }
-  }
-
   openClockInModal() {
     this.showClockInModal = true;
     this.updateRealtimeClock();
@@ -422,8 +385,8 @@ export class HomePage implements OnInit, OnDestroy {
 
     const payload = {
       user_id: this.currentUser.id,
-      latitude: this.currentCoords?.latitude ?? 15.4859,
-      longitude: this.currentCoords?.longitude ?? 120.9678,
+      latitude: this.currentCoords?.latitude ?? null,
+      longitude: this.currentCoords?.longitude ?? null,
       location_name: this.locationName || this.currentUser.company_name || 'Assigned Duty Workplace',
       photo_base64: null,
     };
@@ -498,9 +461,15 @@ export class HomePage implements OnInit, OnDestroy {
       });
   }
 
+  get minTargetDate(): string {
+    const today = getTodayLocalIso();
+    const start = this.currentUser?.start_date;
+    return start && start > today ? start : today;
+  }
+
   openEditGoalModal() {
     this.editRequiredHours = this.stats.required_hours || 486;
-    this.editTargetDate = this.currentUser?.target_date || '2026-12-15';
+    this.editTargetDate = this.currentUser?.target_date || '';
     this.showEditGoalModal = true;
   }
 
@@ -509,6 +478,15 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   saveGoalSettings() {
+    if (
+      this.editTargetDate &&
+      this.editTargetDate !== this.currentUser?.target_date &&
+      this.editTargetDate < this.minTargetDate
+    ) {
+      this.showFeedback('Target completion date cannot be in the past or earlier than your start date.', 'error');
+      return;
+    }
+
     if (this.currentUser) {
       this.currentUser.required_hours = Number(this.editRequiredHours) || 486;
       this.currentUser.target_date = this.editTargetDate;
@@ -520,14 +498,6 @@ export class HomePage implements OnInit, OnDestroy {
     }
     this.showEditGoalModal = false;
     this.showFeedback('Target requirements updated successfully.', 'success');
-  }
-
-  openProfileModal() {
-    this.showProfileModal = true;
-  }
-
-  closeProfileModal() {
-    this.showProfileModal = false;
   }
 
   goToTasks() {
@@ -567,26 +537,12 @@ export class HomePage implements OnInit, OnDestroy {
 
   logout() {
     this.closeSideMenu();
-    this.showProfileModal = false;
     this.authService.logout();
     this.router.navigate(['/login']);
   }
 
   formatDate(dateStr?: string | null): string {
-    if (!dateStr) return 'N/A';
-    try {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        const d = new Date(year, month, day);
-        return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-      }
-      return dateStr;
-    } catch {
-      return dateStr;
-    }
+    return formatDate(dateStr, 'N/A', '2-digit');
   }
 
   formatTime(timeStr?: string | null): string {

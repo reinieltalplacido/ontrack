@@ -35,7 +35,9 @@ export interface SubmittedReportItem {
 })
 export class ReportService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private get apiUrl(): string {
+    return environment.apiUrl;
+  }
 
   /**
    * Submit generated DTR or Summary report to student's academic adviser

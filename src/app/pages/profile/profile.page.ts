@@ -18,26 +18,19 @@ import {
   personOutline,
   schoolOutline,
   businessOutline,
-  mailOutline,
   calendarOutline,
-  hourglassOutline,
   lockClosedOutline,
   saveOutline,
   logOutOutline,
   checkmarkCircleOutline,
   alertCircleOutline,
-  cameraOutline,
-  arrowBackOutline,
   menuOutline,
   closeOutline,
   gridOutline,
   timeOutline,
   checkboxOutline,
   copyOutline,
-  shieldCheckmarkOutline,
   createOutline,
-  locationOutline,
-  callOutline,
   keyOutline,
   eyeOutline,
   eyeOffOutline,
@@ -49,7 +42,7 @@ import { NativeService } from '../../core/services/native.service';
 import { ToastService } from '../../core/services/toast.service';
 import { User } from '../../models/user.model';
 import { DashboardStats } from '../../models/attendance.model';
-import { formatHours } from '../../core/utils/format.util';
+import { formatDate, formatHours, getTodayLocalIso } from '../../core/utils/format.util';
 
 @Component({
   selector: 'app-profile',
@@ -108,11 +101,7 @@ export class ProfilePage implements OnInit {
    * Current local date in YYYY-MM-DD format
    */
   get todayStr(): string {
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const d = String(today.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
+    return getTodayLocalIso();
   }
 
   /**
@@ -129,6 +118,10 @@ export class ProfilePage implements OnInit {
    */
   get minStartDate(): string {
     return this.todayStr;
+  }
+
+  get minTargetDate(): string {
+    return this.startDate && this.startDate > this.todayStr ? this.startDate : this.todayStr;
   }
 
   // Form Fields
@@ -202,26 +195,19 @@ export class ProfilePage implements OnInit {
       personOutline,
       schoolOutline,
       businessOutline,
-      mailOutline,
       calendarOutline,
-      hourglassOutline,
       lockClosedOutline,
       saveOutline,
       logOutOutline,
       checkmarkCircleOutline,
       alertCircleOutline,
-      cameraOutline,
-      arrowBackOutline,
       menuOutline,
       closeOutline,
       gridOutline,
       timeOutline,
       checkboxOutline,
       copyOutline,
-      shieldCheckmarkOutline,
       createOutline,
-      locationOutline,
-      callOutline,
       keyOutline,
       eyeOutline,
       eyeOffOutline,
@@ -325,22 +311,8 @@ export class ProfilePage implements OnInit {
   ngOnInit() {
     this.currentUser = this.authService.currentUserValue;
     if (!this.currentUser) {
-      this.currentUser = {
-        id: 1,
-        student_id: 'SUM2023-00980',
-        full_name: 'Reiniel Talplacido',
-        email: 'reiniel@student.neust.edu.ph',
-        course_section: 'BSIT 4-A',
-        school_campus: 'NEUST - Sumacab Campus',
-        company_name: 'Innovate Tech Solutions Inc.',
-        company_address: 'Maharlika Highway, Cabanatuan City',
-        trainer_name: 'Engr. Michael Santos',
-        adviser_name: 'Prof. Alexander Reyes',
-        adviser_email: 'admin@neust.edu.ph',
-        start_date: '2026-08-15',
-        target_date: '2026-12-15',
-        required_hours: 500,
-      };
+      this.router.navigate(['/login']);
+      return;
     }
 
     this.populateForm();
@@ -352,15 +324,15 @@ export class ProfilePage implements OnInit {
     this.fullName = this.currentUser.full_name || '';
     this.studentId = this.currentUser.student_id || '';
     this.email = this.currentUser.email || '';
-    this.courseSection = this.currentUser.course_section || 'BSIT 4-A';
-    this.schoolCampus = this.currentUser.school_campus || 'NEUST - Sumacab Campus';
-    this.companyName = this.currentUser.company_name || 'Innovate Tech Solutions Inc.';
+    this.courseSection = this.currentUser.course_section || '';
+    this.schoolCampus = this.currentUser.school_campus || '';
+    this.companyName = this.currentUser.company_name || '';
     this.companyAddress = this.currentUser.company_address || '';
     this.trainerName = this.currentUser.trainer_name || '';
-    this.adviserName = this.currentUser.adviser_name || 'Prof. Alexander Reyes';
-    this.adviserEmail = this.currentUser.adviser_email || 'admin@neust.edu.ph';
-    this.startDate = this.currentUser.start_date || '2026-08-15';
-    this.targetDate = this.currentUser.target_date || '2026-12-15';
+    this.adviserName = this.currentUser.adviser_name || '';
+    this.adviserEmail = this.currentUser.adviser_email || '';
+    this.startDate = this.currentUser.start_date || '';
+    this.targetDate = this.currentUser.target_date || '';
     this.requiredHours = Number(this.currentUser.required_hours) || 0;
     this.newPassword = '';
   }
@@ -416,6 +388,15 @@ export class ProfilePage implements OnInit {
       return;
     }
 
+    if (
+      this.targetDate &&
+      this.targetDate !== this.currentUser.target_date &&
+      this.targetDate < this.minTargetDate
+    ) {
+      this.showFeedback('Target end date cannot be in the past or earlier than the start date.', 'error');
+      return;
+    }
+
     this.isSaving = true;
     this.cdr.detectChanges();
 
@@ -462,10 +443,6 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/home']);
-  }
-
   // Side Drawer navigation
   openSideMenu() {
     this.isSideMenuOpen = true;
@@ -501,20 +478,7 @@ export class ProfilePage implements OnInit {
   }
 
   formatDate(dateStr?: string | null): string {
-    if (!dateStr) return 'Not set';
-    try {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        const d = new Date(year, month, day);
-        return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-      }
-      return dateStr;
-    } catch {
-      return dateStr;
-    }
+    return formatDate(dateStr, 'Not set', '2-digit');
   }
 
   showFeedback(msg: string, type: 'success' | 'error') {

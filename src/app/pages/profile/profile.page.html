@@ -25,25 +25,25 @@
     <ion-card class="profile-hero-card">
       <div class="avatar-wrapper">
         <div class="large-avatar-circle">
-          <span>{{ (currentUser?.full_name || 'R').charAt(0) }}</span>
+          <span>{{ (currentUser?.full_name || 'S').charAt(0) }}</span>
         </div>
         <div class="camera-badge">
           <ion-icon name="person-outline"></ion-icon>
         </div>
       </div>
 
-      <h1 class="student-name">{{ currentUser?.full_name || 'Student Intern' }}</h1>
-      <ion-badge color="primary" class="student-id-pill">{{ currentUser?.student_id || 'ID N/A' }}</ion-badge>
+      <h1 class="student-name">{{ currentUser?.full_name || 'Student' }}</h1>
+      <ion-badge color="primary" class="student-id-pill">{{ currentUser?.student_id || '—' }}</ion-badge>
 
       <div class="hero-meta-row">
         <span class="meta-item">
           <ion-icon name="school-outline"></ion-icon>
-          {{ currentUser?.course_section || 'BSIT 4-A' }}
+          {{ currentUser?.course_section || 'Not set' }}
         </span>
         <span class="meta-dot">•</span>
         <span class="meta-item">
           <ion-icon name="business-outline"></ion-icon>
-          {{ currentUser?.company_name || 'Assigned Agency' }}
+          {{ currentUser?.company_name || 'Not specified' }}
         </span>
       </div>
     </ion-card>
@@ -118,7 +118,7 @@
 
             <div class="detail-item">
               <span class="detail-label">Campus / University</span>
-              <span class="detail-val">{{ currentUser?.school_campus || 'NEUST - Sumacab Campus' }}</span>
+              <span class="detail-val">{{ currentUser?.school_campus || 'Not specified' }}</span>
             </div>
           </div>
         </ion-card>
@@ -155,7 +155,7 @@
 
             <div class="detail-item">
               <span class="detail-label">Adviser Email</span>
-              <span class="detail-val email">{{ currentUser?.adviser_email || 'adviser@neust.edu.ph' }}</span>
+              <span class="detail-val email">{{ currentUser?.adviser_email || 'Not specified' }}</span>
             </div>
 
             <div class="detail-item-grid-2">
@@ -241,7 +241,7 @@
           <div class="form-field">
             <label class="field-label">Student ID <span class="req">*</span></label>
             <div class="custom-input-box">
-              <input type="text" [(ngModel)]="studentId" name="studentId" placeholder="e.g. 2026-0001" required />
+              <input type="text" [(ngModel)]="studentId" name="studentId" placeholder="e.g. SUM2023-00712" required />
             </div>
           </div>
 
@@ -424,8 +424,8 @@
           </div>
           <ion-datetime 
             presentation="date"
-            [value]="activeDateField === 'start_date' ? (startDate || minStartDate) : (targetDate || minStartDate)"
-            [min]="activeDateField === 'start_date' ? minStartDate : (startDate || minStartDate)"
+            [value]="activeDateField === 'start_date' ? (startDate || minStartDate) : (targetDate && targetDate >= minTargetDate ? targetDate : minTargetDate)"
+            [min]="activeDateField === 'start_date' ? minStartDate : minTargetDate"
             (ionChange)="onDateSelected($event)"
             class="custom-datetime">
           </ion-datetime>
@@ -441,11 +441,11 @@
   <div class="drawer-header">
     <div class="student-mini-profile">
       <div class="mini-avatar">
-        <span>{{ (currentUser?.full_name || 'J').charAt(0) }}</span>
+        <span>{{ (currentUser?.full_name || 'S').charAt(0) }}</span>
       </div>
       <div class="mini-details">
-        <h4>{{ currentUser?.full_name || 'Juan Dela Cruz' }}</h4>
-        <p>{{ currentUser?.student_id || '2026-0001' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser.course_section }}</span></p>
+        <h4>{{ currentUser?.full_name || 'Student' }}</h4>
+        <p>{{ currentUser?.student_id || '—' }}<span *ngIf="currentUser?.course_section"> • {{ currentUser.course_section }}</span></p>
       </div>
     </div>
     <button class="drawer-close-btn" (click)="closeSideMenu()" aria-label="Close menu">
