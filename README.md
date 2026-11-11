@@ -6,33 +6,30 @@ OnTrack is a cross-platform mobile application built with **Ionic 9**, **Angular
 
 ## Install Prebuilt Android APK (`ontrack.apk`)
 
-The ready-to-install Android debug APK is included in the repository root as [`ontrack.apk`](./ontrack.apk).
+You can download the installable Android APK directly from Google Drive or use the copy included in the repository root ([`ontrack.apk`](./ontrack.apk)):
 
+- **Google Drive APK Folder:** [Download OnTrack APK on Google Drive](https://drive.google.com/drive/folders/1p-AYwqkM48t3zmx6oMXWFor9moR7bsRY)
+- **Repository APK File:** [`ontrack.apk`](./ontrack.apk)
 - **Package / App ID:** `com.ontrack.app`
 - **Minimum Android Version:** Android 7.0 (`minSdkVersion 24`)
 - **Target SDK:** Android API `36` (`targetSdkVersion 36`)
 - **Default Backend API:** `https://ontrack-api.x10.network/ontrack-api/api`
+- **Backend API Repository:** [reinieltalplacido/ontrack-api](https://github.com/reinieltalplacido/ontrack-api)
 
 ### Install Directly on an Android Device
 
-1. Download or transfer [`ontrack.apk`](./ontrack.apk) to your Android phone.
+1. Download `ontrack.apk` from the [Google Drive APK folder](https://drive.google.com/drive/folders/1p-AYwqkM48t3zmx6oMXWFor9moR7bsRY) (or transfer [`ontrack.apk`](./ontrack.apk) from this repository) to your Android phone.
 2. Tap `ontrack.apk` in your phone's file manager and allow **Install unknown apps** for your browser or file manager if prompted.
 3. Open **OnTrack** and grant **Camera** and **Location (GPS)** permissions when requested so attendance clock-ins can capture verification photos and workplace coordinates.
-
-### Install via ADB (USB Debugging)
-
-```powershell
-adb install -r ontrack.apk
-```
 
 ### Switching Backend Server URL (Optional)
 
 The APK connects to the live hosted API (`https://ontrack-api.x10.network/ontrack-api/api`) by default, so no local server setup is required to use the app.
 
 If you need to point the app to a custom/local API server during development:
-1. Open the **Login** screen.
-2. Tap the **OnTrack** logo at the top of the screen.
-3. Enter your API base URL (e.g., `http://<YOUR_LOCAL_IP>/ontrack-api/api`) and tap **Save**, or choose **Reset Default** to return to the live API.
+1. Open the **Login** screen and attempt to sign in (or tap the **OnTrack** logo at the top).
+2. If the login fails or cannot reach the server, tap the error banner (**"Tap to configure server IP for mobile APK"**).
+3. Enter your custom/local API base URL (e.g., `http://<YOUR_LOCAL_IP>/ontrack-api/api`) and tap **Save**, or choose **Reset Default** to return to the live API.
 
 ---
 
@@ -61,6 +58,7 @@ If you need to point the app to a custom/local API server during development:
 - **Frontend:** Ionic (`@ionic/angular ^9.0.0`), Angular (`22.2.3`), RxJS (`~7.8.0`), TypeScript (`~6.0.0`)
 - **Native Runtime & Plugins:** Capacitor (`8.6.0`), `@capacitor/android`, `@capacitor/app`, `@capacitor/camera`, `@capacitor/geolocation`, `@capacitor/haptics`, `@capacitor/keyboard`, `@capacitor/status-bar`
 - **Backend Integration:** Configured in [`src/app/core/utils/api-url.util.ts`](./src/app/core/utils/api-url.util.ts) and [`src/environments/`](./src/environments)
+- **Backend API Repository:** [reinieltalplacido/ontrack-api](https://github.com/reinieltalplacido/ontrack-api)
 
 ### Declared Android Permissions
 
