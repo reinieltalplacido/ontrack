@@ -13,7 +13,8 @@ You can download the installable Android APK directly from Google Drive or use t
 - **Package / App ID:** `com.ontrack.app`
 - **Minimum Android Version:** Android 7.0 (`minSdkVersion 24`)
 - **Target SDK:** Android API `36` (`targetSdkVersion 36`)
-- **Default Backend API:** `https://ontrack-api.x10.network/ontrack-api/api`
+- **Default Backend API:** `https://ontrack-api.x10.network/ontrack-api/api` 
+- **Students API Endpoints:** `https://ontrack-api.x10.network/ontrack-api/api/students.php` 
 - **Backend API Repository:** [reinieltalplacido/ontrack-api](https://github.com/reinieltalplacido/ontrack-api)
 
 ### Install Directly on an Android Device
