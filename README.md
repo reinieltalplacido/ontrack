@@ -53,72 +53,52 @@ If you need to point the app to a custom/local API server during development:
 
 ---
 
-## Tech Stack
-
-- **Frontend:** Ionic (`@ionic/angular ^9.0.0`), Angular (`22.2.3`), RxJS (`~7.8.0`), TypeScript (`~6.0.0`)
-- **Native Runtime & Plugins:** Capacitor (`8.6.0`), `@capacitor/android`, `@capacitor/app`, `@capacitor/camera`, `@capacitor/geolocation`, `@capacitor/haptics`, `@capacitor/keyboard`, `@capacitor/status-bar`
-- **Backend Integration:** Configured in [`src/app/core/utils/api-url.util.ts`](./src/app/core/utils/api-url.util.ts) and [`src/environments/`](./src/environments)
-- **Backend API Repository:** [reinieltalplacido/ontrack-api](https://github.com/reinieltalplacido/ontrack-api)
-
-### Declared Android Permissions
-
-From [`android/app/src/main/AndroidManifest.xml`](./android/app/src/main/AndroidManifest.xml):
-- `android.permission.INTERNET`
-- `android.permission.CAMERA`
-- `android.permission.ACCESS_COARSE_LOCATION`
-- `android.permission.ACCESS_FINE_LOCATION`
-
----
-
 ## Local Development Setup
 
 ### Prerequisites
 
-- **Node.js & npm** (for the Ionic/Angular frontend)
+- **Node.js & npm**
+- **Ionic CLI** (`npm install -g @ionic/cli`)
 - **Android Studio / Android SDK & JDK** (only required if rebuilding the Android APK locally)
 
 ### 1. Install Dependencies
 
-```powershell
+```bash
 npm install
 ```
 
-### 2. Run the Web Development Server
+### 2. Run the App Locally
 
-```powershell
-npm start
+```bash
+ionic serve
 ```
 
-This runs `ng serve` and opens the app locally at `http://localhost:4200`.
-
-### 3. Available npm Scripts
-
-- `npm start` — Start the Angular development server (`ng serve`)
-- `npm run build` — Build the production web bundle into `www/` (`ng build`)
-- `npm run watch` — Watch-mode development build
-- `npm run lint` — Run ESLint (`--max-warnings 0`), E2E TypeScript check, and Prettier check
-- `npm run lint:fix` — Auto-fix ESLint and Prettier formatting issues
-- `npm test` — Run unit tests (`Vitest` via `npm run test:unit`) and E2E tests (`Playwright` via `npm run test:e2e`)
+_(You can also run `npm start` if `@ionic/cli` is not installed globally.)_
 
 ---
 
 ## Rebuilding `ontrack.apk` from Source
 
-1. Build the production web bundle and sync assets into the Android project:
-   ```powershell
-   npm run build
+1. Build the Ionic app and sync Capacitor assets into Android:
+   ```bash
+   ionic build
    npx cap sync android
    ```
-2. Compile the Android debug APK using the Gradle wrapper:
+2. Build the debug APK with Gradle (or open in Android Studio with `npx cap open android`):
    ```powershell
    .\android\gradlew.bat -p android assembleDebug
    ```
-3. Copy the newly generated APK to the repository root (if updating `ontrack.apk`):
+3. Copy the generated APK from `android/app/build/outputs/apk/debug/app-debug.apk` to `ontrack.apk` if updating the root file:
    ```powershell
    Copy-Item .\android\app\build\outputs\apk\debug\app-debug.apk .\ontrack.apk -Force
    ```
-4. To open and run the project inside Android Studio instead:
-   ```powershell
-   npx cap open android
-   ```
+
+---
+
+## Developed By
+
+- Princess Lyka S. Santos
+- Jorald Allen M. Sevilla
+- Reiniel Anjelo T. Talplacido
+- Mark Lennard L. Torres
 
