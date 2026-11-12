@@ -217,9 +217,7 @@ export class TasksPage implements OnInit {
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
       result = result.filter(
-        (t) =>
-          t.title.toLowerCase().includes(q) ||
-          (t.description && t.description.toLowerCase().includes(q))
+        (t) => t.title.toLowerCase().includes(q) || (t.description && t.description.toLowerCase().includes(q)),
       );
     }
 
@@ -272,9 +270,7 @@ export class TasksPage implements OnInit {
 
   get overdueTasksCount(): number {
     const today = new Date().toISOString().split('T')[0];
-    return this.tasks.filter(
-      (t) => t.status !== 'completed' && t.deadline && t.deadline < today
-    ).length;
+    return this.tasks.filter((t) => t.status !== 'completed' && t.deadline && t.deadline < today).length;
   }
 
   isOverdue(task: TaskItem): boolean {
@@ -297,7 +293,7 @@ export class TasksPage implements OnInit {
           this.nativeService.triggerHapticFeedback('medium');
           this.showFeedback(
             newStatus === 'completed' ? 'Task marked as completed!' : 'Task moved to pending.',
-            'success'
+            'success',
           );
         }
       },
@@ -411,7 +407,15 @@ export class TasksPage implements OnInit {
     if (!file) return false;
     const clean = file.split('?')[0];
     const ext = clean.split('.').pop()?.toLowerCase();
-    return ext === 'pdf' || ext === 'doc' || ext === 'docx' || ext === 'xls' || ext === 'xlsx' || ext === 'zip' || ext === 'txt';
+    return (
+      ext === 'pdf' ||
+      ext === 'doc' ||
+      ext === 'docx' ||
+      ext === 'xls' ||
+      ext === 'xlsx' ||
+      ext === 'zip' ||
+      ext === 'txt'
+    );
   }
 
   getTaskProofFilename(task: TaskItem | null | undefined): string {
@@ -461,6 +465,12 @@ export class TasksPage implements OnInit {
     this.taskService.attachTaskProof(task.id, fileData, fileName).subscribe({
       next: (res) => {
         this.isSavingProof = false;
+        if (!res?.success) {
+          this.nativeService.triggerHapticFeedback('warning');
+          this.showFeedback(res?.message || 'Failed to upload deliverable proof.', 'error');
+          this.cdr.detectChanges();
+          return;
+        }
         const savedUrl = res?.task?.proof_url || fileData;
         const savedFile = res?.task?.proof_file || fileName;
         task.proof_url = savedUrl;
@@ -473,15 +483,12 @@ export class TasksPage implements OnInit {
         this.showFeedback('Deliverable proof attached successfully!', 'success');
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.isSavingProof = false;
-        task.proof_url = fileData;
-        task.proof_file = fileName;
-        if (this.selectedTask && this.selectedTask.id === task.id) {
-          this.selectedTask.proof_url = fileData;
-          this.selectedTask.proof_file = fileName;
-        }
-        this.showFeedback('Deliverable proof saved locally.', 'success');
+        this.nativeService.triggerHapticFeedback('warning');
+        const msg =
+          err?.error?.message || 'Failed to upload deliverable proof. Please check your connection and try again.';
+        this.showFeedback(msg, 'error');
         this.cdr.detectChanges();
       },
     });
@@ -489,18 +496,44 @@ export class TasksPage implements OnInit {
 
   removeDocumentation(task: TaskItem, event?: Event) {
     if (event) event.stopPropagation();
+    const prevUrl = task.proof_url;
+    const prevFile = task.proof_file;
     task.proof_url = null;
     task.proof_file = null;
     if (this.selectedTask && this.selectedTask.id === task.id) {
       this.selectedTask.proof_url = null;
       this.selectedTask.proof_file = null;
     }
-    this.taskService.updateTaskStatus(task.id, task.status, '').subscribe({
-      next: () => {
+    this.cdr.detectChanges();
+
+    this.taskService.clearTaskProof(task.id).subscribe({
+      next: (res) => {
+        if (!res?.success) {
+          task.proof_url = prevUrl;
+          task.proof_file = prevFile;
+          if (this.selectedTask && this.selectedTask.id === task.id) {
+            this.selectedTask.proof_url = prevUrl;
+            this.selectedTask.proof_file = prevFile;
+          }
+          this.nativeService.triggerHapticFeedback('warning');
+          this.showFeedback(res?.message || 'Could not remove deliverable proof.', 'error');
+          this.cdr.detectChanges();
+          return;
+        }
         this.showFeedback('Documentation removed.', 'success');
+        this.cdr.detectChanges();
       },
-      error: () => {
-        this.showFeedback('Documentation removed.', 'success');
+      error: (err) => {
+        task.proof_url = prevUrl;
+        task.proof_file = prevFile;
+        if (this.selectedTask && this.selectedTask.id === task.id) {
+          this.selectedTask.proof_url = prevUrl;
+          this.selectedTask.proof_file = prevFile;
+        }
+        this.nativeService.triggerHapticFeedback('warning');
+        const msg = err?.error?.message || 'Could not remove deliverable proof. Please try again.';
+        this.showFeedback(msg, 'error');
+        this.cdr.detectChanges();
       },
     });
   }
@@ -609,10 +642,14 @@ export class TasksPage implements OnInit {
 
   getPriorityLabel(priority: TaskPriority): string {
     switch (priority) {
-      case 'low': return 'Low Priority';
-      case 'medium': return 'Medium Priority';
-      case 'high': return 'High Priority';
-      default: return 'Medium Priority';
+      case 'low':
+        return 'Low Priority';
+      case 'medium':
+        return 'Medium Priority';
+      case 'high':
+        return 'High Priority';
+      default:
+        return 'Medium Priority';
     }
   }
 
@@ -729,4 +766,3 @@ export class TasksPage implements OnInit {
     }, 3500);
   }
 }
-

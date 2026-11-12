@@ -42,6 +42,7 @@ const TEST_COORDINATOR = {
 
 interface MockApiState {
   isClockedIn: boolean;
+  failNextTaskUpdate: boolean;
   clockInPayloads: Array<{ latitude: number | null; longitude: number | null; location_name?: string }>;
   tasks: Array<{
     id: number;
@@ -51,6 +52,8 @@ interface MockApiState {
     deadline: string;
     priority: 'low' | 'medium' | 'high';
     status: 'pending' | 'in_progress' | 'completed';
+    proof_url?: string | null;
+    proof_file?: string | null;
     created_at: string;
   }>;
   logs: Array<{
@@ -70,6 +73,7 @@ interface MockApiState {
 async function setupMockBackend(page: Page): Promise<MockApiState> {
   const state: MockApiState = {
     isClockedIn: false,
+    failNextTaskUpdate: false,
     clockInPayloads: [],
     tasks: [],
     logs: [],
@@ -289,6 +293,40 @@ async function setupMockBackend(page: Page): Promise<MockApiState> {
         success: true,
         message: 'Task created successfully.',
         task: newTask,
+      });
+    }
+
+    if (path.endsWith('/tasks/update.php')) {
+      if (state.failNextTaskUpdate) {
+        state.failNextTaskUpdate = false;
+        return json({ success: false, message: 'Server upload failed.' }, 500);
+      }
+
+      const body = request.postDataJSON() as {
+        task_id: number;
+        status?: 'pending' | 'in_progress' | 'completed';
+        proof_image?: string;
+        proof_file_name?: string;
+        proof_url?: string | null;
+        proof_file?: string | null;
+      };
+      const target = state.tasks.find((t) => t.id === body.task_id);
+      if (!target) {
+        return json({ success: false, message: 'Task not found.' }, 404);
+      }
+
+      if (body.status) target.status = body.status;
+      if (body.proof_url !== undefined) target.proof_url = body.proof_url;
+      if (body.proof_file !== undefined) target.proof_file = body.proof_file;
+      if (body.proof_image) {
+        target.proof_url = body.proof_image;
+        target.proof_file = body.proof_file_name || 'uploaded_proof.png';
+      }
+
+      return json({
+        success: true,
+        message: 'Task updated successfully.',
+        task: { ...target },
       });
     }
 
@@ -526,5 +564,64 @@ test.describe('OnTrack Student Core User Flow', () => {
 
     await approvedChip.click();
     await expect(approvedChip).toHaveClass(/active/);
+  });
+
+  test('persists task proof removal via API and shows an error instead of local fallback when proof upload fails', async ({
+    page,
+  }) => {
+    const apiState = await setupMockBackend(page);
+    await installGeolocationMock(page, 'allow');
+
+    await signInAsStudent(page);
+    await openDrawerAndNavigate(page, 'app-home', 'Tasks');
+    await expect(page).toHaveURL(/\/tasks$/);
+
+    const tasksPage = page.locator('app-tasks');
+    await tasksPage.getByRole('button', { name: /New Task/i }).click();
+    await page.locator('#task-title').fill('Document Daily Deployment');
+    await page.locator('#task-deadline').fill('2099-12-15');
+    await page.getByRole('button', { name: /Add Task/i }).click();
+
+    await expect(tasksPage.getByText('Document Daily Deployment')).toBeVisible();
+
+    // Open task details and upload a valid PNG deliverable
+    await tasksPage.getByRole('button', { name: 'View task details' }).click();
+    const detailModal = page.locator('.task-detail-modal');
+    await expect(detailModal).toBeVisible();
+
+    const tinyPng = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2Z0AAAAASUVORK5CYII=',
+      'base64',
+    );
+    await detailModal.locator('input[type="file"]').setInputFiles({
+      name: 'proof.png',
+      mimeType: 'image/png',
+      buffer: tinyPng,
+    });
+
+    await expect(detailModal.getByText('1 Photo Attached')).toBeVisible();
+    expect(apiState.tasks[0].proof_url).toBeTruthy();
+
+    // Remove the attached proof and verify it clears in backend state + stays removed after reload
+    await detailModal.locator('button[title="Delete proof"]').click();
+    await expect(detailModal.getByText('No Deliverable')).toBeVisible();
+    expect(apiState.tasks[0].proof_url).toBe('');
+
+    await page.reload();
+    await expect(tasksPage.getByText('Document Daily Deployment')).toBeVisible();
+    await expect(tasksPage.locator('.card-proof-badge')).toHaveCount(0);
+
+    // Trigger upload failure and confirm it rejects instead of claiming "saved locally"
+    apiState.failNextTaskUpdate = true;
+    await tasksPage.getByRole('button', { name: 'View task details' }).click();
+    await detailModal.locator('input[type="file"]').setInputFiles({
+      name: 'failed_proof.png',
+      mimeType: 'image/png',
+      buffer: tinyPng,
+    });
+
+    await expect(page.getByText('Deliverable proof saved locally.')).toHaveCount(0);
+    await expect(detailModal.getByText('No Deliverable')).toBeVisible();
+    await expect(page.locator('app-toast').getByText('Server upload failed.')).toBeVisible();
   });
 });

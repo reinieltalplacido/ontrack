@@ -31,7 +31,7 @@ export class TaskService {
   }): Observable<{ success: boolean; message: string; task?: TaskItem }> {
     return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
       `${this.apiUrl}/tasks/create.php`,
-      payload
+      payload,
     );
   }
 
@@ -39,7 +39,7 @@ export class TaskService {
     taskId: number,
     status: 'pending' | 'in_progress' | 'completed',
     proofImage?: string | null,
-    proofFileName?: string | null
+    proofFileName?: string | null,
   ): Observable<{ success: boolean; message: string; task?: TaskItem }> {
     const payload: any = { task_id: taskId, status };
     if (proofImage) {
@@ -50,14 +50,14 @@ export class TaskService {
     }
     return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
       `${this.apiUrl}/tasks/update.php`,
-      payload
+      payload,
     );
   }
 
   attachTaskProof(
     taskId: number,
     proofImage: string,
-    proofFileName?: string
+    proofFileName?: string,
   ): Observable<{ success: boolean; message: string; task?: TaskItem }> {
     const payload: any = { task_id: taskId, proof_image: proofImage };
     if (proofFileName) {
@@ -65,15 +65,21 @@ export class TaskService {
     }
     return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(
       `${this.apiUrl}/tasks/update.php`,
-      payload
+      payload,
     );
+  }
+
+  clearTaskProof(taskId: number): Observable<{ success: boolean; message: string; task?: TaskItem }> {
+    return this.http.post<{ success: boolean; message: string; task?: TaskItem }>(`${this.apiUrl}/tasks/update.php`, {
+      task_id: taskId,
+      proof_url: '',
+      proof_file: '',
+    });
   }
 
   deleteTask(taskId: number): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(
-      `${this.apiUrl}/tasks/delete.php`,
-      { task_id: taskId }
-    );
+    return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/tasks/delete.php`, {
+      task_id: taskId,
+    });
   }
 }
-
