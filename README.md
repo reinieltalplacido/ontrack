@@ -9,11 +9,6 @@ OnTrack is a cross-platform mobile application built with **Ionic 9**, **Angular
 - **Students API Endpoints:** `https://ontrack-api.x10.network/ontrack-api/api/students.php` 
 - **Backend API Repository:** [reinieltalplacido/ontrack-api](https://github.com/reinieltalplacido/ontrack-api)
 
-### Install Directly on an Android Device
-
-1. Download `ontrack.apk` from the [Google Drive APK folder](https://drive.google.com/drive/folders/1p-AYwqkM48t3zmx6oMXWFor9moR7bsRY) (or transfer [`ontrack.apk`](./ontrack.apk) from this repository) to your Android phone.
-2. Tap `ontrack.apk` in your phone's file manager and allow **Install unknown apps** for your browser or file manager if prompted.
-3. Open **OnTrack** and grant **Camera** and **Location (GPS)** permissions when requested so attendance clock-ins can capture verification photos and workplace coordinates.
 
 ### Switching Backend Server URL (Optional)
 
