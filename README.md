@@ -4,15 +4,7 @@ OnTrack is a cross-platform mobile application built with **Ionic 9**, **Angular
 
 ---
 
-## Install Prebuilt Android APK (`ontrack.apk`)
-
-You can download the installable Android APK directly from Google Drive or use the copy included in the repository root ([`ontrack.apk`](./ontrack.apk)):
-
-- **Google Drive APK Folder:** [Download OnTrack APK on Google Drive](https://drive.google.com/drive/folders/1p-AYwqkM48t3zmx6oMXWFor9moR7bsRY)
-- **Repository APK File:** [`ontrack.apk`](./ontrack.apk)
-- **Package / App ID:** `com.ontrack.app`
-- **Minimum Android Version:** Android 7.0 (`minSdkVersion 24`)
-- **Target SDK:** Android API `36` (`targetSdkVersion 36`)
+## API Endpoints
 - **Default Backend API:** `https://ontrack-api.x10.network/ontrack-api/api` 
 - **Students API Endpoints:** `https://ontrack-api.x10.network/ontrack-api/api/students.php` 
 - **Backend API Repository:** [reinieltalplacido/ontrack-api](https://github.com/reinieltalplacido/ontrack-api)
